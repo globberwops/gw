@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 3.23)
 project(
   gw
   VERSION 1.0.0
-  DESCRIPTION ""
-  HOMEPAGE_URL ""
+  DESCRIPTION "A bunch of small C++ utilities"
+  HOMEPAGE_URL "https://github.com/globberwops/gw"
   LANGUAGES CXX)
 
 option(GW_BUILD_TESTS "Build tests" ${PROJECT_IS_TOP_LEVEL})
-option(GW_INSTALL "Generate install target" ${PROJECT_IS_TOP_LEVEL})
+option(GW_INSTALL "Generate install target" ON)
 
 add_library(StrongType INTERFACE)
 add_library(gw::StrongType ALIAS StrongType)
