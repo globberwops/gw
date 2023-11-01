@@ -1,0 +1,44 @@
+{
+    "name": "gw",
+    "dockerFile": "Dockerfile",
+    "capAdd": [
+        "SYS_PTRACE"
+    ],
+    "securityOpt": [
+        "seccomp=unconfined"
+    ],
+    "remoteUser": "ubuntu",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "cheshirekow.cmake-format",
+                "llvm-vs-code-extensions.vscode-clangd",
+                "ms-azuretools.vscode-docker",
+                "ms-vscode.cmake-tools",
+                "ms-vscode.cpptools",
+                "redhat.vscode-yaml",
+                "twxs.cmake"
+            ],
+            "settings": {
+                "C_Cpp.intelliSenseEngine": "disabled",
+                "clangd.path": "clangd-18",
+                "cmake.exportCompileCommandsFile": true,
+                "cmake.generator": "Ninja Multi-Config",
+                "cmake.installPrefix": "${workspaceFolder}/build/prefix",
+                "files.associations": {
+                    ".clang-format": "yaml",
+                    ".clang-tidy": "yaml",
+                    ".clangd": "yaml",
+                    ".cmake-format": "yaml",
+                    "*.cmake.in": "cmake"
+                },
+                "files.exclude": {
+                    "**/.cache": true
+                },
+                "files.insertFinalNewline": true,
+                "files.trimFinalNewlines": true,
+                "files.trimTrailingWhitespace": true
+            }
+        }
+    }
+}
