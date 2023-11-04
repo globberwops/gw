@@ -5,7 +5,8 @@
 #include <type_traits>
 #include <vector>
 
-using strong_type_test = gw::strong_type<int, struct StrongTypeTestTag>;
+struct strong_type_test_tag {};
+using strong_type_test = gw::strong_type<strong_type_test_tag, int>;
 
 static_assert(std::is_nothrow_copy_assignable_v<strong_type_test>);
 static_assert(std::is_nothrow_move_assignable_v<strong_type_test>);
@@ -76,21 +77,19 @@ static_assert(noexcept(strong_type_test{} < strong_type_test{1}));
 static_assert(noexcept(strong_type_test{1} >= strong_type_test{}));
 static_assert(noexcept(strong_type_test{1} > strong_type_test{}));
 
-// make_strong_type
+// Creation functions
 struct make_strong_type_tag {};
 static_assert(*gw::make_strong_type<make_strong_type_tag>(1) == 1);
-static_assert(*gw::make_strong_type<make_strong_type_tag>(1U) == 1);
 static_assert(noexcept(gw::make_strong_type<make_strong_type_tag>(1)));
-static_assert(noexcept(gw::make_strong_type<make_strong_type_tag>(1U)));
-static_assert(gw::make_strong_type<std::vector<int>, make_strong_type_tag>({1, 2, 3}) ==
-              gw::make_strong_type<std::vector<int>, make_strong_type_tag>({1, 2, 3}));
-static_assert(gw::make_strong_type<int, make_strong_type_tag>(1) == gw::make_strong_type<int, make_strong_type_tag>(1));
+static_assert(gw::make_strong_type<make_strong_type_tag, std::vector<int>>({1, 2, 3}) ==
+              gw::make_strong_type<make_strong_type_tag, std::vector<int>>({1, 2, 3}));
+static_assert(gw::make_strong_type<make_strong_type_tag, int>(1) == gw::make_strong_type<make_strong_type_tag, int>(1));
 
-// std::hash
+// Hash
 struct strong_type_hashable1_tag {};
-using strong_type_hashable1 = gw::strong_type<int, strong_type_hashable1_tag>;
+using strong_type_hashable1 = gw::strong_type<strong_type_hashable1_tag, int>;
 struct strong_type_hashable2_tag {};
-using strong_type_hashable2 = gw::strong_type<int, strong_type_hashable2_tag>;
+using strong_type_hashable2 = gw::strong_type<strong_type_hashable2_tag, int>;
 
 // Verbose
 struct verbose_type {
@@ -113,7 +112,7 @@ struct verbose_type {
 };
 
 struct verbose_type_tag {};
-using strong_type_verbose = gw::strong_type<verbose_type, verbose_type_tag>;
+using strong_type_verbose = gw::strong_type<verbose_type_tag, verbose_type>;
 
 void strong_type_verbose_test() {
   std::cout << "--------------------------------------------------------------------------------\n";
@@ -138,7 +137,9 @@ void strong_type_verbose_test() {
     auto strong_type2 = gw::make_strong_type<verbose_type_tag>(strong_type1);
   }
   std::cout << "--------------------------------------------------------------------------------\n";
-  { auto strong_type = gw::make_strong_type<verbose_type, verbose_type_tag>(); }
+  { auto strong_type = gw::make_strong_type<verbose_type_tag, verbose_type>(); }
+  std::cout << "--------------------------------------------------------------------------------\n";
+  { auto strong_type = gw::make_strong_type<verbose_type_tag, verbose_type>(1); }
 }
 
 auto strong_type_hash_test() -> bool {

@@ -12,25 +12,13 @@
 
 namespace gw {
 
-template <class T, typename Tag>
+template <typename Tag, class T>
 struct strong_type {
   // Types
-  using value_type = T;
   using tag_type = Tag;
+  using value_type = T;
 
   // Constructors
-  constexpr strong_type() noexcept(std::is_nothrow_default_constructible_v<T>)
-    requires std::is_default_constructible_v<T>
-  = default;
-
-  constexpr explicit strong_type(const T& value) noexcept(std::is_nothrow_copy_constructible_v<T>)
-    requires std::is_copy_constructible_v<T>
-      : m_value{value} {}
-
-  constexpr explicit strong_type(T&& value) noexcept(std::is_nothrow_move_constructible_v<T>)
-    requires std::is_move_constructible_v<T>
-      : m_value{std::forward<T>(value)} {}
-
   template <class... Args>
   constexpr explicit strong_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
     requires std::is_constructible_v<T, Args...>
@@ -45,6 +33,7 @@ struct strong_type {
   // Observers
   constexpr auto operator->() const noexcept -> const T* { return &m_value; }
   constexpr auto operator->() noexcept -> T* { return &m_value; }
+
   constexpr auto operator*() const& noexcept -> const T& { return m_value; }
   constexpr auto operator*() & noexcept -> T& { return m_value; }
   constexpr auto operator*() const&& noexcept -> const T&& { return std::move(m_value); }
@@ -57,31 +46,31 @@ struct strong_type {
 
   // Monadic operations
   template <class F>
-  constexpr auto transform(F&& callable) const& noexcept(noexcept(callable(m_value)))
-    requires std::is_invocable_v<F, T>
+  constexpr auto transform(F&& func) const& noexcept(noexcept(func(m_value)))
+    requires std::is_invocable_v<F, const T&>
   {
-    return strong_type<std::invoke_result_t<F, T>, Tag>{callable(m_value)};
+    return strong_type<Tag, std::remove_cv_t<std::invoke_result_t<F, const T&>>>{func(m_value)};
   }
 
   template <class F>
-  constexpr auto transform(F&& callable) & noexcept(noexcept(callable(m_value)))
-    requires std::is_invocable_v<F, T>
+  constexpr auto transform(F&& func) & noexcept(noexcept(func(m_value)))
+    requires std::is_invocable_v<F, T&>
   {
-    return strong_type<std::invoke_result_t<F, T>, Tag>{callable(m_value)};
+    return strong_type<Tag, std::remove_cv_t<std::invoke_result_t<F, T&>>>{func(m_value)};
   }
 
   template <class F>
-  constexpr auto transform(F&& callable) const&& noexcept(noexcept(callable(m_value)))
-    requires std::is_invocable_v<F, T>
+  constexpr auto transform(F&& func) const&& noexcept(noexcept(func(m_value)))
+    requires std::is_invocable_v<F, const T&&>
   {
-    return strong_type<std::invoke_result_t<F, T>, Tag>{callable(std::move(m_value))};
+    return strong_type<Tag, std::remove_cv_t<std::invoke_result_t<F, const T&&>>>{func(std::move(m_value))};
   }
 
   template <class F>
-  constexpr auto transform(F&& callable) && noexcept(noexcept(callable(m_value)))
-    requires std::is_invocable_v<F, T>
+  constexpr auto transform(F&& func) && noexcept(noexcept(func(m_value)))
+    requires std::is_invocable_v<F, T&&>
   {
-    return strong_type<std::invoke_result_t<F, T>, Tag>{callable(std::move(m_value))};
+    return strong_type<Tag, std::remove_cv_t<std::invoke_result_t<F, T&&>>>{func(std::move(m_value))};
   }
 
   // Modifiers
@@ -113,49 +102,41 @@ struct strong_type {
   T m_value{};
 };
 
-template <class T, typename Tag>
-constexpr auto make_strong_type(T&& value) noexcept(
-    std::is_nothrow_constructible_v<strong_type<std::decay_t<T>, Tag>, T>) -> gw::strong_type<std::decay_t<T>, Tag>
-  requires std::is_constructible_v<std::decay_t<T>, T>
-{
-  return strong_type<std::decay_t<T>, Tag>{std::forward<T>(value)};
-}
-
-template <class T, typename Tag, typename... Args>
+// Creation functions
+template <typename Tag, class T, typename... Args>
 constexpr auto make_strong_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
-    -> gw::strong_type<std::decay_t<T>, Tag>
-  requires std::is_constructible_v<std::decay_t<T>, Args...>
+  requires std::is_constructible_v<std::remove_cvref_t<T>, Args...>
 {
-  return strong_type<std::decay_t<T>, Tag>{std::forward<Args>(args)...};
+  return strong_type<Tag, std::remove_cvref_t<T>>{std::forward<Args>(args)...};
 }
 
-template <typename T, typename Tag, typename U, typename... Args>
+template <typename Tag, class T, typename U, typename... Args>
 constexpr auto make_strong_type(std::initializer_list<U> ilist, Args&&... args) noexcept(
     std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
   requires std::is_constructible_v<T, std::initializer_list<U>&, Args...>
 {
-  return strong_type<std::decay_t<T>, Tag>{ilist, std::forward<Args>(args)...};
+  return strong_type<Tag, std::remove_cvref_t<T>>{ilist, std::forward<Args>(args)...};
 }
 
-template <typename Tag>
-constexpr auto make_strong_type(auto&& value) noexcept(
-    std::is_nothrow_constructible_v<strong_type<std::decay_t<decltype(value)>, Tag>, decltype(value)>)
-    -> gw::strong_type<std::decay_t<decltype(value)>, Tag>
-  requires std::is_constructible_v<std::decay_t<decltype(value)>, decltype(value)>
+template <typename Tag, class T>
+constexpr auto make_strong_type(T&& value) noexcept(
+    std::is_nothrow_constructible_v<strong_type<Tag, std::remove_cvref_t<T>>, T>)
+  requires std::is_constructible_v<std::remove_cvref_t<T>, T>
 {
-  return strong_type<std::decay_t<decltype(value)>, Tag>{std::forward<decltype(value)>(value)};
+  return strong_type<Tag, std::remove_cvref_t<T>>{std::forward<T>(value)};
 }
 
 }  // namespace gw
 
+// Hash
 namespace std {
 
-template <gw::hashable T, typename Tag>
-struct hash<gw::strong_type<T, Tag>> {  // NOLINT(cert-dcl58-cpp)
-  auto operator()(const gw::strong_type<T, Tag>& strong_type) const noexcept -> size_t {
-    auto value_hash = hash<T>{}(strong_type.value());
+template <typename Tag, gw::hashable T>
+struct hash<gw::strong_type<Tag, T>> {  // NOLINT(cert-dcl58-cpp)
+  auto operator()(const gw::strong_type<Tag, T>& strong_type) const noexcept -> size_t {
     auto tag_hash = hash<type_index>{}(type_index{typeid(Tag)});
-    return value_hash ^ tag_hash;
+    auto value_hash = hash<T>{}(strong_type.value());
+    return tag_hash ^ value_hash;
   }
 };
 
