@@ -5,7 +5,7 @@
 
 #include <concepts>
 #include <functional>
-#include <ostream>
+#include <string>
 
 namespace gw {
 
@@ -18,8 +18,13 @@ template <typename T>
 concept complete = requires { sizeof(T); };
 
 template <typename T>
-concept streamable = requires(std::ostream& os, T value) {
-  { os << value } -> std::same_as<std::ostream&>;
+concept string_convertable = requires(T value) {
+  { std::to_string(value) } -> std::same_as<std::string>;
+};
+
+template <typename T>
+concept named = requires(T value) {
+  { value.name() } -> std::convertible_to<std::string>;
 };
 
 }  // namespace gw

@@ -2,6 +2,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include <concepts>
+#include <iostream>
 #include <type_traits>
 
 #include "gw/concepts.hpp"
@@ -93,11 +94,21 @@ TEST_CASE("strong_types are totally ordered", "[strong_type]") {
   STATIC_REQUIRE(std::totally_ordered<strong_type_test>);
 }
 
-TEST_CASE("strong_types are streamed", "[strong_type]") {
-  struct strong_type_test_tag {};
-  using strong_type_test = gw::strong_type<strong_type_test_tag, int>;
+TEST_CASE("strong_types are converted to string", "[strong_type]") {
+  SECTION("unnamed strong_type") {
+    using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
 
-  STATIC_REQUIRE(gw::streamable<strong_type_test>);
+    REQUIRE(std::to_string(strong_type_test{1}) == "strong_type: 1");
+  }
+
+  SECTION("named strong_type") {
+    struct strong_type_named_tag {
+      static constexpr auto name() noexcept { return "strong_type_named_tag"; }
+    };
+    using strong_type_named = gw::strong_type<strong_type_named_tag, int>;
+
+    REQUIRE(std::to_string(strong_type_named{1}) == "strong_type_named_tag: 1");
+  }
 }
 
 TEST_CASE("strong_types are hashed", "[strong_type]") {

@@ -4,7 +4,7 @@
 #pragma once
 
 #include <functional>
-#include <ostream>
+#include <string>
 #include <type_traits>
 #include <typeindex>
 #include <utility>
@@ -99,14 +99,6 @@ struct strong_type {
   // Comparison operators
   constexpr auto operator<=>(const strong_type&) const noexcept = default;
 
-  // Stream operators
-  friend auto operator<<(std::ostream& os,
-                         const strong_type& strong_type) noexcept(noexcept(os << strong_type.m_value)) -> std::ostream&
-    requires complete<Tag> && streamable<T>
-  {
-    return os << strong_type.m_value;
-  }
-
  private:
   T m_value{};
 };
@@ -141,12 +133,25 @@ namespace std {
 
 // Hash
 template <gw::complete Tag, gw::hashable T>
-struct hash<gw::strong_type<Tag, T>> {  // NOLINT(cert-dcl58-cpp)
-  auto operator()(const gw::strong_type<Tag, T>& strong_type) const noexcept -> size_t {
+// NOLINTNEXTLINE(cert-dcl58-cpp)
+struct hash<gw::strong_type<Tag, T>> {
+  [[nodiscard]] auto operator()(const gw::strong_type<Tag, T>& strong_type) const noexcept -> size_t {
     auto tag_hash = hash<type_index>{}(type_index{typeid(Tag)});
     auto value_hash = hash<T>{}(strong_type.value());
     return tag_hash ^ value_hash;
   }
 };
+
+template <typename Tag, gw::string_convertable T>
+// NOLINTNEXTLINE(cert-dcl58-cpp)
+[[nodiscard]] auto inline to_string(gw::strong_type<Tag, T> strong_type) -> std::string {
+  return "strong_type: " + std::to_string(strong_type.value());
+}
+
+template <gw::named Tag, gw::string_convertable T>
+// NOLINTNEXTLINE(cert-dcl58-cpp)
+[[nodiscard]] auto inline to_string(gw::strong_type<Tag, T> strong_type) -> std::string {
+  return std::string{Tag::name()} + ": " + std::to_string(strong_type.value());
+}
 
 }  // namespace std
