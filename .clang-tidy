@@ -15,20 +15,20 @@ FormatStyle: file
 CheckOptions:
   cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor: true
   hicpp-special-member-functions.AllowSoleDefaultDtor: true
-  readability-identifier-naming.ClassCase: CamelCase
-  readability-identifier-naming.ConstantCase: CamelCase
-  readability-identifier-naming.ConstantPrefix: k
-  readability-identifier-naming.EnumCase: CamelCase
-  readability-identifier-naming.EnumConstantCase: CamelCase
-  readability-identifier-naming.EnumConstantPrefix: k
-  readability-identifier-naming.FunctionCase: CamelCase
+  readability-identifier-naming.ClassCase: lower_case
+  readability-identifier-naming.ConstantCase: lower_case
+  readability-identifier-naming.ConstantPrefix: k_
+  readability-identifier-naming.EnumCase: lower_case
+  readability-identifier-naming.EnumConstantCase: lower_case
+  readability-identifier-naming.EnumConstantPrefix: k_
+  readability-identifier-naming.FunctionCase: lower_case
   readability-identifier-naming.MacroDefinitionCase: UPPER_CASE
   readability-identifier-naming.MemberCase: lower_case
-  readability-identifier-naming.MethodCase: CamelCase
+  readability-identifier-naming.MethodCase: lower_case
   readability-identifier-naming.NamespaceCase: lower_case
   readability-identifier-naming.ParameterCase: lower_case
-  readability-identifier-naming.PrivateMemberSuffix: _
-  readability-identifier-naming.StructCase: CamelCase
+  readability-identifier-naming.PrivateMemberPrefix: m_
+  readability-identifier-naming.StructCase: lower_case
   readability-identifier-naming.TemplateParameterCase: CamelCase
-  readability-identifier-naming.TypeAliasCase: CamelCase
+  readability-identifier-naming.TypeAliasCase: lower_case
   readability-identifier-naming.VariableCase: lower_case

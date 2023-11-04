@@ -8,16 +8,16 @@
 namespace gw {
 
 template <template <typename> class T, typename Derived>
-concept CrtpConcept = requires { std::is_base_of_v<T<Derived>, Derived>; };
+concept crtp_concept = requires { std::is_base_of_v<T<Derived>, Derived>; };
 
 template <template <typename> class T, typename Derived>
-  requires CrtpConcept<T, Derived>
-struct Crtp {
-  auto Self() noexcept -> Derived& { return static_cast<Derived&>(*this); }
-  auto Self() const noexcept -> Derived const& { return static_cast<Derived const&>(*this); }
+  requires crtp_concept<T, Derived>
+struct crtp {
+  auto self() noexcept -> Derived& { return static_cast<Derived&>(*this); }
+  auto self() const noexcept -> Derived const& { return static_cast<Derived const&>(*this); }
 
  private:
-  Crtp() = default;
+  crtp() = default;
   friend T<Derived>;
 };
 
