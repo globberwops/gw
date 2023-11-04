@@ -4,6 +4,7 @@
 #pragma once
 
 #include <functional>
+#include <ostream>
 #include <type_traits>
 #include <typeindex>
 #include <utility>
@@ -98,6 +99,14 @@ struct strong_type {
   // Comparison operators
   constexpr auto operator<=>(const strong_type&) const noexcept = default;
 
+  // Stream operators
+  friend auto operator<<(std::ostream& os,
+                         const strong_type& strong_type) noexcept(noexcept(os << strong_type.m_value)) -> std::ostream&
+    requires complete<Tag> && streamable<T>
+  {
+    return os << strong_type.m_value;
+  }
+
  private:
   T m_value{};
 };
@@ -131,7 +140,7 @@ constexpr auto make_strong_type(T&& value) noexcept(
 namespace std {
 
 // Hash
-template <typename Tag, gw::hashable T>
+template <gw::complete Tag, gw::hashable T>
 struct hash<gw::strong_type<Tag, T>> {  // NOLINT(cert-dcl58-cpp)
   auto operator()(const gw::strong_type<Tag, T>& strong_type) const noexcept -> size_t {
     auto tag_hash = hash<type_index>{}(type_index{typeid(Tag)});

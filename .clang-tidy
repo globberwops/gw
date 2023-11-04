@@ -32,3 +32,4 @@ CheckOptions:
   readability-identifier-naming.TemplateParameterCase: CamelCase
   readability-identifier-naming.TypeAliasCase: lower_case
   readability-identifier-naming.VariableCase: lower_case
+  readability-identifier-length.IgnoredParameterNames: ^os$

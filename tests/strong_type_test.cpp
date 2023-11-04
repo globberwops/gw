@@ -3,6 +3,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <type_traits>
 
+#include "gw/concepts.hpp"
+
 TEST_CASE("strong_types are constructed", "[strong_type]") {
   using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
 
@@ -118,8 +120,16 @@ TEST_CASE("strong_types are compared", "[strong_type]") {
   }
 }
 
-TEST_CASE("strong_types are hashed", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+TEST_CASE("strong_types are streamed", "[strong_type]") {
+  struct strong_type_test_tag {};
+  using strong_type_test = gw::strong_type<strong_type_test_tag, int>;
 
-  STATIC_REQUIRE(std::is_nothrow_invocable_r_v<std::size_t, std::hash<strong_type_test>, strong_type_test>);
+  STATIC_REQUIRE(gw::streamable<strong_type_test>);
+}
+
+TEST_CASE("strong_types are hashed", "[strong_type]") {
+  struct strong_type_test_tag {};
+  using strong_type_test = gw::strong_type<strong_type_test_tag, int>;
+
+  STATIC_REQUIRE(gw::hashable<strong_type_test>);
 }
