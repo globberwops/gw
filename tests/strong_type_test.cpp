@@ -1,6 +1,7 @@
 #include "gw/strong_type.hpp"
 
 #include <catch2/catch_test_macros.hpp>
+#include <concepts>
 #include <type_traits>
 
 #include "gw/concepts.hpp"
@@ -86,38 +87,10 @@ TEST_CASE("strong_types are emplaced", "[strong_type]") {
   STATIC_REQUIRE(noexcept(strong_type_test{}.emplace(1)));
 }
 
-TEST_CASE("strong_types are compared", "[strong_type]") {
+TEST_CASE("strong_types are totally ordered", "[strong_type]") {
   using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
 
-  SECTION("operator==") {
-    STATIC_REQUIRE(strong_type_test{} == strong_type_test{});
-    STATIC_REQUIRE(noexcept(strong_type_test{} == strong_type_test{}));
-  }
-
-  SECTION("operator!=") {
-    STATIC_REQUIRE(strong_type_test{} != strong_type_test{1});
-    STATIC_REQUIRE(noexcept(strong_type_test{} != strong_type_test{}));
-  }
-
-  SECTION("operator<=") {
-    STATIC_REQUIRE(strong_type_test{} <= strong_type_test{1});
-    STATIC_REQUIRE(noexcept(strong_type_test{} <= strong_type_test{}));
-  }
-
-  SECTION("operator<") {
-    STATIC_REQUIRE(strong_type_test{} < strong_type_test{1});
-    STATIC_REQUIRE(noexcept(strong_type_test{} < strong_type_test{}));
-  }
-
-  SECTION("operator>=") {
-    STATIC_REQUIRE(strong_type_test{1} >= strong_type_test{});
-    STATIC_REQUIRE(noexcept(strong_type_test{} >= strong_type_test{}));
-  }
-
-  SECTION("operator>") {
-    STATIC_REQUIRE(strong_type_test{1} > strong_type_test{});
-    STATIC_REQUIRE(noexcept(strong_type_test{} > strong_type_test{}));
-  }
+  STATIC_REQUIRE(std::totally_ordered<strong_type_test>);
 }
 
 TEST_CASE("strong_types are streamed", "[strong_type]") {

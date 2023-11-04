@@ -22,13 +22,13 @@ struct strong_type {
   // Constructors
   template <class... Args>
   constexpr explicit strong_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
-    requires std::is_constructible_v<T, Args...>
+    requires std::constructible_from<T, Args...>
       : m_value(T{std::forward<Args>(args)...}) {}
 
   template <class U, class... Args>
   constexpr strong_type(std::initializer_list<U> ilist,
                         Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
-    requires std::is_constructible_v<T, std::initializer_list<U>&, Args...>
+    requires std::constructible_from<T, std::initializer_list<U>&, Args...>
       : m_value(T{ilist, std::forward<Args>(args)...}) {}
 
   // Observers
@@ -48,49 +48,49 @@ struct strong_type {
   // Monadic operations
   template <class F>
   constexpr auto transform(F&& func) const& noexcept(noexcept(func(m_value)))
-    requires std::is_invocable_v<F, const T&>
+    requires std::invocable<F, const T&>
   {
     return strong_type<Tag, std::remove_cv_t<std::invoke_result_t<F, const T&>>>{func(m_value)};
   }
 
   template <class F>
   constexpr auto transform(F&& func) & noexcept(noexcept(func(m_value)))
-    requires std::is_invocable_v<F, T&>
+    requires std::invocable<F, T&>
   {
     return strong_type<Tag, std::remove_cv_t<std::invoke_result_t<F, T&>>>{func(m_value)};
   }
 
   template <class F>
   constexpr auto transform(F&& func) const&& noexcept(noexcept(func(m_value)))
-    requires std::is_invocable_v<F, const T&&>
+    requires std::invocable<F, const T&&>
   {
     return strong_type<Tag, std::remove_cv_t<std::invoke_result_t<F, const T&&>>>{func(std::move(m_value))};
   }
 
   template <class F>
   constexpr auto transform(F&& func) && noexcept(noexcept(func(m_value)))
-    requires std::is_invocable_v<F, T&&>
+    requires std::invocable<F, T&&>
   {
     return strong_type<Tag, std::remove_cv_t<std::invoke_result_t<F, T&&>>>{func(std::move(m_value))};
   }
 
   // Modifiers
   constexpr void swap(strong_type& other) noexcept(std::is_nothrow_swappable_v<T>)
-    requires std::is_swappable_v<T>
+    requires std::swappable<T>
   {
     using std::swap;
     swap(m_value, other.m_value);
   }
 
   constexpr void reset() noexcept(std::is_nothrow_default_constructible_v<T>)
-    requires std::is_default_constructible_v<T>
+    requires std::default_initializable<T>
   {
     m_value = T{};
   }
 
   template <class... Args>
   constexpr auto emplace(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>) -> T&
-    requires std::is_constructible_v<T, Args...>
+    requires std::constructible_from<T, Args...>
   {
     m_value = T{std::forward<Args>(args)...};
     return m_value;
@@ -114,7 +114,7 @@ struct strong_type {
 // Creation functions
 template <typename Tag, class T, typename... Args>
 constexpr auto make_strong_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
-  requires std::is_constructible_v<std::remove_cvref_t<T>, Args...>
+  requires std::constructible_from<std::remove_cvref_t<T>, Args...>
 {
   return strong_type<Tag, std::remove_cvref_t<T>>{std::forward<Args>(args)...};
 }
@@ -122,7 +122,7 @@ constexpr auto make_strong_type(Args&&... args) noexcept(std::is_nothrow_constru
 template <typename Tag, class T, typename U, typename... Args>
 constexpr auto make_strong_type(std::initializer_list<U> ilist, Args&&... args) noexcept(
     std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
-  requires std::is_constructible_v<T, std::initializer_list<U>&, Args...>
+  requires std::constructible_from<T, std::initializer_list<U>&, Args...>
 {
   return strong_type<Tag, std::remove_cvref_t<T>>{ilist, std::forward<Args>(args)...};
 }
@@ -130,7 +130,7 @@ constexpr auto make_strong_type(std::initializer_list<U> ilist, Args&&... args) 
 template <typename Tag, class T>
 constexpr auto make_strong_type(T&& value) noexcept(
     std::is_nothrow_constructible_v<strong_type<Tag, std::remove_cvref_t<T>>, T>)
-  requires std::is_constructible_v<std::remove_cvref_t<T>, T>
+  requires std::constructible_from<std::remove_cvref_t<T>, T>
 {
   return strong_type<Tag, std::remove_cvref_t<T>>{std::forward<T>(value)};
 }
