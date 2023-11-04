@@ -128,9 +128,9 @@ constexpr auto make_strong_type(T&& value) noexcept(
 
 }  // namespace gw
 
-// Hash
 namespace std {
 
+// Hash
 template <typename Tag, gw::hashable T>
 struct hash<gw::strong_type<Tag, T>> {  // NOLINT(cert-dcl58-cpp)
   auto operator()(const gw::strong_type<Tag, T>& strong_type) const noexcept -> size_t {
