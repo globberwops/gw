@@ -2,7 +2,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include <concepts>
-#include <iostream>
 #include <type_traits>
 
 #include "gw/concepts.hpp"

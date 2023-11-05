@@ -142,6 +142,7 @@ struct hash<gw::strong_type<Tag, T>> {
   }
 };
 
+// String conversion
 template <typename Tag, gw::string_convertable T>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 [[nodiscard]] auto inline to_string(gw::strong_type<Tag, T> strong_type) -> std::string {
