@@ -56,6 +56,8 @@ jobs:
           - os: ubuntu-latest
             compiler: cl
           - os: macos-latest
+            compiler: clang
+          - os: macos-latest
             compiler: cl
 
     steps:
