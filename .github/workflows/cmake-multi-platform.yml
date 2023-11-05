@@ -44,10 +44,6 @@ jobs:
             compiler: gcc
             c_compiler: gcc-12
             cpp_compiler: g++-12
-          # - os: macos-latest
-          #   compiler: clang
-          #   c_compiler: $(brew --prefix llvm@15)/bin/clang
-          #   cpp_compiler: $(brew --prefix llvm@15)/bin/clang
         exclude:
           - os: windows-latest
             compiler: gcc
