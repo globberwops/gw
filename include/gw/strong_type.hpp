@@ -99,6 +99,12 @@ struct strong_type {
   // Comparison operators
   constexpr auto operator<=>(const strong_type&) const noexcept = default;
 
+  // Conversion operators
+  constexpr explicit operator const T&() const& noexcept { return m_value; }
+  constexpr explicit operator T&() & noexcept { return m_value; }
+  constexpr explicit operator const T&&() const&& noexcept { return std::move(m_value); }
+  constexpr explicit operator T&&() && noexcept { return std::move(m_value); }
+
  private:
   T m_value{};
 };

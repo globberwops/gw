@@ -68,6 +68,15 @@ TEST_CASE("strong_types are observed", "[strong_type]") {
   }
 }
 
+TEST_CASE("strong_types are converted", "[strong_type]") {
+  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+
+  SECTION("explicit conversion") {
+    STATIC_REQUIRE(static_cast<int>(strong_type_test{}) == 0);
+    STATIC_REQUIRE(noexcept(static_cast<int>(strong_type_test{})));
+  }
+}
+
 TEST_CASE("strong_types are transformed", "[strong_type]") {
   using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
 
