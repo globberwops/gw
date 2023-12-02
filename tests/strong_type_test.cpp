@@ -68,15 +68,6 @@ TEST_CASE("strong_types are observed", "[strong_type]") {
   }
 }
 
-TEST_CASE("strong_types are converted", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
-
-  SECTION("explicit conversion") {
-    STATIC_REQUIRE(static_cast<int>(strong_type_test{}) == 0);
-    STATIC_REQUIRE(noexcept(static_cast<int>(strong_type_test{})));
-  }
-}
-
 TEST_CASE("strong_types are transformed", "[strong_type]") {
   using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
 
@@ -100,6 +91,43 @@ TEST_CASE("strong_types are totally ordered", "[strong_type]") {
   using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
 
   STATIC_REQUIRE(std::totally_ordered<strong_type_test>);
+}
+
+TEST_CASE("strong_types are converted", "[strong_type]") {
+  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+
+  SECTION("explicit conversion") {
+    STATIC_REQUIRE(static_cast<int>(strong_type_test{}) == 0);
+    STATIC_REQUIRE(noexcept(static_cast<int>(strong_type_test{})));
+  }
+}
+
+TEST_CASE("strong_types are incremented and decremented", "[strong_type]") {
+  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+
+  SECTION("pre-increment") {
+    STATIC_REQUIRE(++strong_type_test{} == strong_type_test{1});
+    STATIC_REQUIRE(noexcept(++strong_type_test{}));
+  }
+
+  SECTION("post-increment") {
+    auto value = strong_type_test{};
+    REQUIRE(value++ == strong_type_test{0});
+    REQUIRE(value == strong_type_test{1});
+    STATIC_REQUIRE(noexcept(value++));
+  }
+
+  SECTION("pre-decrement") {
+    STATIC_REQUIRE(--strong_type_test{} == strong_type_test{-1});
+    STATIC_REQUIRE(noexcept(--strong_type_test{}));
+  }
+
+  SECTION("post-decrement") {
+    auto value = strong_type_test{1};
+    REQUIRE(value-- == strong_type_test{1});
+    REQUIRE(value == strong_type_test{0});
+    STATIC_REQUIRE(noexcept(value--));
+  }
 }
 
 TEST_CASE("strong_types are converted to string", "[strong_type]") {

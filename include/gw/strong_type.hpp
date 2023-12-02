@@ -105,6 +105,59 @@ struct strong_type {
   constexpr explicit operator const T&&() const&& noexcept { return std::move(m_value); }
   constexpr explicit operator T&&() && noexcept { return std::move(m_value); }
 
+  // Increment and decrement operators
+  constexpr auto operator++() & noexcept(noexcept(++m_value)) -> strong_type&
+    requires gw::arithmetic<T>
+  {
+    ++m_value;
+    return *this;
+  }
+
+  constexpr auto operator++() && noexcept(noexcept(++m_value)) -> strong_type&&
+    requires gw::arithmetic<T>
+  {
+    ++m_value;
+    return std::move(*this);
+  }
+
+  constexpr auto operator++(int) & noexcept(noexcept(m_value++)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value++};
+  }
+
+  constexpr auto operator++(int) && noexcept(noexcept(m_value++)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value++};
+  }
+
+  constexpr auto operator--() & noexcept(noexcept(--m_value)) -> strong_type&
+    requires gw::arithmetic<T>
+  {
+    --m_value;
+    return *this;
+  }
+
+  constexpr auto operator--() && noexcept(noexcept(--m_value)) -> strong_type&&
+    requires gw::arithmetic<T>
+  {
+    --m_value;
+    return std::move(*this);
+  }
+
+  constexpr auto operator--(int) & noexcept(noexcept(m_value--)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value--};
+  }
+
+  constexpr auto operator--(int) && noexcept(noexcept(m_value--)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value--};
+  }
+
  private:
   T m_value{};
 };

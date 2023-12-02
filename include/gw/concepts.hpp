@@ -6,8 +6,15 @@
 #include <concepts>
 #include <functional>
 #include <string>
+#include <type_traits>
 
 namespace gw {
+
+template <typename T>
+concept arithmetic = requires { std::is_arithmetic_v<T>; };
+
+template <typename T>
+concept complete = requires { sizeof(T); };
 
 template <typename T>
 concept hashable = requires(T value) {
@@ -15,16 +22,13 @@ concept hashable = requires(T value) {
 };
 
 template <typename T>
-concept complete = requires { sizeof(T); };
+concept named = requires(T value) {
+  { value.name() } -> std::convertible_to<std::string>;
+};
 
 template <typename T>
 concept string_convertable = requires(T value) {
   { std::to_string(value) } -> std::same_as<std::string>;
-};
-
-template <typename T>
-concept named = requires(T value) {
-  { value.name() } -> std::convertible_to<std::string>;
 };
 
 }  // namespace gw
