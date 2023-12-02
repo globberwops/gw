@@ -11,7 +11,7 @@ namespace gw {
 
 template <typename T>
 concept hashable = requires(T value) {
-  { std::hash<T>{}(value) } -> std::convertible_to<std::size_t>;
+  { std::hash<T>{}(value) } -> std::same_as<std::size_t>;
 };
 
 template <typename T>
