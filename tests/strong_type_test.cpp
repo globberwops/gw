@@ -1,7 +1,11 @@
+// Copyright (c) 2023 Martin Stump
+// SPDX-License-Identifier: BSL-1.0
+
 #include "gw/strong_type.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 #include <concepts>
+#include <sstream>
 #include <type_traits>
 
 #include "gw/concepts.hpp"
@@ -130,6 +134,16 @@ TEST_CASE("strong_types are incremented and decremented", "[strong_type]") {
   }
 }
 
+#ifdef GW_ENABLE_HASH_CALCULATION
+TEST_CASE("strong_types are hashed", "[strong_type]") {
+  struct strong_type_test_tag {};
+  using strong_type_test = gw::strong_type<strong_type_test_tag, int>;
+
+  STATIC_REQUIRE(gw::hashable<strong_type_test>);
+}
+#endif  // GW_ENABLE_HASH_CALCULATION
+
+#ifdef GW_ENABLE_STRING_CONVERSION
 TEST_CASE("strong_types are converted to string", "[strong_type]") {
   SECTION("unnamed strong_type") {
     using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
@@ -146,10 +160,27 @@ TEST_CASE("strong_types are converted to string", "[strong_type]") {
     REQUIRE(std::to_string(strong_type_named{1}) == "strong_type_named_tag: 1");
   }
 }
+#endif  // GW_ENABLE_STRING_CONVERSION
 
-TEST_CASE("strong_types are hashed", "[strong_type]") {
-  struct strong_type_test_tag {};
-  using strong_type_test = gw::strong_type<strong_type_test_tag, int>;
+#ifdef GW_ENABLE_STREAM_OPERATORS
+TEST_CASE("strong_types are streamed", "[strong_type]") {
+  SECTION("unnamed strong_type") {
+    using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
 
-  STATIC_REQUIRE(gw::hashable<strong_type_test>);
+    auto sstream = std::stringstream{};
+    sstream << strong_type_test{1};
+    REQUIRE(sstream.str() == "strong_type: 1");
+  }
+
+  SECTION("named strong_type") {
+    struct strong_type_named_tag {
+      static constexpr auto name() noexcept { return "strong_type_named_tag"; }
+    };
+    using strong_type_named = gw::strong_type<strong_type_named_tag, int>;
+
+    auto sstream = std::stringstream{};
+    sstream << strong_type_named{1};
+    REQUIRE(sstream.str() == "strong_type_named_tag: 1");
+  }
 }
+#endif  // GW_ENABLE_STREAM_OPERATORS

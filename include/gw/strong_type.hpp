@@ -3,11 +3,24 @@
 
 #pragma once
 
-#include <functional>
-#include <string>
+#include <concepts>
+#include <initializer_list>
 #include <type_traits>
-#include <typeindex>
 #include <utility>
+
+#ifdef GW_ENABLE_HASH_CALCULATION
+#include <cstddef>
+#include <functional>
+#include <typeindex>
+#endif  // GW_ENABLE_HASH_CALCULATION
+
+#ifdef GW_ENABLE_STRING_CONVERSION
+#include <string>
+#endif  // GW_ENABLE_STRING_CONVERSION
+
+#ifdef GW_ENABLE_STREAM_OPERATORS
+#include <ostream>
+#endif  // GW_ENABLE_STREAM_OPERATORS
 
 #include "gw/concepts.hpp"
 
@@ -158,6 +171,17 @@ struct strong_type {
     return strong_type{m_value--};
   }
 
+  // Stream operators
+#ifdef GW_ENABLE_STREAM_OPERATORS
+  template <typename Char, typename Traits>
+  friend auto operator<<(std::basic_ostream<Char, Traits>& ostream,
+                         const strong_type& rhs) -> std::basic_ostream<Char, Traits>&
+  // requires gw::string_convertable<strong_type>
+  {
+    return ostream << std::to_string(rhs);
+  }
+#endif  // GW_ENABLE_STREAM_OPERATORS
+
  private:
   T m_value{};
 };
@@ -191,6 +215,7 @@ constexpr auto make_strong_type(T&& value) noexcept(
 namespace std {
 
 // Hash
+#ifdef GW_ENABLE_HASH_CALCULATION
 template <gw::complete Tag, gw::hashable T>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 struct hash<gw::strong_type<Tag, T>> {
@@ -200,8 +225,10 @@ struct hash<gw::strong_type<Tag, T>> {
     return tag_hash ^ value_hash;
   }
 };
+#endif  // GW_ENABLE_HASH_CALCULATION
 
 // String conversion
+#ifdef GW_ENABLE_STRING_CONVERSION
 template <typename Tag, gw::string_convertable T>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 [[nodiscard]] auto inline to_string(gw::strong_type<Tag, T> strong_type) -> std::string {
@@ -213,5 +240,6 @@ template <gw::named Tag, gw::string_convertable T>
 [[nodiscard]] auto inline to_string(gw::strong_type<Tag, T> strong_type) -> std::string {
   return std::string{Tag::name()} + ": " + std::to_string(strong_type.value());
 }
+#endif  // GW_ENABLE_STRING_CONVERSION
 
 }  // namespace std

@@ -5,6 +5,4 @@
 
 A bunch of small C++ utilities
 
-## StrongType
-
-Rationale: Same interface as `std::optional`
+ * [`gw::strong_type`](docs/strong_type.md)
