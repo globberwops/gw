@@ -10,10 +10,9 @@ project(
 option(GW_BUILD_TESTS "Build tests" ${PROJECT_IS_TOP_LEVEL})
 option(GW_INSTALL "Generate install target" ON)
 
-include(CMakeDependentOption)
 option(GW_ENABLE_HASH_CALCULATION "Enable hash calculation" ON)
+option(GW_ENABLE_STREAM_OPERATORS "Enable stream operators" ON)
 option(GW_ENABLE_STRING_CONVERSION "Enable string conversion" ON)
-cmake_dependent_option(GW_ENABLE_STREAM_OPERATORS "Enable stream operators" ON "GW_ENABLE_STRING_CONVERSION" OFF)
 
 add_library(StrongType INTERFACE)
 add_library(gw::StrongType ALIAS StrongType)
@@ -23,11 +22,11 @@ target_include_directories(StrongType INTERFACE $<BUILD_INTERFACE:${PROJECT_SOUR
 if(GW_ENABLE_HASH_CALCULATION)
   target_compile_definitions(StrongType INTERFACE GW_ENABLE_HASH_CALCULATION)
 endif()
-if(GW_ENABLE_STRING_CONVERSION)
-  target_compile_definitions(StrongType INTERFACE GW_ENABLE_STRING_CONVERSION)
-endif()
 if(GW_ENABLE_STREAM_OPERATORS)
   target_compile_definitions(StrongType INTERFACE GW_ENABLE_STREAM_OPERATORS)
+endif()
+if(GW_ENABLE_STRING_CONVERSION)
+  target_compile_definitions(StrongType INTERFACE GW_ENABLE_STRING_CONVERSION)
 endif()
 
 add_library(Crtp INTERFACE)

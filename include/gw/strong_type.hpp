@@ -14,13 +14,13 @@
 #include <typeindex>
 #endif  // GW_ENABLE_HASH_CALCULATION
 
+#ifdef GW_ENABLE_STREAM_OPERATORS
+#include <iostream>
+#endif  // GW_ENABLE_STREAM_OPERATORS
+
 #ifdef GW_ENABLE_STRING_CONVERSION
 #include <string>
 #endif  // GW_ENABLE_STRING_CONVERSION
-
-#ifdef GW_ENABLE_STREAM_OPERATORS
-#include <ostream>
-#endif  // GW_ENABLE_STREAM_OPERATORS
 
 #include "gw/concepts.hpp"
 
@@ -173,12 +173,16 @@ struct strong_type {
 
   // Stream operators
 #ifdef GW_ENABLE_STREAM_OPERATORS
-  template <typename Char, typename Traits>
-  friend auto operator<<(std::basic_ostream<Char, Traits>& ostream,
-                         const strong_type& rhs) -> std::basic_ostream<Char, Traits>&
-  // requires gw::string_convertable<strong_type>
+  friend inline auto operator<<(std::ostream& ostream, const strong_type& rhs) -> std::ostream&
+    requires gw::ostreamable<T>
   {
-    return ostream << std::to_string(rhs);
+    return ostream << rhs.m_value;
+  }
+
+  friend inline auto operator>>(std::istream& istream, strong_type& rhs) -> std::istream&
+    requires gw::istreamable<T>
+  {
+    return istream >> rhs.m_value;
   }
 #endif  // GW_ENABLE_STREAM_OPERATORS
 
@@ -232,7 +236,7 @@ struct hash<gw::strong_type<Tag, T>> {
 template <typename Tag, gw::string_convertable T>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 [[nodiscard]] auto inline to_string(gw::strong_type<Tag, T> strong_type) -> std::string {
-  return "strong_type: " + std::to_string(strong_type.value());
+  return std::to_string(strong_type.value());
 }
 
 template <gw::named Tag, gw::string_convertable T>

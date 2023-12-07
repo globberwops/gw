@@ -11,6 +11,10 @@
 #include <functional>
 #endif  // GW_ENABLE_HASH_CALCULATION
 
+#ifdef GW_ENABLE_STREAM_OPERATORS
+#include <iostream>
+#endif  // GW_ENABLE_STREAM_OPERATORS
+
 #ifdef GW_ENABLE_STRING_CONVERSION
 #include <string>
 #endif  // GW_ENABLE_STRING_CONVERSION
@@ -29,6 +33,18 @@ concept hashable = requires(T value) {
   { std::hash<T>{}(value) } -> std::same_as<std::size_t>;
 };
 #endif  // GW_ENABLE_HASH_CALCULATION
+
+#ifdef GW_ENABLE_STREAM_OPERATORS
+template <typename T>
+concept ostreamable = requires(std::ostream& ostream, T value) {
+  { ostream << value } -> std::same_as<std::ostream&>;
+};
+
+template <typename T>
+concept istreamable = requires(std::istream& istream, T value) {
+  { istream >> value } -> std::same_as<std::istream&>;
+};
+#endif  // GW_ENABLE_STREAM_OPERATORS
 
 #ifdef GW_ENABLE_STRING_CONVERSION
 template <typename T>

@@ -125,5 +125,5 @@ Enabled only if `T` is an arithmetic type.
 | Option | Description | Default |
 | ------ | ----------- | ------- |
 | `GW_ENABLE_HASH_CALCULATION` | If `T` has a `std::hash` specialization, the wrapped type will provide a specialization of `std::hash`. | `ON` |
+| `GW_ENABLE_STREAM_OPERATORS` | If `T` has an `operator<<` overload, the wrapped type will provide an overload of `operator<<`. | `ON` |
 | `GW_ENABLE_STRING_CONVERSION` | If `T` has a `std::to_string` overload, the wrapped type will provide an overload of `std::to_string`. | `ON` |
-| `GW_ENABLE_STREAM_OPERATORS` | If `T` has a `std::to_string` overload, the wrapped type will provide an overload of `operator<<`. | `ON` |

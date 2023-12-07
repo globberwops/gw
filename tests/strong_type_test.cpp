@@ -143,44 +143,45 @@ TEST_CASE("strong_types are hashed", "[strong_type]") {
 }
 #endif  // GW_ENABLE_HASH_CALCULATION
 
+#ifdef GW_ENABLE_STREAM_OPERATORS
+TEST_CASE("strong_types are streamed", "[strong_type]") {
+  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+
+  SECTION("ostream strong_type") {
+    STATIC_REQUIRE(gw::ostreamable<strong_type_test>);
+
+    auto sstream = std::stringstream{};
+    sstream << strong_type_test{1};
+    REQUIRE(sstream.str() == "1");
+  }
+
+  SECTION("istream strong_type") {
+    STATIC_REQUIRE(gw::istreamable<strong_type_test>);
+
+    auto sstream = std::stringstream{};
+    sstream << "1";
+    auto value = strong_type_test{};
+    sstream >> value;
+    REQUIRE(value == strong_type_test{1});
+  }
+}
+#endif  // GW_ENABLE_STREAM_OPERATORS
+
 #ifdef GW_ENABLE_STRING_CONVERSION
 TEST_CASE("strong_types are converted to string", "[strong_type]") {
   SECTION("unnamed strong_type") {
     using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
 
-    REQUIRE(std::to_string(strong_type_test{1}) == "strong_type: 1");
+    REQUIRE(std::to_string(strong_type_test{1}) == "1");
   }
 
   SECTION("named strong_type") {
     struct strong_type_named_tag {
-      static constexpr auto name() noexcept { return "strong_type_named_tag"; }
+      static constexpr auto name() noexcept { return "StrongTypeNamedTag"; }
     };
     using strong_type_named = gw::strong_type<strong_type_named_tag, int>;
 
-    REQUIRE(std::to_string(strong_type_named{1}) == "strong_type_named_tag: 1");
+    REQUIRE(std::to_string(strong_type_named{1}) == "StrongTypeNamedTag: 1");
   }
 }
 #endif  // GW_ENABLE_STRING_CONVERSION
-
-#ifdef GW_ENABLE_STREAM_OPERATORS
-TEST_CASE("strong_types are streamed", "[strong_type]") {
-  SECTION("unnamed strong_type") {
-    using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
-
-    auto sstream = std::stringstream{};
-    sstream << strong_type_test{1};
-    REQUIRE(sstream.str() == "strong_type: 1");
-  }
-
-  SECTION("named strong_type") {
-    struct strong_type_named_tag {
-      static constexpr auto name() noexcept { return "strong_type_named_tag"; }
-    };
-    using strong_type_named = gw::strong_type<strong_type_named_tag, int>;
-
-    auto sstream = std::stringstream{};
-    sstream << strong_type_named{1};
-    REQUIRE(sstream.str() == "strong_type_named_tag: 1");
-  }
-}
-#endif  // GW_ENABLE_STREAM_OPERATORS
