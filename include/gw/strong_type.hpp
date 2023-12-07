@@ -173,16 +173,18 @@ struct strong_type {
 
   // Stream operators
 #ifdef GW_ENABLE_STREAM_OPERATORS
-  friend inline auto operator<<(std::ostream& ostream, const strong_type& rhs) -> std::ostream&
+  friend inline auto operator<<(std::ostream& ostream,
+                                const strong_type& rhs) noexcept(noexcept(ostream << rhs.m_value)) -> std::ostream&
     requires gw::ostreamable<T>
   {
-    return ostream << rhs.m_value;
+    return ostream << *rhs;
   }
 
-  friend inline auto operator>>(std::istream& istream, strong_type& rhs) -> std::istream&
+  friend inline auto operator>>(std::istream& istream,
+                                strong_type& rhs) noexcept(noexcept(istream >> rhs.m_value)) -> std::istream&
     requires gw::istreamable<T>
   {
-    return istream >> rhs.m_value;
+    return istream >> *rhs;
   }
 #endif  // GW_ENABLE_STREAM_OPERATORS
 
@@ -223,7 +225,7 @@ namespace std {
 template <gw::complete Tag, gw::hashable T>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 struct hash<gw::strong_type<Tag, T>> {
-  [[nodiscard]] auto operator()(const gw::strong_type<Tag, T>& strong_type) const noexcept -> size_t {
+  [[nodiscard]] auto inline operator()(const gw::strong_type<Tag, T>& strong_type) const noexcept -> size_t {
     auto tag_hash = hash<type_index>{}(type_index{typeid(Tag)});
     auto value_hash = hash<T>{}(strong_type.value());
     return tag_hash ^ value_hash;
