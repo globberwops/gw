@@ -177,14 +177,14 @@ struct strong_type {
                                 const strong_type& rhs) noexcept(noexcept(ostream << rhs.m_value)) -> std::ostream&
     requires gw::ostreamable<T>
   {
-    return ostream << *rhs;
+    return ostream << rhs.m_value;
   }
 
   friend inline auto operator>>(std::istream& istream,
                                 strong_type& rhs) noexcept(noexcept(istream >> rhs.m_value)) -> std::istream&
     requires gw::istreamable<T>
   {
-    return istream >> *rhs;
+    return istream >> rhs.m_value;
   }
 #endif  // GW_ENABLE_STREAM_OPERATORS
 
