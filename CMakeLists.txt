@@ -7,6 +7,7 @@ project(
   HOMEPAGE_URL "https://github.com/globberwops/gw"
   LANGUAGES CXX)
 
+option(GW_BUILD_DOCS "Build documentation" ${PROJECT_IS_TOP_LEVEL})
 option(GW_BUILD_TESTS "Build tests" ${PROJECT_IS_TOP_LEVEL})
 option(GW_INSTALL "Generate install target" ON)
 
@@ -14,26 +15,30 @@ option(GW_ENABLE_HASH_CALCULATION "Enable hash calculation" ON)
 option(GW_ENABLE_STREAM_OPERATORS "Enable stream operators" ON)
 option(GW_ENABLE_STRING_CONVERSION "Enable string conversion" ON)
 
-add_library(StrongType INTERFACE)
-add_library(gw::StrongType ALIAS StrongType)
-target_sources(StrongType INTERFACE FILE_SET HEADERS BASE_DIRS include FILES include/gw/strong_type.hpp)
-target_compile_features(StrongType INTERFACE cxx_std_20)
-target_include_directories(StrongType INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+add_library(strong_type INTERFACE)
+add_library(gw::strong_type ALIAS strong_type)
+target_sources(strong_type INTERFACE FILE_SET HEADERS BASE_DIRS include FILES include/gw/strong_type.hpp)
+target_compile_features(strong_type INTERFACE cxx_std_20)
+target_include_directories(strong_type INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 if(GW_ENABLE_HASH_CALCULATION)
-  target_compile_definitions(StrongType INTERFACE GW_ENABLE_HASH_CALCULATION)
+  target_compile_definitions(strong_type INTERFACE GW_ENABLE_HASH_CALCULATION)
 endif()
 if(GW_ENABLE_STREAM_OPERATORS)
-  target_compile_definitions(StrongType INTERFACE GW_ENABLE_STREAM_OPERATORS)
+  target_compile_definitions(strong_type INTERFACE GW_ENABLE_STREAM_OPERATORS)
 endif()
 if(GW_ENABLE_STRING_CONVERSION)
-  target_compile_definitions(StrongType INTERFACE GW_ENABLE_STRING_CONVERSION)
+  target_compile_definitions(strong_type INTERFACE GW_ENABLE_STRING_CONVERSION)
 endif()
 
-add_library(Crtp INTERFACE)
-add_library(gw::Crtp ALIAS Crtp)
-target_sources(Crtp INTERFACE FILE_SET HEADERS BASE_DIRS include FILES include/gw/crtp.hpp)
-target_compile_features(Crtp INTERFACE cxx_std_20)
-target_include_directories(Crtp INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+add_library(crtp INTERFACE)
+add_library(gw::crtp ALIAS crtp)
+target_sources(crtp INTERFACE FILE_SET HEADERS BASE_DIRS include FILES include/gw/crtp.hpp)
+target_compile_features(crtp INTERFACE cxx_std_20)
+target_include_directories(crtp INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+
+if(GW_BUILD_DOCS)
+  add_subdirectory(docs)
+endif()
 
 if(GW_BUILD_TESTS)
   enable_testing()
@@ -60,7 +65,7 @@ if(GW_INSTALL)
     COMPATIBILITY SameMajorVersion)
 
   install(
-    TARGETS StrongType Crtp
+    TARGETS strong_type crtp
     EXPORT gw-targets
     FILE_SET HEADERS
     COMPONENT gw-devel)

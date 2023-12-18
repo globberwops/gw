@@ -11,9 +11,11 @@ RUN apt-get update && apt-get install -y \
     cppcheck \
     cpplint \
     curl \
+    doxygen \
     gdb \
     git \
     gnupg \
+    graphviz \
     iwyu \
     libbenchmark-dev \
     libgmock-dev \
