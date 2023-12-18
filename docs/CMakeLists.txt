@@ -1,3 +1,10 @@
+find_package(Doxygen OPTIONAL_COMPONENTS dot)
+
+if(NOT Doxygen_FOUND)
+  message(WARNING "Doxygen not found, documentation will not be generated")
+  return()
+endif()
+
 include(FetchContent)
 FetchContent_Declare(
   doxygen_awesome_css
@@ -5,8 +12,6 @@ FetchContent_Declare(
   GIT_TAG df88fe4fdd97714fadfd3ef17de0b4401f804052 # v2.3.1
 )
 FetchContent_MakeAvailable(doxygen_awesome_css)
-
-find_package(Doxygen REQUIRED dot)
 
 set(DOXYGEN_BUILTIN_STL_SUPPORT YES)
 set(DOXYGEN_DISABLE_INDEX NO)
