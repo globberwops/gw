@@ -17,6 +17,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Install Doxygen
+        run: sudo apt-get -y install doxygen graphviz
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Pages
