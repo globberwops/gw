@@ -171,6 +171,390 @@ struct strong_type {
     return strong_type{m_value--};
   }
 
+  // Arithmetic operators
+  constexpr auto operator+(const strong_type& rhs) const& noexcept(noexcept(m_value + rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value + rhs.m_value};
+  }
+
+  constexpr auto operator+(strong_type&& rhs) const& noexcept(noexcept(m_value + rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value + rhs.m_value};
+  }
+
+  constexpr auto operator+(const strong_type& rhs) && noexcept(noexcept(m_value + rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value + rhs.m_value};
+  }
+
+  constexpr auto operator+(strong_type&& rhs) && noexcept(noexcept(m_value + rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value + rhs.m_value};
+  }
+
+  constexpr auto operator-(const strong_type& rhs) const& noexcept(noexcept(m_value - rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value - rhs.m_value};
+  }
+
+  constexpr auto operator-(strong_type&& rhs) const& noexcept(noexcept(m_value - rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value - rhs.m_value};
+  }
+
+  constexpr auto operator-(const strong_type& rhs) && noexcept(noexcept(m_value - rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value - rhs.m_value};
+  }
+
+  constexpr auto operator-(strong_type&& rhs) && noexcept(noexcept(m_value - rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value - rhs.m_value};
+  }
+
+  constexpr auto operator*(const strong_type& rhs) const& noexcept(noexcept(m_value * rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value * rhs.m_value};
+  }
+
+  constexpr auto operator*(strong_type&& rhs) const& noexcept(noexcept(m_value * rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value * rhs.m_value};
+  }
+
+  constexpr auto operator*(const strong_type& rhs) && noexcept(noexcept(m_value * rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value * rhs.m_value};
+  }
+
+  constexpr auto operator*(strong_type&& rhs) && noexcept(noexcept(m_value * rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value * rhs.m_value};
+  }
+
+  constexpr auto operator/(const strong_type& rhs) const& noexcept(noexcept(m_value / rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value / rhs.m_value};
+  }
+
+  constexpr auto operator/(strong_type&& rhs) const& noexcept(noexcept(m_value / rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value / rhs.m_value};
+  }
+
+  constexpr auto operator/(const strong_type& rhs) && noexcept(noexcept(m_value / rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value / rhs.m_value};
+  }
+
+  constexpr auto operator/(strong_type&& rhs) && noexcept(noexcept(m_value / rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value / rhs.m_value};
+  }
+
+  constexpr auto operator%(const strong_type& rhs) const& noexcept(noexcept(m_value % rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value % rhs.m_value};
+  }
+
+  constexpr auto operator%(strong_type&& rhs) const& noexcept(noexcept(m_value % rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value % rhs.m_value};
+  }
+
+  constexpr auto operator%(const strong_type& rhs) && noexcept(noexcept(m_value % rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value % rhs.m_value};
+  }
+
+  constexpr auto operator%(strong_type&& rhs) && noexcept(noexcept(m_value % rhs.m_value)) -> strong_type
+    requires gw::arithmetic<T>
+  {
+    return strong_type{m_value % rhs.m_value};
+  }
+
+  // Arithmetic assignment operators
+  constexpr auto operator+=(const strong_type& rhs) & noexcept(noexcept(m_value += rhs.m_value)) -> strong_type&
+    requires gw::arithmetic<T>
+  {
+    m_value += rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator+=(strong_type&& rhs) & noexcept(noexcept(m_value += rhs.m_value)) -> strong_type&
+    requires gw::arithmetic<T>
+  {
+    m_value += rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator-=(const strong_type& rhs) & noexcept(noexcept(m_value -= rhs.m_value)) -> strong_type&
+    requires gw::arithmetic<T>
+  {
+    m_value -= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator-=(strong_type&& rhs) & noexcept(noexcept(m_value -= rhs.m_value)) -> strong_type&
+    requires gw::arithmetic<T>
+  {
+    m_value -= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator*=(const strong_type& rhs) & noexcept(noexcept(m_value *= rhs.m_value)) -> strong_type&
+    requires gw::arithmetic<T>
+  {
+    m_value *= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator*=(strong_type&& rhs) & noexcept(noexcept(m_value *= rhs.m_value)) -> strong_type&
+    requires gw::arithmetic<T>
+  {
+    m_value *= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator/=(const strong_type& rhs) & noexcept(noexcept(m_value /= rhs.m_value)) -> strong_type&
+    requires gw::arithmetic<T>
+  {
+    m_value /= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator/=(strong_type&& rhs) & noexcept(noexcept(m_value /= rhs.m_value)) -> strong_type&
+    requires gw::arithmetic<T>
+  {
+    m_value /= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator%=(const strong_type& rhs) & noexcept(noexcept(m_value %= rhs.m_value)) -> strong_type&
+    requires gw::arithmetic<T>
+  {
+    m_value %= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator%=(strong_type&& rhs) & noexcept(noexcept(m_value %= rhs.m_value)) -> strong_type&
+    requires gw::arithmetic<T>
+  {
+    m_value %= rhs.m_value;
+    return *this;
+  }
+
+  // Bitwise operators
+  constexpr auto operator&(const strong_type& rhs) const& noexcept(noexcept(m_value & rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value & rhs.m_value};
+  }
+
+  constexpr auto operator&(strong_type&& rhs) const& noexcept(noexcept(m_value & rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value & rhs.m_value};
+  }
+
+  constexpr auto operator&(const strong_type& rhs) && noexcept(noexcept(m_value & rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value & rhs.m_value};
+  }
+
+  constexpr auto operator&(strong_type&& rhs) && noexcept(noexcept(m_value & rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value & rhs.m_value};
+  }
+
+  constexpr auto operator|(const strong_type& rhs) const& noexcept(noexcept(m_value | rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value | rhs.m_value};
+  }
+
+  constexpr auto operator|(strong_type&& rhs) const& noexcept(noexcept(m_value | rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value | rhs.m_value};
+  }
+
+  constexpr auto operator|(const strong_type& rhs) && noexcept(noexcept(m_value | rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value | rhs.m_value};
+  }
+
+  constexpr auto operator|(strong_type&& rhs) && noexcept(noexcept(m_value | rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value | rhs.m_value};
+  }
+
+  constexpr auto operator^(const strong_type& rhs) const& noexcept(noexcept(m_value ^ rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value ^ rhs.m_value};
+  }
+
+  constexpr auto operator^(strong_type&& rhs) const& noexcept(noexcept(m_value ^ rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value ^ rhs.m_value};
+  }
+
+  constexpr auto operator^(const strong_type& rhs) && noexcept(noexcept(m_value ^ rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value ^ rhs.m_value};
+  }
+
+  constexpr auto operator^(strong_type&& rhs) && noexcept(noexcept(m_value ^ rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value ^ rhs.m_value};
+  }
+
+  constexpr auto operator<<(const strong_type& rhs) const& noexcept(noexcept(m_value << rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value << rhs.m_value};
+  }
+
+  constexpr auto operator<<(strong_type&& rhs) const& noexcept(noexcept(m_value << rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value << rhs.m_value};
+  }
+
+  constexpr auto operator<<(const strong_type& rhs) && noexcept(noexcept(m_value << rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value << rhs.m_value};
+  }
+
+  constexpr auto operator<<(strong_type&& rhs) && noexcept(noexcept(m_value << rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value << rhs.m_value};
+  }
+
+  constexpr auto operator>>(const strong_type& rhs) const& noexcept(noexcept(m_value >> rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value >> rhs.m_value};
+  }
+
+  constexpr auto operator>>(strong_type&& rhs) const& noexcept(noexcept(m_value >> rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value >> rhs.m_value};
+  }
+
+  constexpr auto operator>>(const strong_type& rhs) && noexcept(noexcept(m_value >> rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value >> rhs.m_value};
+  }
+
+  constexpr auto operator>>(strong_type&& rhs) && noexcept(noexcept(m_value >> rhs.m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{m_value >> rhs.m_value};
+  }
+
+  // Bitwise assignment operators
+  constexpr auto operator&=(const strong_type& rhs) & noexcept(noexcept(m_value &= rhs.m_value)) -> strong_type&
+    requires std::unsigned_integral<T>
+  {
+    m_value &= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator&=(strong_type&& rhs) & noexcept(noexcept(m_value &= rhs.m_value)) -> strong_type&
+    requires std::unsigned_integral<T>
+  {
+    m_value &= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator|=(const strong_type& rhs) & noexcept(noexcept(m_value |= rhs.m_value)) -> strong_type&
+    requires std::unsigned_integral<T>
+  {
+    m_value |= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator|=(strong_type&& rhs) & noexcept(noexcept(m_value |= rhs.m_value)) -> strong_type&
+    requires std::unsigned_integral<T>
+  {
+    m_value |= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator^=(const strong_type& rhs) & noexcept(noexcept(m_value ^= rhs.m_value)) -> strong_type&
+    requires std::unsigned_integral<T>
+  {
+    m_value ^= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator^=(strong_type&& rhs) & noexcept(noexcept(m_value ^= rhs.m_value)) -> strong_type&
+    requires std::unsigned_integral<T>
+  {
+    m_value ^= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator<<=(const strong_type& rhs) & noexcept(noexcept(m_value <<= rhs.m_value)) -> strong_type&
+    requires std::unsigned_integral<T>
+  {
+    m_value <<= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator<<=(strong_type&& rhs) & noexcept(noexcept(m_value <<= rhs.m_value)) -> strong_type&
+    requires std::unsigned_integral<T>
+  {
+    m_value <<= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator>>=(const strong_type& rhs) & noexcept(noexcept(m_value >>= rhs.m_value)) -> strong_type&
+    requires std::unsigned_integral<T>
+  {
+    m_value >>= rhs.m_value;
+    return *this;
+  }
+
+  constexpr auto operator>>=(strong_type&& rhs) & noexcept(noexcept(m_value >>= rhs.m_value)) -> strong_type&
+    requires std::unsigned_integral<T>
+  {
+    m_value >>= rhs.m_value;
+    return *this;
+  }
+
   // Stream operators
 #ifdef GW_ENABLE_STREAM_OPERATORS
   friend inline auto operator<<(std::ostream& ostream,

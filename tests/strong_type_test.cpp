@@ -134,6 +134,162 @@ TEST_CASE("strong_types are incremented and decremented", "[strong_type]") {
   }
 }
 
+TEST_CASE("strong_types are added and subtracted", "[strong_type]") {
+  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+
+  SECTION("strong_type + strong_type") {
+    STATIC_REQUIRE(strong_type_test{1} + strong_type_test{1} == strong_type_test{2});
+    STATIC_REQUIRE(noexcept(strong_type_test{} + strong_type_test{}));
+  }
+
+  SECTION("strong_type - strong_type") {
+    STATIC_REQUIRE(strong_type_test{1} - strong_type_test{1} == strong_type_test{0});
+    STATIC_REQUIRE(noexcept(strong_type_test{} - strong_type_test{}));
+  }
+}
+
+TEST_CASE("strong_types are multiplied and divided", "[strong_type]") {
+  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+
+  SECTION("strong_type * strong_type") {
+    STATIC_REQUIRE(strong_type_test{2} * strong_type_test{2} == strong_type_test{4});
+    STATIC_REQUIRE(noexcept(strong_type_test{} * strong_type_test{}));
+  }
+
+  SECTION("strong_type / strong_type") {
+    STATIC_REQUIRE(strong_type_test{4} / strong_type_test{2} == strong_type_test{2});
+    STATIC_REQUIRE(noexcept(strong_type_test{} / strong_type_test{}));
+  }
+}
+
+TEST_CASE("strong_types are modulo reduced", "[strong_type]") {
+  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+
+  STATIC_REQUIRE(strong_type_test{4} % strong_type_test{3} == strong_type_test{1});
+  STATIC_REQUIRE(noexcept(strong_type_test{} % strong_type_test{}));
+}
+
+TEST_CASE("strong_types are added and subtracted with assignment", "[strong_type]") {
+  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+
+  SECTION("strong_type += strong_type") {
+    auto test = []() constexpr {
+      auto value = strong_type_test{1};
+      return value += strong_type_test{1};
+    };
+    STATIC_REQUIRE(test() == strong_type_test{2});
+  }
+
+  SECTION("strong_type -= strong_type") {
+    auto test = []() constexpr {
+      auto value = strong_type_test{1};
+      return value -= strong_type_test{1};
+    };
+    STATIC_REQUIRE(test() == strong_type_test{0});
+  }
+}
+
+TEST_CASE("strong_types are multiplied and divided with assignment", "[strong_type]") {
+  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+
+  SECTION("strong_type *= strong_type") {
+    auto test = []() constexpr {
+      auto value = strong_type_test{2};
+      return value *= strong_type_test{2};
+    };
+    STATIC_REQUIRE(test() == strong_type_test{4});
+  }
+
+  SECTION("strong_type /= strong_type") {
+    auto test = []() constexpr {
+      auto value = strong_type_test{4};
+      return value /= strong_type_test{2};
+    };
+    STATIC_REQUIRE(test() == strong_type_test{2});
+  }
+}
+
+TEST_CASE("strong_types are bitwise operated", "[strong_type]") {
+  using strong_type_test = gw::strong_type<struct strong_type_test_tag, unsigned int>;
+
+  SECTION("strong_type & strong_type") {
+    STATIC_REQUIRE((strong_type_test{1U} & strong_type_test{1U}) == strong_type_test{1U});
+    STATIC_REQUIRE(noexcept(strong_type_test{} & strong_type_test{}));
+  }
+
+  SECTION("strong_type | strong_type") {
+    STATIC_REQUIRE((strong_type_test{1U} | strong_type_test{1U}) == strong_type_test{1U});
+    STATIC_REQUIRE(noexcept(strong_type_test{} | strong_type_test{}));
+  }
+
+  SECTION("strong_type ^ strong_type") {
+    STATIC_REQUIRE((strong_type_test{1U} ^ strong_type_test{1U}) == strong_type_test{0U});
+    STATIC_REQUIRE(noexcept(strong_type_test{} ^ strong_type_test{}));
+  }
+}
+
+TEST_CASE("strong_types are bitwise shifted", "[strong_type]") {
+  using strong_type_test = gw::strong_type<struct strong_type_test_tag, unsigned int>;
+
+  SECTION("strong_type << strong_type") {
+    STATIC_REQUIRE((strong_type_test{1U} << strong_type_test{1U}) == strong_type_test{2U});
+    STATIC_REQUIRE(noexcept(strong_type_test{} << strong_type_test{}));
+  }
+
+  SECTION("strong_type >> strong_type") {
+    STATIC_REQUIRE((strong_type_test{2U} >> strong_type_test{1U}) == strong_type_test{1U});
+    STATIC_REQUIRE(noexcept(strong_type_test{} >> strong_type_test{}));
+  }
+}
+
+TEST_CASE("strong_types are bitwise operated with assignment", "[strong_type]") {
+  using strong_type_test = gw::strong_type<struct strong_type_test_tag, unsigned int>;
+
+  SECTION("strong_type &= strong_type") {
+    auto test = []() constexpr {
+      auto value = strong_type_test{1U};
+      return value &= strong_type_test{1U};
+    };
+    STATIC_REQUIRE(test() == strong_type_test{1U});
+  }
+
+  SECTION("strong_type |= strong_type") {
+    auto test = []() constexpr {
+      auto value = strong_type_test{1U};
+      return value |= strong_type_test{1U};
+    };
+    STATIC_REQUIRE(test() == strong_type_test{1U});
+  }
+
+  SECTION("strong_type ^= strong_type") {
+    auto test = []() constexpr {
+      auto value = strong_type_test{1U};
+      return value ^= strong_type_test{1U};
+    };
+    STATIC_REQUIRE(test() == strong_type_test{0U});
+  }
+}
+
+TEST_CASE("strong_types are bitwise shifted with assignment", "[strong_type]") {
+  using strong_type_test = gw::strong_type<struct strong_type_test_tag, unsigned int>;
+
+  SECTION("strong_type <<= strong_type") {
+    auto test = []() constexpr {
+      auto value = strong_type_test{1U};
+      return value <<= strong_type_test{1U};
+    };
+    STATIC_REQUIRE(test() == strong_type_test{2U});
+  }
+
+  SECTION("strong_type >>= strong_type") {
+    auto test = []() constexpr {
+      auto value = strong_type_test{2U};
+      return value >>= strong_type_test{1U};
+    };
+    STATIC_REQUIRE(test() == strong_type_test{1U});
+  }
+}
+
 #ifdef GW_ENABLE_HASH_CALCULATION
 TEST_CASE("strong_types are hashed", "[strong_type]") {
   struct strong_type_test_tag {};
