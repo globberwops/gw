@@ -75,11 +75,24 @@ TEST_CASE("strong_types are observed", "[strong_type]") {
 TEST_CASE("strong_types are transformed", "[strong_type]") {
   using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
 
+  auto test = []() constexpr {
+    auto value = strong_type_test{1};
+    return value.transform([](auto value) { return value + 1; });
+  };
+  STATIC_REQUIRE(test() == strong_type_test{2});
+
   STATIC_REQUIRE(noexcept(strong_type_test{}.transform([](auto value) noexcept { return value + 1; })));
 }
 
 TEST_CASE("strong_types are reset", "[strong_type]") {
   using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+
+  auto test = []() constexpr {
+    auto value = strong_type_test{1};
+    value.reset();
+    return value;
+  };
+  STATIC_REQUIRE(test() == strong_type_test{0});
 
   STATIC_REQUIRE(noexcept(strong_type_test{}.reset()));
 }
