@@ -5,6 +5,7 @@
 
 #include <concepts>
 #include <initializer_list>
+#include <ranges>
 #include <type_traits>
 #include <utility>
 
@@ -26,8 +27,18 @@
 
 namespace gw {
 
+namespace detail {
+
+struct view_interface_empty_base {
+  constexpr auto operator<=>(const view_interface_empty_base&) const noexcept = default;
+};
+
+}  // namespace detail
+
 template <typename Tag, class T>
-struct strong_type {
+struct strong_type final
+    : public std::conditional_t<std::ranges::range<T>, std::ranges::view_interface<strong_type<Tag, T>>,
+                                detail::view_interface_empty_base> {
   // Types
   using tag_type = Tag;
   using value_type = T;
@@ -553,6 +564,31 @@ struct strong_type {
   {
     m_value >>= rhs.m_value;
     return *this;
+  }
+
+  // Ranges interface
+  constexpr auto begin() const noexcept(noexcept(std::ranges::begin(m_value)))
+    requires std::ranges::range<T>
+  {
+    return std::ranges::begin(m_value);
+  }
+
+  constexpr auto begin() noexcept(noexcept(std::ranges::begin(m_value)))
+    requires std::ranges::range<T>
+  {
+    return std::ranges::begin(m_value);
+  }
+
+  constexpr auto end() const noexcept(noexcept(std::ranges::end(m_value)))
+    requires std::ranges::range<T>
+  {
+    return std::ranges::end(m_value);
+  }
+
+  constexpr auto end() noexcept(noexcept(std::ranges::end(m_value)))
+    requires std::ranges::range<T>
+  {
+    return std::ranges::end(m_value);
   }
 
   // Stream operators

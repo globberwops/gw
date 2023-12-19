@@ -3,8 +3,10 @@
 
 #include "gw/strong_type.hpp"
 
+#include <array>
 #include <catch2/catch_test_macros.hpp>
 #include <concepts>
+#include <ranges>
 #include <sstream>
 #include <type_traits>
 
@@ -336,6 +338,21 @@ TEST_CASE("strong_types are bitwise shifted with assignment", "[strong_type]") {
     auto value = strong_type_test{2U};
     STATIC_REQUIRE(noexcept(value >>= strong_type_test{1U}));
   }
+}
+
+TEST_CASE("strong_types are viewable ranges", "[strong_type]") {
+  constexpr auto k_value = gw::make_strong_type<struct strong_type_test_tag>(std::array{1, 2, 3, 4, 5});
+
+  STATIC_REQUIRE(!k_value.empty());
+  STATIC_REQUIRE(k_value.size() == 5);
+  STATIC_REQUIRE(k_value[0] == 1);
+  STATIC_REQUIRE(k_value[1] == 2);
+  STATIC_REQUIRE(k_value[2] == 3);
+  STATIC_REQUIRE(k_value[3] == 4);
+  STATIC_REQUIRE(k_value[4] == 5);
+
+  using strong_type_test = std::remove_cv_t<decltype(k_value)>;
+  STATIC_REQUIRE(std::ranges::viewable_range<strong_type_test>);
 }
 
 #ifdef GW_ENABLE_HASH_CALCULATION
