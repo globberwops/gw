@@ -115,9 +115,13 @@ TEST_CASE("strong_types are incremented and decremented", "[strong_type]") {
   }
 
   SECTION("post-increment") {
+    auto test = []() constexpr {
+      auto value = strong_type_test{1};
+      return value++;
+    };
+    STATIC_REQUIRE(test() == strong_type_test{1});
+
     auto value = strong_type_test{};
-    REQUIRE(value++ == strong_type_test{0});
-    REQUIRE(value == strong_type_test{1});
     STATIC_REQUIRE(noexcept(value++));
   }
 
@@ -127,9 +131,13 @@ TEST_CASE("strong_types are incremented and decremented", "[strong_type]") {
   }
 
   SECTION("post-decrement") {
+    auto test = []() constexpr {
+      auto value = strong_type_test{1};
+      return value--;
+    };
+    STATIC_REQUIRE(test() == strong_type_test{1});
+
     auto value = strong_type_test{1};
-    REQUIRE(value-- == strong_type_test{1});
-    REQUIRE(value == strong_type_test{0});
     STATIC_REQUIRE(noexcept(value--));
   }
 }
@@ -178,6 +186,9 @@ TEST_CASE("strong_types are added and subtracted with assignment", "[strong_type
       return value += strong_type_test{1};
     };
     STATIC_REQUIRE(test() == strong_type_test{2});
+
+    auto value = strong_type_test{1};
+    STATIC_REQUIRE(noexcept(value += strong_type_test{1}));
   }
 
   SECTION("strong_type -= strong_type") {
@@ -186,6 +197,9 @@ TEST_CASE("strong_types are added and subtracted with assignment", "[strong_type
       return value -= strong_type_test{1};
     };
     STATIC_REQUIRE(test() == strong_type_test{0});
+
+    auto value = strong_type_test{1};
+    STATIC_REQUIRE(noexcept(value -= strong_type_test{1}));
   }
 }
 
@@ -198,6 +212,9 @@ TEST_CASE("strong_types are multiplied and divided with assignment", "[strong_ty
       return value *= strong_type_test{2};
     };
     STATIC_REQUIRE(test() == strong_type_test{4});
+
+    auto value = strong_type_test{2};
+    STATIC_REQUIRE(noexcept(value *= strong_type_test{2}));
   }
 
   SECTION("strong_type /= strong_type") {
@@ -206,6 +223,9 @@ TEST_CASE("strong_types are multiplied and divided with assignment", "[strong_ty
       return value /= strong_type_test{2};
     };
     STATIC_REQUIRE(test() == strong_type_test{2});
+
+    auto value = strong_type_test{4};
+    STATIC_REQUIRE(noexcept(value /= strong_type_test{2}));
   }
 }
 
@@ -251,6 +271,9 @@ TEST_CASE("strong_types are bitwise operated with assignment", "[strong_type]") 
       return value &= strong_type_test{1U};
     };
     STATIC_REQUIRE(test() == strong_type_test{1U});
+
+    auto value = strong_type_test{1U};
+    STATIC_REQUIRE(noexcept(value &= strong_type_test{1U}));
   }
 
   SECTION("strong_type |= strong_type") {
@@ -259,6 +282,9 @@ TEST_CASE("strong_types are bitwise operated with assignment", "[strong_type]") 
       return value |= strong_type_test{1U};
     };
     STATIC_REQUIRE(test() == strong_type_test{1U});
+
+    auto value = strong_type_test{1U};
+    STATIC_REQUIRE(noexcept(value |= strong_type_test{1U}));
   }
 
   SECTION("strong_type ^= strong_type") {
@@ -267,6 +293,9 @@ TEST_CASE("strong_types are bitwise operated with assignment", "[strong_type]") 
       return value ^= strong_type_test{1U};
     };
     STATIC_REQUIRE(test() == strong_type_test{0U});
+
+    auto value = strong_type_test{1U};
+    STATIC_REQUIRE(noexcept(value ^= strong_type_test{1U}));
   }
 }
 
@@ -279,6 +308,9 @@ TEST_CASE("strong_types are bitwise shifted with assignment", "[strong_type]") {
       return value <<= strong_type_test{1U};
     };
     STATIC_REQUIRE(test() == strong_type_test{2U});
+
+    auto value = strong_type_test{1U};
+    STATIC_REQUIRE(noexcept(value <<= strong_type_test{1U}));
   }
 
   SECTION("strong_type >>= strong_type") {
@@ -287,6 +319,9 @@ TEST_CASE("strong_types are bitwise shifted with assignment", "[strong_type]") {
       return value >>= strong_type_test{1U};
     };
     STATIC_REQUIRE(test() == strong_type_test{1U});
+
+    auto value = strong_type_test{2U};
+    STATIC_REQUIRE(noexcept(value >>= strong_type_test{1U}));
   }
 }
 
