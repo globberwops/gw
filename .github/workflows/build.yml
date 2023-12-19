@@ -47,6 +47,8 @@ jobs:
           - os: windows-latest
             compiler: clang
           - os: ubuntu-latest
+            compiler: clang
+          - os: ubuntu-latest
             compiler: cl
           - os: macos-latest
             compiler: clang
