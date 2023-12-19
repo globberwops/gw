@@ -33,10 +33,6 @@ jobs:
             compiler: gcc
             c_compiler: gcc-13
             cpp_compiler: g++-13
-          - os: ubuntu-latest
-            compiler: clang
-            c_compiler: clang-15
-            cpp_compiler: clang++-15
           - os: macos-latest
             compiler: gcc
             c_compiler: gcc-12
