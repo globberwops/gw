@@ -340,6 +340,7 @@ TEST_CASE("strong_types are bitwise shifted with assignment", "[strong_type]") {
   }
 }
 
+#ifdef GW_ENABLE_RANGES_INTERFACE
 TEST_CASE("strong_types are viewable ranges", "[strong_type]") {
   constexpr auto k_value = gw::make_strong_type<struct strong_type_test_tag>(std::array{1, 2, 3, 4, 5});
 
@@ -354,6 +355,7 @@ TEST_CASE("strong_types are viewable ranges", "[strong_type]") {
   using strong_type_test = std::remove_cv_t<decltype(k_value)>;
   STATIC_REQUIRE(std::ranges::viewable_range<strong_type_test>);
 }
+#endif  // GW_ENABLE_RANGES_INTERFACE
 
 #ifdef GW_ENABLE_HASH_CALCULATION
 TEST_CASE("strong_types are hashed", "[strong_type]") {

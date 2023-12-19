@@ -25,6 +25,18 @@ template <typename T>
 concept arithmetic = requires { std::is_arithmetic_v<T>; };
 
 template <typename T>
+concept incrementable = requires(T value) {
+  { ++value } -> std::common_with<T>;
+  value++;
+};
+
+template <typename T>
+concept decrementable = requires(T value) {
+  { --value } -> std::common_with<T>;
+  value--;
+};
+
+template <typename T>
 concept complete = requires { sizeof(T); };
 
 #ifdef GW_ENABLE_HASH_CALCULATION

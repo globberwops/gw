@@ -5,9 +5,12 @@
 
 #include <concepts>
 #include <initializer_list>
-#include <ranges>
 #include <type_traits>
 #include <utility>
+
+#ifdef GW_ENABLE_RANGES_INTERFACE
+#include <ranges>
+#endif  // GW_ENABLE_RANGES_INTERFACE
 
 #ifdef GW_ENABLE_HASH_CALCULATION
 #include <cstddef>
@@ -27,6 +30,7 @@
 
 namespace gw {
 
+#ifdef GW_ENABLE_RANGES_INTERFACE
 namespace detail {
 
 struct view_interface_empty_base {
@@ -34,16 +38,24 @@ struct view_interface_empty_base {
 };
 
 }  // namespace detail
+#endif  // GW_ENABLE_RANGES_INTERFACE
 
 template <typename Tag, class T>
-struct strong_type final
-    : public std::conditional_t<std::ranges::range<T>, std::ranges::view_interface<strong_type<Tag, T>>,
-                                detail::view_interface_empty_base> {
-  // Types
-  using tag_type = Tag;
-  using value_type = T;
+struct strong_type
+#ifdef GW_ENABLE_RANGES_INTERFACE
+    final : public std::conditional_t<std::ranges::range<T>, std::ranges::view_interface<strong_type<Tag, T>>,
+                                      detail::view_interface_empty_base>
+#endif  // GW_ENABLE_RANGES_INTERFACE
+{
+  //
+  // Public types
+  //
+  using tag_type = Tag;  ///< The tag type.
+  using value_type = T;  ///< The value type.
 
+  //
   // Constructors
+  //
   template <class... Args>
   constexpr explicit strong_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
     requires std::constructible_from<T, Args...>
@@ -55,7 +67,9 @@ struct strong_type final
     requires std::constructible_from<T, std::initializer_list<U>&, Args...>
       : m_value(T{ilist, std::forward<Args>(args)...}) {}
 
+  //
   // Observers
+  //
   constexpr auto operator->() const noexcept -> const T* { return &m_value; }
   constexpr auto operator->() noexcept -> T* { return &m_value; }
 
@@ -69,7 +83,9 @@ struct strong_type final
   constexpr auto value() const&& noexcept -> const T&& { return std::move(m_value); }
   constexpr auto value() && noexcept -> T&& { return std::move(m_value); }
 
+  //
   // Monadic operations
+  //
   template <class F>
   constexpr auto transform(F&& func) const& noexcept(noexcept(func(m_value)))
     requires std::invocable<F, const T&>
@@ -98,12 +114,14 @@ struct strong_type final
     return strong_type<Tag, std::remove_cv_t<std::invoke_result_t<F, T&&>>>{func(std::move(m_value))};
   }
 
+  //
   // Modifiers
-  constexpr void swap(strong_type& other) noexcept(std::is_nothrow_swappable_v<T>)
+  //
+  constexpr void swap(strong_type& rhs) noexcept(std::is_nothrow_swappable_v<T>)
     requires std::swappable<T>
   {
     using std::swap;
-    swap(m_value, other.m_value);
+    swap(m_value, rhs.m_value);
   }
 
   constexpr void reset() noexcept(std::is_nothrow_default_constructible_v<T>)
@@ -120,69 +138,77 @@ struct strong_type final
     return m_value;
   }
 
+  //
   // Comparison operators
-  constexpr auto operator<=>(const strong_type&) const noexcept = default;
+  //
+  constexpr auto operator<=>(const strong_type& rhs) const noexcept = default;
 
+  //
   // Conversion operators
+  //
   constexpr explicit operator const T&() const& noexcept { return m_value; }
   constexpr explicit operator T&() & noexcept { return m_value; }
   constexpr explicit operator const T&&() const&& noexcept { return std::move(m_value); }
   constexpr explicit operator T&&() && noexcept { return std::move(m_value); }
 
+  //
   // Increment and decrement operators
+  //
   constexpr auto operator++() & noexcept(noexcept(++m_value)) -> strong_type&
-    requires gw::arithmetic<T>
+    requires gw::incrementable<T>
   {
     ++m_value;
     return *this;
   }
 
   constexpr auto operator++() && noexcept(noexcept(++m_value)) -> strong_type&&
-    requires gw::arithmetic<T>
+    requires gw::incrementable<T>
   {
     ++m_value;
     return std::move(*this);
   }
 
   constexpr auto operator++(int) & noexcept(noexcept(m_value++)) -> strong_type
-    requires gw::arithmetic<T>
+    requires gw::incrementable<T>
   {
     return strong_type{m_value++};
   }
 
   constexpr auto operator++(int) && noexcept(noexcept(m_value++)) -> strong_type
-    requires gw::arithmetic<T>
+    requires gw::incrementable<T>
   {
     return strong_type{m_value++};
   }
 
   constexpr auto operator--() & noexcept(noexcept(--m_value)) -> strong_type&
-    requires gw::arithmetic<T>
+    requires gw::decrementable<T>
   {
     --m_value;
     return *this;
   }
 
   constexpr auto operator--() && noexcept(noexcept(--m_value)) -> strong_type&&
-    requires gw::arithmetic<T>
+    requires gw::decrementable<T>
   {
     --m_value;
     return std::move(*this);
   }
 
   constexpr auto operator--(int) & noexcept(noexcept(m_value--)) -> strong_type
-    requires gw::arithmetic<T>
+    requires gw::decrementable<T>
   {
     return strong_type{m_value--};
   }
 
   constexpr auto operator--(int) && noexcept(noexcept(m_value--)) -> strong_type
-    requires gw::arithmetic<T>
+    requires gw::decrementable<T>
   {
     return strong_type{m_value--};
   }
 
+  //
   // Arithmetic operators
+  //
   constexpr auto operator+(const strong_type& rhs) const& noexcept(noexcept(m_value + rhs.m_value)) -> strong_type
     requires gw::arithmetic<T>
   {
@@ -303,7 +329,9 @@ struct strong_type final
     return strong_type{m_value % rhs.m_value};
   }
 
+  //
   // Arithmetic assignment operators
+  //
   constexpr auto operator+=(const strong_type& rhs) & noexcept(noexcept(m_value += rhs.m_value)) -> strong_type&
     requires gw::arithmetic<T>
   {
@@ -374,7 +402,9 @@ struct strong_type final
     return *this;
   }
 
+  //
   // Bitwise operators
+  //
   constexpr auto operator&(const strong_type& rhs) const& noexcept(noexcept(m_value & rhs.m_value)) -> strong_type
     requires std::unsigned_integral<T>
   {
@@ -495,7 +525,9 @@ struct strong_type final
     return strong_type{m_value >> rhs.m_value};
   }
 
+  //
   // Bitwise assignment operators
+  //
   constexpr auto operator&=(const strong_type& rhs) & noexcept(noexcept(m_value &= rhs.m_value)) -> strong_type&
     requires std::unsigned_integral<T>
   {
@@ -566,7 +598,10 @@ struct strong_type final
     return *this;
   }
 
+  //
   // Ranges interface
+  //
+#ifdef GW_ENABLE_RANGES_INTERFACE
   constexpr auto begin() const noexcept(noexcept(std::ranges::begin(m_value)))
     requires std::ranges::range<T>
   {
@@ -590,8 +625,11 @@ struct strong_type final
   {
     return std::ranges::end(m_value);
   }
+#endif  // GW_ENABLE_RANGES_INTERFACE
 
+  //
   // Stream operators
+  //
 #ifdef GW_ENABLE_STREAM_OPERATORS
   friend inline auto operator<<(std::ostream& ostream,
                                 const strong_type& rhs) noexcept(noexcept(ostream << rhs.m_value)) -> std::ostream&
@@ -612,7 +650,9 @@ struct strong_type final
   T m_value{};
 };
 
+//
 // Creation functions
+//
 template <typename Tag, class T, typename... Args>
 constexpr auto make_strong_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
   requires std::constructible_from<std::remove_cvref_t<T>, Args...>
@@ -640,7 +680,9 @@ constexpr auto make_strong_type(T&& value) noexcept(
 
 namespace std {
 
-// Hash
+//
+// Hash calculation
+//
 #ifdef GW_ENABLE_HASH_CALCULATION
 template <gw::complete Tag, gw::hashable T>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
@@ -653,7 +695,9 @@ struct hash<gw::strong_type<Tag, T>> {
 };
 #endif  // GW_ENABLE_HASH_CALCULATION
 
+//
 // String conversion
+//
 #ifdef GW_ENABLE_STRING_CONVERSION
 template <typename Tag, gw::string_convertable T>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
