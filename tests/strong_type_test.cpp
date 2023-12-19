@@ -247,6 +247,11 @@ TEST_CASE("strong_types are multiplied and divided with assignment", "[strong_ty
 TEST_CASE("strong_types are bitwise operated", "[strong_type]") {
   using strong_type_test = gw::strong_type<struct strong_type_test_tag, unsigned int>;
 
+  SECTION("strong_type ~") {
+    STATIC_REQUIRE(~strong_type_test{1U} == strong_type_test{~1U});
+    STATIC_REQUIRE(noexcept(~strong_type_test{}));
+  }
+
   SECTION("strong_type & strong_type") {
     STATIC_REQUIRE((strong_type_test{1U} & strong_type_test{1U}) == strong_type_test{1U});
     STATIC_REQUIRE(noexcept(strong_type_test{} & strong_type_test{}));
@@ -340,7 +345,6 @@ TEST_CASE("strong_types are bitwise shifted with assignment", "[strong_type]") {
   }
 }
 
-#ifdef GW_ENABLE_RANGES_INTERFACE
 TEST_CASE("strong_types are viewable ranges", "[strong_type]") {
   constexpr auto k_value = gw::make_strong_type<struct strong_type_test_tag>(std::array{1, 2, 3, 4, 5});
 
@@ -355,18 +359,14 @@ TEST_CASE("strong_types are viewable ranges", "[strong_type]") {
   using strong_type_test = std::remove_cv_t<decltype(k_value)>;
   STATIC_REQUIRE(std::ranges::viewable_range<strong_type_test>);
 }
-#endif  // GW_ENABLE_RANGES_INTERFACE
 
-#ifdef GW_ENABLE_HASH_CALCULATION
 TEST_CASE("strong_types are hashed", "[strong_type]") {
   struct strong_type_test_tag {};
   using strong_type_test = gw::strong_type<strong_type_test_tag, int>;
 
   STATIC_REQUIRE(gw::hashable<strong_type_test>);
 }
-#endif  // GW_ENABLE_HASH_CALCULATION
 
-#ifdef GW_ENABLE_STREAM_OPERATORS
 TEST_CASE("strong_types are streamed", "[strong_type]") {
   using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
 
@@ -388,9 +388,7 @@ TEST_CASE("strong_types are streamed", "[strong_type]") {
     REQUIRE(value == strong_type_test{1});
   }
 }
-#endif  // GW_ENABLE_STREAM_OPERATORS
 
-#ifdef GW_ENABLE_STRING_CONVERSION
 TEST_CASE("strong_types are converted to string", "[strong_type]") {
   SECTION("unnamed strong_type") {
     using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
@@ -407,4 +405,3 @@ TEST_CASE("strong_types are converted to string", "[strong_type]") {
     REQUIRE(std::to_string(strong_type_named{1}) == "StrongTypeNamedTag: 1");
   }
 }
-#endif  // GW_ENABLE_STRING_CONVERSION

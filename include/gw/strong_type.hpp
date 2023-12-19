@@ -4,33 +4,20 @@
 #pragma once
 
 #include <concepts>
-#include <initializer_list>
-#include <type_traits>
-#include <utility>
-
-#ifdef GW_ENABLE_RANGES_INTERFACE
-#include <ranges>
-#endif  // GW_ENABLE_RANGES_INTERFACE
-
-#ifdef GW_ENABLE_HASH_CALCULATION
 #include <cstddef>
 #include <functional>
-#include <typeindex>
-#endif  // GW_ENABLE_HASH_CALCULATION
-
-#ifdef GW_ENABLE_STREAM_OPERATORS
+#include <initializer_list>
 #include <iostream>
-#endif  // GW_ENABLE_STREAM_OPERATORS
-
-#ifdef GW_ENABLE_STRING_CONVERSION
+#include <ranges>
 #include <string>
-#endif  // GW_ENABLE_STRING_CONVERSION
+#include <type_traits>
+#include <typeindex>
+#include <utility>
 
 #include "gw/concepts.hpp"
 
 namespace gw {
 
-#ifdef GW_ENABLE_RANGES_INTERFACE
 namespace detail {
 
 struct view_interface_empty_base {
@@ -38,20 +25,16 @@ struct view_interface_empty_base {
 };
 
 }  // namespace detail
-#endif  // GW_ENABLE_RANGES_INTERFACE
 
 template <typename Tag, class T>
-struct strong_type
-#ifdef GW_ENABLE_RANGES_INTERFACE
-    final : public std::conditional_t<std::ranges::range<T>, std::ranges::view_interface<strong_type<Tag, T>>,
-                                      detail::view_interface_empty_base>
-#endif  // GW_ENABLE_RANGES_INTERFACE
-{
+struct strong_type final
+    : public std::conditional_t<std::ranges::range<T>, std::ranges::view_interface<strong_type<Tag, T>>,
+                                detail::view_interface_empty_base> {
   //
   // Public types
   //
-  using tag_type = Tag;  ///< The tag type.
-  using value_type = T;  ///< The value type.
+  using tag_type = Tag;
+  using value_type = T;
 
   //
   // Constructors
@@ -329,9 +312,6 @@ struct strong_type
     return strong_type{m_value % rhs.m_value};
   }
 
-  //
-  // Arithmetic assignment operators
-  //
   constexpr auto operator+=(const strong_type& rhs) & noexcept(noexcept(m_value += rhs.m_value)) -> strong_type&
     requires gw::arithmetic<T>
   {
@@ -405,6 +385,12 @@ struct strong_type
   //
   // Bitwise operators
   //
+  constexpr auto operator~() const& noexcept(noexcept(~m_value)) -> strong_type
+    requires std::unsigned_integral<T>
+  {
+    return strong_type{~m_value};
+  }
+
   constexpr auto operator&(const strong_type& rhs) const& noexcept(noexcept(m_value & rhs.m_value)) -> strong_type
     requires std::unsigned_integral<T>
   {
@@ -601,7 +587,6 @@ struct strong_type
   //
   // Ranges interface
   //
-#ifdef GW_ENABLE_RANGES_INTERFACE
   constexpr auto begin() const noexcept(noexcept(std::ranges::begin(m_value)))
     requires std::ranges::range<T>
   {
@@ -625,12 +610,10 @@ struct strong_type
   {
     return std::ranges::end(m_value);
   }
-#endif  // GW_ENABLE_RANGES_INTERFACE
 
   //
   // Stream operators
   //
-#ifdef GW_ENABLE_STREAM_OPERATORS
   friend inline auto operator<<(std::ostream& ostream,
                                 const strong_type& rhs) noexcept(noexcept(ostream << rhs.m_value)) -> std::ostream&
     requires gw::ostreamable<T>
@@ -644,7 +627,6 @@ struct strong_type
   {
     return istream >> rhs.m_value;
   }
-#endif  // GW_ENABLE_STREAM_OPERATORS
 
  private:
   T m_value{};
@@ -683,7 +665,6 @@ namespace std {
 //
 // Hash calculation
 //
-#ifdef GW_ENABLE_HASH_CALCULATION
 template <gw::complete Tag, gw::hashable T>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 struct hash<gw::strong_type<Tag, T>> {
@@ -693,12 +674,10 @@ struct hash<gw::strong_type<Tag, T>> {
     return tag_hash ^ value_hash;
   }
 };
-#endif  // GW_ENABLE_HASH_CALCULATION
 
 //
 // String conversion
 //
-#ifdef GW_ENABLE_STRING_CONVERSION
 template <typename Tag, gw::string_convertable T>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 [[nodiscard]] auto inline to_string(gw::strong_type<Tag, T> strong_type) -> std::string {
@@ -710,6 +689,5 @@ template <gw::named Tag, gw::string_convertable T>
 [[nodiscard]] auto inline to_string(gw::strong_type<Tag, T> strong_type) -> std::string {
   return std::string{Tag::name()} + ": " + std::to_string(strong_type.value());
 }
-#endif  // GW_ENABLE_STRING_CONVERSION
 
 }  // namespace std

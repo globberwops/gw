@@ -92,39 +92,60 @@ int main() {
 
 #### Increment and decrement operators
 
-Enabled only if `T` is an arithmetic type.
-
 |   |   |
 |---|---|
 | `operator++` | increments the wrapped value |
 | `operator--` | decrements the wrapped value |
+| `operator++(int)` | increments the wrapped value |
+| `operator--(int)` | decrements the wrapped value |
+
+#### Arithmetic operators
+
+|   |   |
+|---|---|
+| `operator+` | adds the wrapped value to another value |
+| `operator-` | subtracts another value from the wrapped value |
+| `operator*` | multiplies the wrapped value by another value |
+| `operator/` | divides the wrapped value by another value |
+| `operator%` | computes the remainder of the wrapped value divided by another value |
+| `operator+=` | adds another value to the wrapped value |
+| `operator-=` | subtracts another value from the wrapped value |
+| `operator*=` | multiplies the wrapped value by another value |
+| `operator/=` | divides the wrapped value by another value |
+| `operator%=` | computes the remainder of the wrapped value divided by another value |
+
+#### Bitwise operators
+
+|   |   |
+|---|---|
+| `operator~` | bitwise negation of the wrapped value |
+| `operator&` | bitwise AND of the wrapped value and another value |
+| `operator\|` | bitwise OR of the wrapped value and another value |
+| `operator^` | bitwise XOR of the wrapped value and another value |
+| `operator<<` | bitwise left shift of the wrapped value by another value |
+| `operator>>` | bitwise right shift of the wrapped value by another value |
+| `operator&=` | bitwise AND of the wrapped value and another value |
+| `operator\|=` | bitwise OR of the wrapped value and another value |
+| `operator^=` | bitwise XOR of the wrapped value and another value |
+| `operator<<=` | bitwise left shift of the wrapped value by another value |
+| `operator>>=` | bitwise right shift of the wrapped value by another value |
 
 #### Stream operators
 
 |   |   |
 |---|---|
-| `operator<<` | writes the wrapped value to an output stream (enabled only if `T` has a `std::to_string` overload) |
+| `operator<<` | writes the wrapped value to an output stream |
+| `operator>>` | reads the wrapped value from an input stream |
 
 ### Non-member functions
 
 | Non-member function | Description |
 | --------------- | ----------- |
 | `gw::make_strong_type` | creates a `gw::strong_type` object |
-| `std::to_string` | converts a `gw::strong_type` object to a `std::string` (enabled only if `T` has a `std::to_string` overload) |
+| `std::to_string` | converts a `gw::strong_type` object to a `std::string` |
 
 ### Helper classes
 
-
-
 | Helper class | Description |
 | ------------ | ----------- |
-| `std::hash<gw::strong_type>` | hash support for `gw::strong_type` (enabled only if `T` has a `std::hash` specialization) |
-
-## Options
-
-| Option | Description | Default |
-| ------ | ----------- | ------- |
-| `GW_ENABLE_HASH_CALCULATION` | If `T` has a `std::hash` specialization, the wrapped type will provide a specialization of `std::hash`. | `ON` |
-| `GW_ENABLE_RANGES_INTERFACE` | If `T` is a range, the wrapped type will provide a `std::ranges::view` interface. | `ON` |
-| `GW_ENABLE_STREAM_OPERATORS` | If `T` has an `operator<<` overload, the wrapped type will provide an overload of `operator<<`. | `ON` |
-| `GW_ENABLE_STRING_CONVERSION` | If `T` has a `std::to_string` overload, the wrapped type will provide an overload of `std::to_string`. | `ON` |
+| `std::hash<gw::strong_type>` | hash support for `gw::strong_type` |
