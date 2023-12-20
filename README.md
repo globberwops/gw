@@ -1,6 +1,8 @@
 # gw
 
-[![Build](https://github.com/globberwops/gw/actions/workflows/build.yml/badge.svg)](https://github.com/globberwops/gw/actions/workflows/build.yml)
+[![Linux](https://github.com/globberwops/gw/actions/workflows/linux.yml/badge.svg)](https://github.com/globberwops/gw/actions/workflows/linux.yml)
+[![macOS](https://github.com/globberwops/gw/actions/workflows/macos.yml/badge.svg)](https://github.com/globberwops/gw/actions/workflows/macos.yml)
+[![Windows](https://github.com/globberwops/gw/actions/workflows/windows.yml/badge.svg)](https://github.com/globberwops/gw/actions/workflows/windows.yml)
 [![CodeQL](https://github.com/globberwops/gw/actions/workflows/codeql.yml/badge.svg)](https://github.com/globberwops/gw/actions/workflows/codeql.yml)
 [![Pages](https://github.com/globberwops/gw/actions/workflows/pages.yml/badge.svg)](https://github.com/globberwops/gw/actions/workflows/pages.yml)
 
