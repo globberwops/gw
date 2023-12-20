@@ -13,348 +13,346 @@
 #include "gw/concepts.hpp"
 
 TEST_CASE("strong_types are constructed", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
-  SECTION("default constructed") { STATIC_REQUIRE(std::is_nothrow_default_constructible_v<strong_type_test>); }
+  SECTION("default constructed") { STATIC_REQUIRE(std::is_nothrow_default_constructible_v<test_t>); }
 
-  SECTION("constructed from int") { STATIC_REQUIRE(std::is_nothrow_constructible_v<strong_type_test, int>); }
+  SECTION("constructed from int") { STATIC_REQUIRE(std::is_nothrow_constructible_v<test_t, int>); }
 
-  SECTION("constructed from int&&") { STATIC_REQUIRE(std::is_nothrow_constructible_v<strong_type_test, int&&>); }
+  SECTION("constructed from int&&") { STATIC_REQUIRE(std::is_nothrow_constructible_v<test_t, int&&>); }
 
-  SECTION("constructed from const int&") {
-    STATIC_REQUIRE(std::is_nothrow_constructible_v<strong_type_test, const int&>);
-  }
+  SECTION("constructed from const int&") { STATIC_REQUIRE(std::is_nothrow_constructible_v<test_t, const int&>); }
 
-  SECTION("copy constructed") { STATIC_REQUIRE(std::is_nothrow_copy_constructible_v<strong_type_test>); }
+  SECTION("copy constructed") { STATIC_REQUIRE(std::is_nothrow_copy_constructible_v<test_t>); }
 
-  SECTION("move constructed") { STATIC_REQUIRE(std::is_nothrow_move_constructible_v<strong_type_test>); }
+  SECTION("move constructed") { STATIC_REQUIRE(std::is_nothrow_move_constructible_v<test_t>); }
 
   SECTION("make_strong_type") {
-    STATIC_REQUIRE(gw::make_strong_type<strong_type_test_tag>(1) == strong_type_test{1});
-    STATIC_REQUIRE(noexcept(gw::make_strong_type<strong_type_test_tag>(1)));
+    STATIC_REQUIRE(gw::make_strong_type<test_tag>(1) == test_t{1});
+    STATIC_REQUIRE(noexcept(gw::make_strong_type<test_tag>(1)));
   }
 }
 
 TEST_CASE("strong_types are assigned", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
-  SECTION("copy assigned") { STATIC_REQUIRE(std::is_nothrow_copy_assignable_v<strong_type_test>); }
+  SECTION("copy assigned") { STATIC_REQUIRE(std::is_nothrow_copy_assignable_v<test_t>); }
 
-  SECTION("move assigned") { STATIC_REQUIRE(std::is_nothrow_move_assignable_v<strong_type_test>); }
+  SECTION("move assigned") { STATIC_REQUIRE(std::is_nothrow_move_assignable_v<test_t>); }
 }
 
 TEST_CASE("strong_types are destroyed", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
-  STATIC_REQUIRE(std::is_nothrow_destructible_v<strong_type_test>);
+  STATIC_REQUIRE(std::is_nothrow_destructible_v<test_t>);
 }
 
 TEST_CASE("strong_types are distinguished by their tag", "[strong_type]") {
-  using strong_type_test1 = gw::strong_type<struct strong_type_test_tag1, int>;
-  using strong_type_test2 = gw::strong_type<struct strong_type_test_tag2, int>;
+  using test1_t = gw::strong_type<struct strong_type_test_tag1, int>;
+  using test2_t = gw::strong_type<struct strong_type_test_tag2, int>;
 
-  STATIC_REQUIRE(std::is_same_v<strong_type_test1, strong_type_test1>);
-  STATIC_REQUIRE(!std::is_same_v<strong_type_test1, strong_type_test2>);
+  STATIC_REQUIRE(std::is_same_v<test1_t, test1_t>);
+  STATIC_REQUIRE(!std::is_same_v<test1_t, test2_t>);
 }
 
 TEST_CASE("strong_types are swapped", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
-  STATIC_REQUIRE(std::is_nothrow_swappable_v<strong_type_test>);
+  STATIC_REQUIRE(std::is_nothrow_swappable_v<test_t>);
 }
 
 TEST_CASE("strong_types are observed", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
   SECTION("operator*") {
-    STATIC_REQUIRE(strong_type_test{}.operator*() == 0);
-    STATIC_REQUIRE(noexcept(strong_type_test{}.operator*()));
+    STATIC_REQUIRE(test_t{}.operator*() == 0);
+    STATIC_REQUIRE(noexcept(test_t{}.operator*()));
   }
 
   SECTION("operator->") {
-    STATIC_REQUIRE(*strong_type_test{}.operator->() == 0);
-    STATIC_REQUIRE(noexcept(strong_type_test{}.operator->()));
+    STATIC_REQUIRE(*test_t{}.operator->() == 0);
+    STATIC_REQUIRE(noexcept(test_t{}.operator->()));
   }
 
   SECTION("value") {
-    STATIC_REQUIRE(strong_type_test{}.value() == 0);
-    STATIC_REQUIRE(noexcept(strong_type_test{}.value()));
+    STATIC_REQUIRE(test_t{}.value() == 0);
+    STATIC_REQUIRE(noexcept(test_t{}.value()));
   }
 }
 
 TEST_CASE("strong_types are transformed", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
   auto test = []() constexpr {
-    auto value = strong_type_test{1};
+    auto value = test_t{1};
     return value.transform([](auto value) { return value + 1; });
   };
-  STATIC_REQUIRE(test() == strong_type_test{2});
+  STATIC_REQUIRE(test() == test_t{2});
 
-  STATIC_REQUIRE(noexcept(strong_type_test{}.transform([](auto value) noexcept { return value + 1; })));
+  STATIC_REQUIRE(noexcept(test_t{}.transform([](auto value) noexcept { return value + 1; })));
 }
 
 TEST_CASE("strong_types are reset", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
   auto test = []() constexpr {
-    auto value = strong_type_test{1};
+    auto value = test_t{1};
     value.reset();
     return value;
   };
-  STATIC_REQUIRE(test() == strong_type_test{0});
+  STATIC_REQUIRE(test() == test_t{0});
 
-  STATIC_REQUIRE(noexcept(strong_type_test{}.reset()));
+  STATIC_REQUIRE(noexcept(test_t{}.reset()));
 }
 
 TEST_CASE("strong_types are emplaced", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
-  STATIC_REQUIRE(strong_type_test{}.emplace(1) == 1);
-  STATIC_REQUIRE(noexcept(strong_type_test{}.emplace(1)));
+  STATIC_REQUIRE(test_t{}.emplace(1) == 1);
+  STATIC_REQUIRE(noexcept(test_t{}.emplace(1)));
 }
 
 TEST_CASE("strong_types are totally ordered", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
-  STATIC_REQUIRE(std::totally_ordered<strong_type_test>);
+  STATIC_REQUIRE(std::totally_ordered<test_t>);
 }
 
 TEST_CASE("strong_types are converted", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
   SECTION("explicit conversion") {
-    STATIC_REQUIRE(static_cast<int>(strong_type_test{}) == 0);
-    STATIC_REQUIRE(noexcept(static_cast<int>(strong_type_test{})));
+    STATIC_REQUIRE(static_cast<int>(test_t{}) == 0);
+    STATIC_REQUIRE(noexcept(static_cast<int>(test_t{})));
   }
 }
 
 TEST_CASE("strong_types are incremented and decremented", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
   SECTION("pre-increment") {
-    STATIC_REQUIRE(++strong_type_test{} == strong_type_test{1});
-    STATIC_REQUIRE(noexcept(++strong_type_test{}));
+    STATIC_REQUIRE(++test_t{} == test_t{1});
+    STATIC_REQUIRE(noexcept(++test_t{}));
   }
 
   SECTION("post-increment") {
     auto test = []() constexpr {
-      auto value = strong_type_test{1};
+      auto value = test_t{1};
       return value++;
     };
-    STATIC_REQUIRE(test() == strong_type_test{1});
+    STATIC_REQUIRE(test() == test_t{1});
 
-    auto value = strong_type_test{};
+    auto value = test_t{};
     STATIC_REQUIRE(noexcept(value++));
   }
 
   SECTION("pre-decrement") {
-    STATIC_REQUIRE(--strong_type_test{} == strong_type_test{-1});
-    STATIC_REQUIRE(noexcept(--strong_type_test{}));
+    STATIC_REQUIRE(--test_t{} == test_t{-1});
+    STATIC_REQUIRE(noexcept(--test_t{}));
   }
 
   SECTION("post-decrement") {
     auto test = []() constexpr {
-      auto value = strong_type_test{1};
+      auto value = test_t{1};
       return value--;
     };
-    STATIC_REQUIRE(test() == strong_type_test{1});
+    STATIC_REQUIRE(test() == test_t{1});
 
-    auto value = strong_type_test{1};
+    auto value = test_t{1};
     STATIC_REQUIRE(noexcept(value--));
   }
 }
 
 TEST_CASE("strong_types are added and subtracted", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
   SECTION("strong_type + strong_type") {
-    STATIC_REQUIRE(strong_type_test{1} + strong_type_test{1} == strong_type_test{2});
-    STATIC_REQUIRE(noexcept(strong_type_test{} + strong_type_test{}));
+    STATIC_REQUIRE(test_t{1} + test_t{1} == test_t{2});
+    STATIC_REQUIRE(noexcept(test_t{} + test_t{}));
   }
 
   SECTION("strong_type - strong_type") {
-    STATIC_REQUIRE(strong_type_test{1} - strong_type_test{1} == strong_type_test{0});
-    STATIC_REQUIRE(noexcept(strong_type_test{} - strong_type_test{}));
+    STATIC_REQUIRE(test_t{1} - test_t{1} == test_t{0});
+    STATIC_REQUIRE(noexcept(test_t{} - test_t{}));
   }
 }
 
 TEST_CASE("strong_types are multiplied and divided", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
   SECTION("strong_type * strong_type") {
-    STATIC_REQUIRE(strong_type_test{2} * strong_type_test{2} == strong_type_test{4});
-    STATIC_REQUIRE(noexcept(strong_type_test{} * strong_type_test{}));
+    STATIC_REQUIRE(test_t{2} * test_t{2} == test_t{4});
+    STATIC_REQUIRE(noexcept(test_t{} * test_t{}));
   }
 
   SECTION("strong_type / strong_type") {
-    STATIC_REQUIRE(strong_type_test{4} / strong_type_test{2} == strong_type_test{2});
-    STATIC_REQUIRE(noexcept(strong_type_test{} / strong_type_test{}));
+    STATIC_REQUIRE(test_t{4} / test_t{2} == test_t{2});
+    STATIC_REQUIRE(noexcept(test_t{} / test_t{}));
   }
 }
 
 TEST_CASE("strong_types are modulo reduced", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
-  STATIC_REQUIRE(strong_type_test{4} % strong_type_test{3} == strong_type_test{1});
-  STATIC_REQUIRE(noexcept(strong_type_test{} % strong_type_test{}));
+  STATIC_REQUIRE(test_t{4} % test_t{3} == test_t{1});
+  STATIC_REQUIRE(noexcept(test_t{} % test_t{}));
 }
 
 TEST_CASE("strong_types are added and subtracted with assignment", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
   SECTION("strong_type += strong_type") {
     auto test = []() constexpr {
-      auto value = strong_type_test{1};
-      return value += strong_type_test{1};
+      auto value = test_t{1};
+      return value += test_t{1};
     };
-    STATIC_REQUIRE(test() == strong_type_test{2});
+    STATIC_REQUIRE(test() == test_t{2});
 
-    auto value = strong_type_test{1};
-    STATIC_REQUIRE(noexcept(value += strong_type_test{1}));
+    auto value = test_t{1};
+    STATIC_REQUIRE(noexcept(value += test_t{1}));
   }
 
   SECTION("strong_type -= strong_type") {
     auto test = []() constexpr {
-      auto value = strong_type_test{1};
-      return value -= strong_type_test{1};
+      auto value = test_t{1};
+      return value -= test_t{1};
     };
-    STATIC_REQUIRE(test() == strong_type_test{0});
+    STATIC_REQUIRE(test() == test_t{0});
 
-    auto value = strong_type_test{1};
-    STATIC_REQUIRE(noexcept(value -= strong_type_test{1}));
+    auto value = test_t{1};
+    STATIC_REQUIRE(noexcept(value -= test_t{1}));
   }
 }
 
 TEST_CASE("strong_types are multiplied and divided with assignment", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
   SECTION("strong_type *= strong_type") {
     auto test = []() constexpr {
-      auto value = strong_type_test{2};
-      return value *= strong_type_test{2};
+      auto value = test_t{2};
+      return value *= test_t{2};
     };
-    STATIC_REQUIRE(test() == strong_type_test{4});
+    STATIC_REQUIRE(test() == test_t{4});
 
-    auto value = strong_type_test{2};
-    STATIC_REQUIRE(noexcept(value *= strong_type_test{2}));
+    auto value = test_t{2};
+    STATIC_REQUIRE(noexcept(value *= test_t{2}));
   }
 
   SECTION("strong_type /= strong_type") {
     auto test = []() constexpr {
-      auto value = strong_type_test{4};
-      return value /= strong_type_test{2};
+      auto value = test_t{4};
+      return value /= test_t{2};
     };
-    STATIC_REQUIRE(test() == strong_type_test{2});
+    STATIC_REQUIRE(test() == test_t{2});
 
-    auto value = strong_type_test{4};
-    STATIC_REQUIRE(noexcept(value /= strong_type_test{2}));
+    auto value = test_t{4};
+    STATIC_REQUIRE(noexcept(value /= test_t{2}));
   }
 }
 
 TEST_CASE("strong_types are bitwise operated", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, unsigned int>;
+  using test_t = gw::strong_type<struct test_tag, unsigned int>;
 
   SECTION("strong_type ~") {
-    STATIC_REQUIRE(~strong_type_test{1U} == strong_type_test{~1U});
-    STATIC_REQUIRE(noexcept(~strong_type_test{}));
+    STATIC_REQUIRE(~test_t{1U} == test_t{~1U});
+    STATIC_REQUIRE(noexcept(~test_t{}));
   }
 
   SECTION("strong_type & strong_type") {
-    STATIC_REQUIRE((strong_type_test{1U} & strong_type_test{1U}) == strong_type_test{1U});
-    STATIC_REQUIRE(noexcept(strong_type_test{} & strong_type_test{}));
+    STATIC_REQUIRE((test_t{1U} & test_t{1U}) == test_t{1U});
+    STATIC_REQUIRE(noexcept(test_t{} & test_t{}));
   }
 
   SECTION("strong_type | strong_type") {
-    STATIC_REQUIRE((strong_type_test{1U} | strong_type_test{1U}) == strong_type_test{1U});
-    STATIC_REQUIRE(noexcept(strong_type_test{} | strong_type_test{}));
+    STATIC_REQUIRE((test_t{1U} | test_t{1U}) == test_t{1U});
+    STATIC_REQUIRE(noexcept(test_t{} | test_t{}));
   }
 
   SECTION("strong_type ^ strong_type") {
-    STATIC_REQUIRE((strong_type_test{1U} ^ strong_type_test{1U}) == strong_type_test{0U});
-    STATIC_REQUIRE(noexcept(strong_type_test{} ^ strong_type_test{}));
+    STATIC_REQUIRE((test_t{1U} ^ test_t{1U}) == test_t{0U});
+    STATIC_REQUIRE(noexcept(test_t{} ^ test_t{}));
   }
 }
 
 TEST_CASE("strong_types are bitwise shifted", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, unsigned int>;
+  using test_t = gw::strong_type<struct test_tag, unsigned int>;
 
   SECTION("strong_type << strong_type") {
-    STATIC_REQUIRE((strong_type_test{1U} << strong_type_test{1U}) == strong_type_test{2U});
-    STATIC_REQUIRE(noexcept(strong_type_test{} << strong_type_test{}));
+    STATIC_REQUIRE((test_t{1U} << test_t{1U}) == test_t{2U});
+    STATIC_REQUIRE(noexcept(test_t{} << test_t{}));
   }
 
   SECTION("strong_type >> strong_type") {
-    STATIC_REQUIRE((strong_type_test{2U} >> strong_type_test{1U}) == strong_type_test{1U});
-    STATIC_REQUIRE(noexcept(strong_type_test{} >> strong_type_test{}));
+    STATIC_REQUIRE((test_t{2U} >> test_t{1U}) == test_t{1U});
+    STATIC_REQUIRE(noexcept(test_t{} >> test_t{}));
   }
 }
 
 TEST_CASE("strong_types are bitwise operated with assignment", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, unsigned int>;
+  using test_t = gw::strong_type<struct test_tag, unsigned int>;
 
   SECTION("strong_type &= strong_type") {
     auto test = []() constexpr {
-      auto value = strong_type_test{1U};
-      return value &= strong_type_test{1U};
+      auto value = test_t{1U};
+      return value &= test_t{1U};
     };
-    STATIC_REQUIRE(test() == strong_type_test{1U});
+    STATIC_REQUIRE(test() == test_t{1U});
 
-    auto value = strong_type_test{1U};
-    STATIC_REQUIRE(noexcept(value &= strong_type_test{1U}));
+    auto value = test_t{1U};
+    STATIC_REQUIRE(noexcept(value &= test_t{1U}));
   }
 
   SECTION("strong_type |= strong_type") {
     auto test = []() constexpr {
-      auto value = strong_type_test{1U};
-      return value |= strong_type_test{1U};
+      auto value = test_t{1U};
+      return value |= test_t{1U};
     };
-    STATIC_REQUIRE(test() == strong_type_test{1U});
+    STATIC_REQUIRE(test() == test_t{1U});
 
-    auto value = strong_type_test{1U};
-    STATIC_REQUIRE(noexcept(value |= strong_type_test{1U}));
+    auto value = test_t{1U};
+    STATIC_REQUIRE(noexcept(value |= test_t{1U}));
   }
 
   SECTION("strong_type ^= strong_type") {
     auto test = []() constexpr {
-      auto value = strong_type_test{1U};
-      return value ^= strong_type_test{1U};
+      auto value = test_t{1U};
+      return value ^= test_t{1U};
     };
-    STATIC_REQUIRE(test() == strong_type_test{0U});
+    STATIC_REQUIRE(test() == test_t{0U});
 
-    auto value = strong_type_test{1U};
-    STATIC_REQUIRE(noexcept(value ^= strong_type_test{1U}));
+    auto value = test_t{1U};
+    STATIC_REQUIRE(noexcept(value ^= test_t{1U}));
   }
 }
 
 TEST_CASE("strong_types are bitwise shifted with assignment", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, unsigned int>;
+  using test_t = gw::strong_type<struct test_tag, unsigned int>;
 
   SECTION("strong_type <<= strong_type") {
     auto test = []() constexpr {
-      auto value = strong_type_test{1U};
-      return value <<= strong_type_test{1U};
+      auto value = test_t{1U};
+      return value <<= test_t{1U};
     };
-    STATIC_REQUIRE(test() == strong_type_test{2U});
+    STATIC_REQUIRE(test() == test_t{2U});
 
-    auto value = strong_type_test{1U};
-    STATIC_REQUIRE(noexcept(value <<= strong_type_test{1U}));
+    auto value = test_t{1U};
+    STATIC_REQUIRE(noexcept(value <<= test_t{1U}));
   }
 
   SECTION("strong_type >>= strong_type") {
     auto test = []() constexpr {
-      auto value = strong_type_test{2U};
-      return value >>= strong_type_test{1U};
+      auto value = test_t{2U};
+      return value >>= test_t{1U};
     };
-    STATIC_REQUIRE(test() == strong_type_test{1U});
+    STATIC_REQUIRE(test() == test_t{1U});
 
-    auto value = strong_type_test{2U};
-    STATIC_REQUIRE(noexcept(value >>= strong_type_test{1U}));
+    auto value = test_t{2U};
+    STATIC_REQUIRE(noexcept(value >>= test_t{1U}));
   }
 }
 
 TEST_CASE("strong_types are viewable ranges", "[strong_type]") {
-  constexpr auto k_value = gw::make_strong_type<struct strong_type_test_tag>(std::array{1, 2, 3, 4, 5});
+  constexpr auto k_value = gw::make_strong_type<struct test_tag>(std::array{1, 2, 3, 4, 5});
 
   STATIC_REQUIRE(!k_value.empty());
   STATIC_REQUIRE(k_value.size() == 5);
@@ -364,52 +362,52 @@ TEST_CASE("strong_types are viewable ranges", "[strong_type]") {
   STATIC_REQUIRE(k_value[3] == 4);
   STATIC_REQUIRE(k_value[4] == 5);
 
-  using strong_type_test = std::remove_cv_t<decltype(k_value)>;
-  STATIC_REQUIRE(std::ranges::viewable_range<strong_type_test>);
+  using test_t = std::remove_cv_t<decltype(k_value)>;
+  STATIC_REQUIRE(std::ranges::viewable_range<test_t>);
 }
 
 TEST_CASE("strong_types are hashed", "[strong_type]") {
-  struct strong_type_test_tag {};
-  using strong_type_test = gw::strong_type<strong_type_test_tag, int>;
+  struct test_tag {};
+  using test_t = gw::strong_type<test_tag, int>;
 
-  STATIC_REQUIRE(gw::hashable<strong_type_test>);
+  STATIC_REQUIRE(gw::hashable<test_t>);
 }
 
 TEST_CASE("strong_types are streamed", "[strong_type]") {
-  using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+  using test_t = gw::strong_type<struct test_tag, int>;
 
   SECTION("ostream strong_type") {
-    STATIC_REQUIRE(gw::ostreamable<strong_type_test>);
+    STATIC_REQUIRE(gw::ostreamable<test_t>);
 
     auto sstream = std::stringstream{};
-    sstream << strong_type_test{1};
+    sstream << test_t{1};
     REQUIRE(sstream.str() == "1");
   }
 
   SECTION("istream strong_type") {
-    STATIC_REQUIRE(gw::istreamable<strong_type_test>);
+    STATIC_REQUIRE(gw::istreamable<test_t>);
 
     auto sstream = std::stringstream{};
     sstream << "1";
-    auto value = strong_type_test{};
+    auto value = test_t{};
     sstream >> value;
-    REQUIRE(value == strong_type_test{1});
+    REQUIRE(value == test_t{1});
   }
 }
 
 TEST_CASE("strong_types are converted to string", "[strong_type]") {
   SECTION("unnamed strong_type") {
-    using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
+    using test_t = gw::strong_type<struct test_tag, int>;
 
-    REQUIRE(std::to_string(strong_type_test{1}) == "1");
+    REQUIRE(std::to_string(test_t{1}) == "1");
   }
 
   SECTION("named strong_type") {
     struct strong_type_named_tag {
-      static constexpr auto name() noexcept { return "StrongTypeNamedTag"; }
+      static constexpr auto name() noexcept { return "TestType"; }
     };
     using strong_type_named = gw::strong_type<strong_type_named_tag, int>;
 
-    REQUIRE(std::to_string(strong_type_named{1}) == "StrongTypeNamedTag: 1");
+    REQUIRE(std::to_string(strong_type_named{1}) == "TestType: 1");
   }
 }

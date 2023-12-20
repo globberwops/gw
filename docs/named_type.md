@@ -54,6 +54,7 @@ int main() {
 | --------------- | ----------- |
 | (constructor) | constructs the `gw::named_type` |
 | (destructor) | destroys the `gw::named_type` |
+| `name()` [static] | returns the name of the `gw::named_type` |
 
 #### Observers
 

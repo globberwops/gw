@@ -11,6 +11,7 @@
 #include <iostream>
 #include <ranges>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -46,11 +47,6 @@ class named_type final
   using value_type = T;
 
   //
-  // Public constants
-  //
-  static constexpr auto k_name = Name.value;
-
-  //
   // Constructors
   //
   template <class... Args>
@@ -63,6 +59,16 @@ class named_type final
                        Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
     requires std::constructible_from<T, std::initializer_list<U>&, Args...>
       : m_value(T{ilist, std::forward<Args>(args)...}) {}
+
+  //
+  // Destructor
+  //
+  ~named_type() noexcept(std::is_nothrow_destructible_v<T>) = default;
+
+  //
+  // Static functions
+  //
+  static constexpr auto name() noexcept -> std::string_view { return k_name; }
 
   //
   // Observers
@@ -641,6 +647,7 @@ class named_type final
 
  private:
   T m_value{};
+  static constexpr auto k_name = Name.value;
 };
 
 //
