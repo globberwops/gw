@@ -688,7 +688,7 @@ template <gw::hashable T, gw::detail::fixed_string Name>
 struct hash<gw::named_type<T, Name>> {
   [[nodiscard]] auto inline operator()(const gw::named_type<T, Name>& named_type) const noexcept -> size_t {
     auto value_hash = hash<T>{}(named_type.value());
-    auto name_hash = hash<const char*>{}(Name.value);
+    auto name_hash = hash<std::string_view>{}(named_type.name());
     return value_hash ^ name_hash;
   }
 };
@@ -699,7 +699,7 @@ struct hash<gw::named_type<T, Name>> {
 template <gw::string_convertable T, gw::detail::fixed_string Name>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 [[nodiscard]] auto inline to_string(gw::named_type<T, Name> named_type) -> std::string {
-  return std::string{Name.value} + ": " + std::to_string(named_type.value());
+  return std::string{named_type.name()} + ": " + std::to_string(named_type.value());
 }
 
 }  // namespace std
