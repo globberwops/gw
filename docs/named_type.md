@@ -10,7 +10,7 @@ The class template [`gw::named_type`](../include/gw/named_type.hpp) is a simple 
 #include <string>
 
 using name_t = gw::named_type<std::string, "name">;
-using address_t = gw::named_type< std::string, "address">;
+using address_t = gw::named_type<std::string, "address">;
 
 void print_name(const name_t& name) {
   std::cout << name << '\n';
