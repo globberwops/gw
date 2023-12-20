@@ -511,9 +511,6 @@ struct strong_type final
     return strong_type{m_value >> rhs.m_value};
   }
 
-  //
-  // Bitwise assignment operators
-  //
   constexpr auto operator&=(const strong_type& rhs) & noexcept(noexcept(m_value &= rhs.m_value)) -> strong_type&
     requires std::unsigned_integral<T>
   {

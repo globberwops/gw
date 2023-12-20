@@ -11,6 +11,12 @@ option(GW_BUILD_DOCS "Build documentation" ${PROJECT_IS_TOP_LEVEL})
 option(GW_BUILD_TESTS "Build tests" ${PROJECT_IS_TOP_LEVEL})
 option(GW_INSTALL "Generate install target" ON)
 
+add_library(named_type INTERFACE)
+add_library(gw::named_type ALIAS named_type)
+target_sources(named_type INTERFACE FILE_SET HEADERS BASE_DIRS include FILES include/gw/named_type.hpp)
+target_compile_features(named_type INTERFACE cxx_std_20)
+target_include_directories(named_type INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+
 add_library(strong_type INTERFACE)
 add_library(gw::strong_type ALIAS strong_type)
 target_sources(strong_type INTERFACE FILE_SET HEADERS BASE_DIRS include FILES include/gw/strong_type.hpp)

@@ -6,4 +6,5 @@
 
 A bunch of small C++ utilities
 
+ * [`gw::named_type`](docs/named_type.md)
  * [`gw::strong_type`](docs/strong_type.md)

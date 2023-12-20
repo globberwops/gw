@@ -49,6 +49,14 @@ TEST_CASE("strong_types are destroyed", "[strong_type]") {
   STATIC_REQUIRE(std::is_nothrow_destructible_v<strong_type_test>);
 }
 
+TEST_CASE("strong_types are distinguished by their tag", "[strong_type]") {
+  using strong_type_test1 = gw::strong_type<struct strong_type_test_tag1, int>;
+  using strong_type_test2 = gw::strong_type<struct strong_type_test_tag2, int>;
+
+  STATIC_REQUIRE(std::is_same_v<strong_type_test1, strong_type_test1>);
+  STATIC_REQUIRE(!std::is_same_v<strong_type_test1, strong_type_test2>);
+}
+
 TEST_CASE("strong_types are swapped", "[strong_type]") {
   using strong_type_test = gw::strong_type<struct strong_type_test_tag, int>;
 
