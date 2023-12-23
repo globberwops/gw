@@ -158,53 +158,53 @@ class named_type final
   // Increment and decrement operators
   //
   constexpr auto operator++() & noexcept(noexcept(++m_value)) -> named_type&
-    requires gw::incrementable<T>
+    requires incrementable<T>
   {
     ++m_value;
     return *this;
   }
 
   constexpr auto operator++() && noexcept(noexcept(++m_value)) -> named_type&&
-    requires gw::incrementable<T>
+    requires incrementable<T>
   {
     ++m_value;
     return std::move(*this);
   }
 
   constexpr auto operator++(int) & noexcept(noexcept(m_value++)) -> named_type
-    requires gw::incrementable<T>
+    requires incrementable<T>
   {
     return named_type{m_value++};
   }
 
   constexpr auto operator++(int) && noexcept(noexcept(m_value++)) -> named_type
-    requires gw::incrementable<T>
+    requires incrementable<T>
   {
     return named_type{m_value++};
   }
 
   constexpr auto operator--() & noexcept(noexcept(--m_value)) -> named_type&
-    requires gw::decrementable<T>
+    requires decrementable<T>
   {
     --m_value;
     return *this;
   }
 
   constexpr auto operator--() && noexcept(noexcept(--m_value)) -> named_type&&
-    requires gw::decrementable<T>
+    requires decrementable<T>
   {
     --m_value;
     return std::move(*this);
   }
 
   constexpr auto operator--(int) & noexcept(noexcept(m_value--)) -> named_type
-    requires gw::decrementable<T>
+    requires decrementable<T>
   {
     return named_type{m_value--};
   }
 
   constexpr auto operator--(int) && noexcept(noexcept(m_value--)) -> named_type
-    requires gw::decrementable<T>
+    requires decrementable<T>
   {
     return named_type{m_value--};
   }
@@ -213,190 +213,190 @@ class named_type final
   // Arithmetic operators
   //
   constexpr auto operator+(const named_type& rhs) const& noexcept(noexcept(m_value + rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value + rhs.m_value};
   }
 
   constexpr auto operator+(named_type&& rhs) const& noexcept(noexcept(m_value + rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value + rhs.m_value};
   }
 
   constexpr auto operator+(const named_type& rhs) && noexcept(noexcept(m_value + rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value + rhs.m_value};
   }
 
   constexpr auto operator+(named_type&& rhs) && noexcept(noexcept(m_value + rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value + rhs.m_value};
   }
 
   constexpr auto operator-(const named_type& rhs) const& noexcept(noexcept(m_value - rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value - rhs.m_value};
   }
 
   constexpr auto operator-(named_type&& rhs) const& noexcept(noexcept(m_value - rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value - rhs.m_value};
   }
 
   constexpr auto operator-(const named_type& rhs) && noexcept(noexcept(m_value - rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value - rhs.m_value};
   }
 
   constexpr auto operator-(named_type&& rhs) && noexcept(noexcept(m_value - rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value - rhs.m_value};
   }
 
   constexpr auto operator*(const named_type& rhs) const& noexcept(noexcept(m_value * rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value * rhs.m_value};
   }
 
   constexpr auto operator*(named_type&& rhs) const& noexcept(noexcept(m_value * rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value * rhs.m_value};
   }
 
   constexpr auto operator*(const named_type& rhs) && noexcept(noexcept(m_value * rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value * rhs.m_value};
   }
 
   constexpr auto operator*(named_type&& rhs) && noexcept(noexcept(m_value * rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value * rhs.m_value};
   }
 
   constexpr auto operator/(const named_type& rhs) const& noexcept(noexcept(m_value / rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value / rhs.m_value};
   }
 
   constexpr auto operator/(named_type&& rhs) const& noexcept(noexcept(m_value / rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value / rhs.m_value};
   }
 
   constexpr auto operator/(const named_type& rhs) && noexcept(noexcept(m_value / rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value / rhs.m_value};
   }
 
   constexpr auto operator/(named_type&& rhs) && noexcept(noexcept(m_value / rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value / rhs.m_value};
   }
 
   constexpr auto operator%(const named_type& rhs) const& noexcept(noexcept(m_value % rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value % rhs.m_value};
   }
 
   constexpr auto operator%(named_type&& rhs) const& noexcept(noexcept(m_value % rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value % rhs.m_value};
   }
 
   constexpr auto operator%(const named_type& rhs) && noexcept(noexcept(m_value % rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value % rhs.m_value};
   }
 
   constexpr auto operator%(named_type&& rhs) && noexcept(noexcept(m_value % rhs.m_value)) -> named_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return named_type{m_value % rhs.m_value};
   }
 
   constexpr auto operator+=(const named_type& rhs) & noexcept(noexcept(m_value += rhs.m_value)) -> named_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value += rhs.m_value;
     return *this;
   }
 
   constexpr auto operator+=(named_type&& rhs) & noexcept(noexcept(m_value += rhs.m_value)) -> named_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value += rhs.m_value;
     return *this;
   }
 
   constexpr auto operator-=(const named_type& rhs) & noexcept(noexcept(m_value -= rhs.m_value)) -> named_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value -= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator-=(named_type&& rhs) & noexcept(noexcept(m_value -= rhs.m_value)) -> named_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value -= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator*=(const named_type& rhs) & noexcept(noexcept(m_value *= rhs.m_value)) -> named_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value *= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator*=(named_type&& rhs) & noexcept(noexcept(m_value *= rhs.m_value)) -> named_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value *= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator/=(const named_type& rhs) & noexcept(noexcept(m_value /= rhs.m_value)) -> named_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value /= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator/=(named_type&& rhs) & noexcept(noexcept(m_value /= rhs.m_value)) -> named_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value /= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator%=(const named_type& rhs) & noexcept(noexcept(m_value %= rhs.m_value)) -> named_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value %= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator%=(named_type&& rhs) & noexcept(noexcept(m_value %= rhs.m_value)) -> named_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value %= rhs.m_value;
     return *this;
@@ -633,14 +633,14 @@ class named_type final
   //
   friend inline auto operator<<(std::ostream& ostream,
                                 const named_type& rhs) noexcept(noexcept(ostream << rhs.m_value)) -> std::ostream&
-    requires gw::ostreamable<T>
+    requires ostreamable<T>
   {
     return ostream << rhs.m_value;
   }
 
   friend inline auto operator>>(std::istream& istream,
                                 named_type& rhs) noexcept(noexcept(istream >> rhs.m_value)) -> std::istream&
-    requires gw::istreamable<T>
+    requires istreamable<T>
   {
     return istream >> rhs.m_value;
   }
@@ -683,12 +683,12 @@ namespace std {
 //
 // Hash calculation
 //
-template <gw::hashable T, gw::detail::fixed_string Name>
+template <::gw::hashable T, ::gw::detail::fixed_string Name>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
-struct hash<gw::named_type<T, Name>> {
-  [[nodiscard]] auto inline operator()(const gw::named_type<T, Name>& named_type) const noexcept -> size_t {
+struct hash<::gw::named_type<T, Name>> {
+  [[nodiscard]] auto inline operator()(const ::gw::named_type<T, Name>& named_type) const noexcept -> size_t {
     auto value_hash = hash<T>{}(named_type.value());
-    auto name_hash = hash<std::string_view>{}(named_type.name());
+    auto name_hash = hash<string_view>{}(named_type.name());
     return value_hash ^ name_hash;
   }
 };
@@ -696,10 +696,10 @@ struct hash<gw::named_type<T, Name>> {
 //
 // String conversion
 //
-template <gw::string_convertable T, gw::detail::fixed_string Name>
+template <::gw::string_convertable T, ::gw::detail::fixed_string Name>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
-[[nodiscard]] auto inline to_string(gw::named_type<T, Name> named_type) -> std::string {
-  return std::string{named_type.name()} + ": " + std::to_string(named_type.value());
+[[nodiscard]] auto inline to_string(const ::gw::named_type<T, Name>& named_type) -> string {
+  return string{named_type.name()} + ": " + to_string(named_type.value());
 }
 
 }  // namespace std

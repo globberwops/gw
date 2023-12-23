@@ -20,8 +20,8 @@ namespace gw {
 
 namespace detail {
 
-struct view_interface_empty_base {
-  constexpr auto operator<=>(const view_interface_empty_base&) const noexcept = default;
+struct strong_type_empty_base {
+  constexpr auto operator<=>(const strong_type_empty_base&) const noexcept = default;
 };
 
 }  // namespace detail
@@ -29,7 +29,7 @@ struct view_interface_empty_base {
 template <typename Tag, class T>
 struct strong_type final
     : public std::conditional_t<std::ranges::range<T>, std::ranges::view_interface<strong_type<Tag, T>>,
-                                detail::view_interface_empty_base> {
+                                detail::strong_type_empty_base> {
   //
   // Public types
   //
@@ -138,53 +138,53 @@ struct strong_type final
   // Increment and decrement operators
   //
   constexpr auto operator++() & noexcept(noexcept(++m_value)) -> strong_type&
-    requires gw::incrementable<T>
+    requires incrementable<T>
   {
     ++m_value;
     return *this;
   }
 
   constexpr auto operator++() && noexcept(noexcept(++m_value)) -> strong_type&&
-    requires gw::incrementable<T>
+    requires incrementable<T>
   {
     ++m_value;
     return std::move(*this);
   }
 
   constexpr auto operator++(int) & noexcept(noexcept(m_value++)) -> strong_type
-    requires gw::incrementable<T>
+    requires incrementable<T>
   {
     return strong_type{m_value++};
   }
 
   constexpr auto operator++(int) && noexcept(noexcept(m_value++)) -> strong_type
-    requires gw::incrementable<T>
+    requires incrementable<T>
   {
     return strong_type{m_value++};
   }
 
   constexpr auto operator--() & noexcept(noexcept(--m_value)) -> strong_type&
-    requires gw::decrementable<T>
+    requires decrementable<T>
   {
     --m_value;
     return *this;
   }
 
   constexpr auto operator--() && noexcept(noexcept(--m_value)) -> strong_type&&
-    requires gw::decrementable<T>
+    requires decrementable<T>
   {
     --m_value;
     return std::move(*this);
   }
 
   constexpr auto operator--(int) & noexcept(noexcept(m_value--)) -> strong_type
-    requires gw::decrementable<T>
+    requires decrementable<T>
   {
     return strong_type{m_value--};
   }
 
   constexpr auto operator--(int) && noexcept(noexcept(m_value--)) -> strong_type
-    requires gw::decrementable<T>
+    requires decrementable<T>
   {
     return strong_type{m_value--};
   }
@@ -193,190 +193,190 @@ struct strong_type final
   // Arithmetic operators
   //
   constexpr auto operator+(const strong_type& rhs) const& noexcept(noexcept(m_value + rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value + rhs.m_value};
   }
 
   constexpr auto operator+(strong_type&& rhs) const& noexcept(noexcept(m_value + rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value + rhs.m_value};
   }
 
   constexpr auto operator+(const strong_type& rhs) && noexcept(noexcept(m_value + rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value + rhs.m_value};
   }
 
   constexpr auto operator+(strong_type&& rhs) && noexcept(noexcept(m_value + rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value + rhs.m_value};
   }
 
   constexpr auto operator-(const strong_type& rhs) const& noexcept(noexcept(m_value - rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value - rhs.m_value};
   }
 
   constexpr auto operator-(strong_type&& rhs) const& noexcept(noexcept(m_value - rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value - rhs.m_value};
   }
 
   constexpr auto operator-(const strong_type& rhs) && noexcept(noexcept(m_value - rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value - rhs.m_value};
   }
 
   constexpr auto operator-(strong_type&& rhs) && noexcept(noexcept(m_value - rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value - rhs.m_value};
   }
 
   constexpr auto operator*(const strong_type& rhs) const& noexcept(noexcept(m_value * rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value * rhs.m_value};
   }
 
   constexpr auto operator*(strong_type&& rhs) const& noexcept(noexcept(m_value * rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value * rhs.m_value};
   }
 
   constexpr auto operator*(const strong_type& rhs) && noexcept(noexcept(m_value * rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value * rhs.m_value};
   }
 
   constexpr auto operator*(strong_type&& rhs) && noexcept(noexcept(m_value * rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value * rhs.m_value};
   }
 
   constexpr auto operator/(const strong_type& rhs) const& noexcept(noexcept(m_value / rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value / rhs.m_value};
   }
 
   constexpr auto operator/(strong_type&& rhs) const& noexcept(noexcept(m_value / rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value / rhs.m_value};
   }
 
   constexpr auto operator/(const strong_type& rhs) && noexcept(noexcept(m_value / rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value / rhs.m_value};
   }
 
   constexpr auto operator/(strong_type&& rhs) && noexcept(noexcept(m_value / rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value / rhs.m_value};
   }
 
   constexpr auto operator%(const strong_type& rhs) const& noexcept(noexcept(m_value % rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value % rhs.m_value};
   }
 
   constexpr auto operator%(strong_type&& rhs) const& noexcept(noexcept(m_value % rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value % rhs.m_value};
   }
 
   constexpr auto operator%(const strong_type& rhs) && noexcept(noexcept(m_value % rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value % rhs.m_value};
   }
 
   constexpr auto operator%(strong_type&& rhs) && noexcept(noexcept(m_value % rhs.m_value)) -> strong_type
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     return strong_type{m_value % rhs.m_value};
   }
 
   constexpr auto operator+=(const strong_type& rhs) & noexcept(noexcept(m_value += rhs.m_value)) -> strong_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value += rhs.m_value;
     return *this;
   }
 
   constexpr auto operator+=(strong_type&& rhs) & noexcept(noexcept(m_value += rhs.m_value)) -> strong_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value += rhs.m_value;
     return *this;
   }
 
   constexpr auto operator-=(const strong_type& rhs) & noexcept(noexcept(m_value -= rhs.m_value)) -> strong_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value -= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator-=(strong_type&& rhs) & noexcept(noexcept(m_value -= rhs.m_value)) -> strong_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value -= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator*=(const strong_type& rhs) & noexcept(noexcept(m_value *= rhs.m_value)) -> strong_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value *= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator*=(strong_type&& rhs) & noexcept(noexcept(m_value *= rhs.m_value)) -> strong_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value *= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator/=(const strong_type& rhs) & noexcept(noexcept(m_value /= rhs.m_value)) -> strong_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value /= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator/=(strong_type&& rhs) & noexcept(noexcept(m_value /= rhs.m_value)) -> strong_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value /= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator%=(const strong_type& rhs) & noexcept(noexcept(m_value %= rhs.m_value)) -> strong_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value %= rhs.m_value;
     return *this;
   }
 
   constexpr auto operator%=(strong_type&& rhs) & noexcept(noexcept(m_value %= rhs.m_value)) -> strong_type&
-    requires gw::arithmetic<T>
+    requires arithmetic<T>
   {
     m_value %= rhs.m_value;
     return *this;
@@ -613,14 +613,14 @@ struct strong_type final
   //
   friend inline auto operator<<(std::ostream& ostream,
                                 const strong_type& rhs) noexcept(noexcept(ostream << rhs.m_value)) -> std::ostream&
-    requires gw::ostreamable<T>
+    requires ostreamable<T>
   {
     return ostream << rhs.m_value;
   }
 
   friend inline auto operator>>(std::istream& istream,
                                 strong_type& rhs) noexcept(noexcept(istream >> rhs.m_value)) -> std::istream&
-    requires gw::istreamable<T>
+    requires istreamable<T>
   {
     return istream >> rhs.m_value;
   }
@@ -662,10 +662,10 @@ namespace std {
 //
 // Hash calculation
 //
-template <gw::complete Tag, gw::hashable T>
+template <::gw::complete Tag, ::gw::hashable T>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
-struct hash<gw::strong_type<Tag, T>> {
-  [[nodiscard]] auto inline operator()(const gw::strong_type<Tag, T>& strong_type) const noexcept -> size_t {
+struct hash<::gw::strong_type<Tag, T>> {
+  [[nodiscard]] auto inline operator()(const ::gw::strong_type<Tag, T>& strong_type) const noexcept -> size_t {
     auto tag_hash = hash<type_index>{}(type_index{typeid(Tag)});
     auto value_hash = hash<T>{}(strong_type.value());
     return tag_hash ^ value_hash;
@@ -675,16 +675,16 @@ struct hash<gw::strong_type<Tag, T>> {
 //
 // String conversion
 //
-template <typename Tag, gw::string_convertable T>
+template <typename Tag, ::gw::string_convertable T>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
-[[nodiscard]] auto inline to_string(gw::strong_type<Tag, T> strong_type) -> std::string {
-  return std::to_string(strong_type.value());
+[[nodiscard]] auto inline to_string(const ::gw::strong_type<Tag, T>& strong_type) -> string {
+  return to_string(strong_type.value());
 }
 
-template <gw::named Tag, gw::string_convertable T>
+template <::gw::named Tag, ::gw::string_convertable T>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
-[[nodiscard]] auto inline to_string(gw::strong_type<Tag, T> strong_type) -> std::string {
-  return std::string{Tag::name()} + ": " + std::to_string(strong_type.value());
+[[nodiscard]] auto inline to_string(const ::gw::strong_type<Tag, T>& strong_type) -> string {
+  return string{Tag::name()} + ": " + to_string(strong_type.value());
 }
 
 }  // namespace std
