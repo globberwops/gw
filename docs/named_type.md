@@ -82,6 +82,12 @@ int main() {
 
 |   |   |
 |---|---|
+| `operator==` | compares `gw::named_type` objects |
+| `operator!=` | compares `gw::named_type` objects |
+| `operator<` | compares `gw::named_type` objects |
+| `operator<=` | compares `gw::named_type` objects |
+| `operator>` | compares `gw::named_type` objects |
+| `operator>=` | compares `gw::named_type` objects |
 | `operator<=>` | compares `gw::named_type` objects |
 
 #### Conversion operators

@@ -118,10 +118,45 @@ TEST_CASE("strong_types are emplaced", "[strong_type]") {
   STATIC_REQUIRE(noexcept(test_t{}.emplace(1)));
 }
 
-TEST_CASE("strong_types are totally ordered", "[strong_type]") {
+TEST_CASE("strong_types are compared", "[strong_type]") {
   using test_t = gw::strong_type<int, struct test_tag>;
 
+  SECTION("equality") {
+    STATIC_REQUIRE(test_t{1} == test_t{1});
+    STATIC_REQUIRE(test_t{1} != test_t{2});
+    STATIC_REQUIRE(noexcept(test_t{} == test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} != test_t{}));
+  }
+
+  SECTION("less than") {
+    STATIC_REQUIRE(test_t{1} < test_t{2});
+    STATIC_REQUIRE(test_t{1} <= test_t{1});
+    STATIC_REQUIRE(test_t{1} <= test_t{2});
+    STATIC_REQUIRE(test_t{2} > test_t{1});
+    STATIC_REQUIRE(test_t{1} >= test_t{1});
+    STATIC_REQUIRE(test_t{2} >= test_t{1});
+    STATIC_REQUIRE(noexcept(test_t{} < test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} <= test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} > test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} >= test_t{}));
+  }
+
+  SECTION("greater than") {
+    STATIC_REQUIRE(test_t{2} > test_t{1});
+    STATIC_REQUIRE(test_t{2} >= test_t{2});
+    STATIC_REQUIRE(test_t{2} >= test_t{1});
+    STATIC_REQUIRE(test_t{1} < test_t{2});
+    STATIC_REQUIRE(test_t{2} <= test_t{2});
+    STATIC_REQUIRE(test_t{1} <= test_t{2});
+    STATIC_REQUIRE(noexcept(test_t{} > test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} >= test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} < test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} <= test_t{}));
+  }
+
+  STATIC_REQUIRE(std::equality_comparable<test_t>);
   STATIC_REQUIRE(std::totally_ordered<test_t>);
+  STATIC_REQUIRE(std::three_way_comparable<test_t>);
 }
 
 TEST_CASE("strong_types are converted", "[strong_type]") {

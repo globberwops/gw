@@ -121,10 +121,45 @@ TEST_CASE("named_types are emplaced", "[named_type]") {
   STATIC_REQUIRE(noexcept(test_t{}.emplace(1)));
 }
 
-TEST_CASE("named_types are totally ordered", "[named_type]") {
+TEST_CASE("named_types are compared", "[named_type]") {
   using test_t = gw::named_type<int, "TestType">;
 
+  SECTION("equality") {
+    STATIC_REQUIRE(test_t{1} == test_t{1});
+    STATIC_REQUIRE(test_t{1} != test_t{2});
+    STATIC_REQUIRE(noexcept(test_t{} == test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} != test_t{}));
+  }
+
+  SECTION("less than") {
+    STATIC_REQUIRE(test_t{1} < test_t{2});
+    STATIC_REQUIRE(test_t{1} <= test_t{1});
+    STATIC_REQUIRE(test_t{1} <= test_t{2});
+    STATIC_REQUIRE(test_t{2} > test_t{1});
+    STATIC_REQUIRE(test_t{1} >= test_t{1});
+    STATIC_REQUIRE(test_t{2} >= test_t{1});
+    STATIC_REQUIRE(noexcept(test_t{} < test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} <= test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} > test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} >= test_t{}));
+  }
+
+  SECTION("greater than") {
+    STATIC_REQUIRE(test_t{2} > test_t{1});
+    STATIC_REQUIRE(test_t{2} >= test_t{2});
+    STATIC_REQUIRE(test_t{2} >= test_t{1});
+    STATIC_REQUIRE(test_t{1} < test_t{2});
+    STATIC_REQUIRE(test_t{2} <= test_t{2});
+    STATIC_REQUIRE(test_t{1} <= test_t{2});
+    STATIC_REQUIRE(noexcept(test_t{} > test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} >= test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} < test_t{}));
+    STATIC_REQUIRE(noexcept(test_t{} <= test_t{}));
+  }
+
+  STATIC_REQUIRE(std::equality_comparable<test_t>);
   STATIC_REQUIRE(std::totally_ordered<test_t>);
+  STATIC_REQUIRE(std::three_way_comparable<test_t>);
 }
 
 TEST_CASE("named_types are converted", "[named_type]") {
@@ -169,6 +204,20 @@ TEST_CASE("named_types are incremented and decremented", "[named_type]") {
 
     auto value = test_t{1};
     STATIC_REQUIRE(noexcept(value--));
+  }
+}
+
+TEST_CASE("named_types are affirmed and negated", "[named_type]") {
+  using test_t = gw::named_type<int, "TestType">;
+
+  SECTION("affirmation") {
+    STATIC_REQUIRE(+test_t{1} == test_t{1});
+    STATIC_REQUIRE(noexcept(+test_t{}));
+  }
+
+  SECTION("negation") {
+    STATIC_REQUIRE(-test_t{1} == test_t{-1});
+    STATIC_REQUIRE(noexcept(-test_t{}));
   }
 }
 
