@@ -26,25 +26,25 @@ struct strong_type_empty_base {
 
 }  // namespace detail
 
-template <typename Tag, class T>
+template <typename T, typename Tag>
 struct strong_type final
-    : public std::conditional_t<std::ranges::range<T>, std::ranges::view_interface<strong_type<Tag, T>>,
+    : public std::conditional_t<std::ranges::range<T>, std::ranges::view_interface<strong_type<T, Tag>>,
                                 detail::strong_type_empty_base> {
   //
   // Public types
   //
-  using tag_type = Tag;
   using value_type = T;
+  using tag_type = Tag;
 
   //
   // Constructors
   //
-  template <class... Args>
+  template <typename... Args>
   constexpr explicit strong_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
     requires std::constructible_from<T, Args...>
       : m_value(T{std::forward<Args>(args)...}) {}
 
-  template <class U, class... Args>
+  template <typename U, typename... Args>
   constexpr strong_type(std::initializer_list<U> ilist,
                         Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
     requires std::constructible_from<T, std::initializer_list<U>&, Args...>
@@ -69,32 +69,32 @@ struct strong_type final
   //
   // Monadic operations
   //
-  template <class F>
+  template <typename F>
   constexpr auto transform(F&& func) const& noexcept(noexcept(func(m_value)))
     requires std::invocable<F, const T&>
   {
-    return strong_type<Tag, std::remove_cv_t<std::invoke_result_t<F, const T&>>>{func(m_value)};
+    return strong_type<std::remove_cv_t<std::invoke_result_t<F, const T&>>, Tag>{func(m_value)};
   }
 
-  template <class F>
+  template <typename F>
   constexpr auto transform(F&& func) & noexcept(noexcept(func(m_value)))
     requires std::invocable<F, T&>
   {
-    return strong_type<Tag, std::remove_cv_t<std::invoke_result_t<F, T&>>>{func(m_value)};
+    return strong_type<std::remove_cv_t<std::invoke_result_t<F, T&>>, Tag>{func(m_value)};
   }
 
-  template <class F>
+  template <typename F>
   constexpr auto transform(F&& func) const&& noexcept(noexcept(func(m_value)))
     requires std::invocable<F, const T&&>
   {
-    return strong_type<Tag, std::remove_cv_t<std::invoke_result_t<F, const T&&>>>{func(std::move(m_value))};
+    return strong_type<std::remove_cv_t<std::invoke_result_t<F, const T&&>>, Tag>{func(std::move(m_value))};
   }
 
-  template <class F>
+  template <typename F>
   constexpr auto transform(F&& func) && noexcept(noexcept(func(m_value)))
     requires std::invocable<F, T&&>
   {
-    return strong_type<Tag, std::remove_cv_t<std::invoke_result_t<F, T&&>>>{func(std::move(m_value))};
+    return strong_type<std::remove_cv_t<std::invoke_result_t<F, T&&>>, Tag>{func(std::move(m_value))};
   }
 
   //
@@ -113,7 +113,7 @@ struct strong_type final
     m_value = T{};
   }
 
-  template <class... Args>
+  template <typename... Args>
   constexpr auto emplace(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>) -> T&
     requires std::constructible_from<T, Args...>
   {
@@ -632,27 +632,27 @@ struct strong_type final
 //
 // Creation functions
 //
-template <typename Tag, class T, typename... Args>
+template <typename Tag, typename T, typename... Args>
 constexpr auto make_strong_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
   requires std::constructible_from<std::remove_cvref_t<T>, Args...>
 {
-  return strong_type<Tag, std::remove_cvref_t<T>>{std::forward<Args>(args)...};
+  return strong_type<std::remove_cvref_t<T>, Tag>{std::forward<Args>(args)...};
 }
 
-template <typename Tag, class T, typename U, typename... Args>
+template <typename Tag, typename T, typename U, typename... Args>
 constexpr auto make_strong_type(std::initializer_list<U> ilist, Args&&... args) noexcept(
     std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
   requires std::constructible_from<T, std::initializer_list<U>&, Args...>
 {
-  return strong_type<Tag, std::remove_cvref_t<T>>{ilist, std::forward<Args>(args)...};
+  return strong_type<std::remove_cvref_t<T>, Tag>{ilist, std::forward<Args>(args)...};
 }
 
-template <typename Tag, class T>
+template <typename Tag, typename T>
 constexpr auto make_strong_type(T&& value) noexcept(
-    std::is_nothrow_constructible_v<strong_type<Tag, std::remove_cvref_t<T>>, T>)
+    std::is_nothrow_constructible_v<strong_type<std::remove_cvref_t<T>, Tag>, T>)
   requires std::constructible_from<std::remove_cvref_t<T>, T>
 {
-  return strong_type<Tag, std::remove_cvref_t<T>>{std::forward<T>(value)};
+  return strong_type<std::remove_cvref_t<T>, Tag>{std::forward<T>(value)};
 }
 
 }  // namespace gw
@@ -662,10 +662,10 @@ namespace std {
 //
 // Hash calculation
 //
-template <::gw::complete Tag, ::gw::hashable T>
+template <::gw::hashable T, ::gw::complete Tag>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
-struct hash<::gw::strong_type<Tag, T>> {
-  [[nodiscard]] auto inline operator()(const ::gw::strong_type<Tag, T>& strong_type) const noexcept -> size_t {
+struct hash<::gw::strong_type<T, Tag>> {
+  [[nodiscard]] auto inline operator()(const ::gw::strong_type<T, Tag>& strong_type) const noexcept -> size_t {
     auto tag_hash = hash<type_index>{}(type_index{typeid(Tag)});
     auto value_hash = hash<T>{}(strong_type.value());
     return tag_hash ^ value_hash;
@@ -675,15 +675,15 @@ struct hash<::gw::strong_type<Tag, T>> {
 //
 // String conversion
 //
-template <typename Tag, ::gw::string_convertable T>
+template <::gw::string_convertable T, typename Tag>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
-[[nodiscard]] auto inline to_string(const ::gw::strong_type<Tag, T>& strong_type) -> string {
+[[nodiscard]] auto inline to_string(const ::gw::strong_type<T, Tag>& strong_type) -> string {
   return to_string(strong_type.value());
 }
 
-template <::gw::named Tag, ::gw::string_convertable T>
+template <::gw::string_convertable T, ::gw::named Tag>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
-[[nodiscard]] auto inline to_string(const ::gw::strong_type<Tag, T>& strong_type) -> string {
+[[nodiscard]] auto inline to_string(const ::gw::strong_type<T, Tag>& strong_type) -> string {
   return string{Tag::name()} + ": " + to_string(strong_type.value());
 }
 

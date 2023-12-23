@@ -15,6 +15,8 @@
 TEST_CASE("named_types are constructed", "[named_type]") {
   using test_t = gw::named_type<int, "TestType">;
 
+  SECTION("public types") { STATIC_REQUIRE(std::is_same_v<test_t::value_type, int>); }
+
   SECTION("default constructed") { STATIC_REQUIRE(std::is_nothrow_default_constructible_v<test_t>); }
 
   SECTION("constructed from int") { STATIC_REQUIRE(std::is_nothrow_constructible_v<test_t, int>); }
@@ -48,12 +50,12 @@ TEST_CASE("named_types are destroyed", "[named_type]") {
 }
 
 TEST_CASE("named_types are distinguished by their name", "[named_type]") {
-  using test1_t = gw::named_type<int, "NamedTypeTest1">;
-  using test2_t = gw::named_type<int, "NamedTypeTest2">;
+  using test1_t = gw::named_type<int, "TestType1">;
+  using test2_t = gw::named_type<int, "TestType2">;
 
   SECTION("named_type::name()") {
-    STATIC_REQUIRE(test1_t::name() == "NamedTypeTest1");
-    STATIC_REQUIRE(test2_t::name() == "NamedTypeTest2");
+    STATIC_REQUIRE(test1_t::name() == "TestType1");
+    STATIC_REQUIRE(test2_t::name() == "TestType2");
   }
 
   SECTION("named_type type") {

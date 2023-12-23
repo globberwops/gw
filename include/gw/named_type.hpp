@@ -49,12 +49,12 @@ class named_type final
   //
   // Constructors
   //
-  template <class... Args>
+  template <typename... Args>
   constexpr explicit named_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
     requires std::constructible_from<T, Args...>
       : m_value(T{std::forward<Args>(args)...}) {}
 
-  template <class U, class... Args>
+  template <typename U, typename... Args>
   constexpr named_type(std::initializer_list<U> ilist,
                        Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
     requires std::constructible_from<T, std::initializer_list<U>&, Args...>
@@ -89,28 +89,28 @@ class named_type final
   //
   // Monadic operations
   //
-  template <class F>
+  template <typename F>
   constexpr auto transform(F&& func) const& noexcept(noexcept(func(m_value)))
     requires std::invocable<F, const T&>
   {
     return named_type<std::remove_cv_t<std::invoke_result_t<F, const T&>>, Name>{func(m_value)};
   }
 
-  template <class F>
+  template <typename F>
   constexpr auto transform(F&& func) & noexcept(noexcept(func(m_value)))
     requires std::invocable<F, T&>
   {
     return named_type<std::remove_cv_t<std::invoke_result_t<F, T&>>, Name>{func(m_value)};
   }
 
-  template <class F>
+  template <typename F>
   constexpr auto transform(F&& func) const&& noexcept(noexcept(func(m_value)))
     requires std::invocable<F, const T&&>
   {
     return named_type<std::remove_cv_t<std::invoke_result_t<F, const T&&>>, Name>{func(std::move(m_value))};
   }
 
-  template <class F>
+  template <typename F>
   constexpr auto transform(F&& func) && noexcept(noexcept(func(m_value)))
     requires std::invocable<F, T&&>
   {
@@ -133,7 +133,7 @@ class named_type final
     m_value = T{};
   }
 
-  template <class... Args>
+  template <typename... Args>
   constexpr auto emplace(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>) -> T&
     requires std::constructible_from<T, Args...>
   {
@@ -653,14 +653,14 @@ class named_type final
 //
 // Creation functions
 //
-template <detail::fixed_string Name, class T, typename... Args>
+template <detail::fixed_string Name, typename T, typename... Args>
 constexpr auto make_named_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
   requires std::constructible_from<std::remove_cvref_t<T>, Args...>
 {
   return named_type<std::remove_cvref_t<T>, Name>{std::forward<Args>(args)...};
 }
 
-template <detail::fixed_string Name, class T, typename U, typename... Args>
+template <detail::fixed_string Name, typename T, typename U, typename... Args>
 constexpr auto make_named_type(std::initializer_list<U> ilist, Args&&... args) noexcept(
     std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
   requires std::constructible_from<T, std::initializer_list<U>&, Args...>
@@ -668,7 +668,7 @@ constexpr auto make_named_type(std::initializer_list<U> ilist, Args&&... args) n
   return named_type<std::remove_cvref_t<T>, Name>{ilist, std::forward<Args>(args)...};
 }
 
-template <detail::fixed_string Name, class T>
+template <detail::fixed_string Name, typename T>
 constexpr auto make_named_type(T&& value) noexcept(
     std::is_nothrow_constructible_v<named_type<std::remove_cvref_t<T>, Name>, T>)
   requires std::constructible_from<std::remove_cvref_t<T>, T>

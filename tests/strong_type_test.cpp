@@ -13,7 +13,13 @@
 #include "gw/concepts.hpp"
 
 TEST_CASE("strong_types are constructed", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using tag_t = struct test_tag;
+  using test_t = gw::strong_type<int, tag_t>;
+
+  SECTION("public types") {
+    STATIC_REQUIRE(std::is_same_v<test_t::value_type, int>);
+    STATIC_REQUIRE(std::is_same_v<test_t::tag_type, tag_t>);
+  }
 
   SECTION("default constructed") { STATIC_REQUIRE(std::is_nothrow_default_constructible_v<test_t>); }
 
@@ -34,7 +40,7 @@ TEST_CASE("strong_types are constructed", "[strong_type]") {
 }
 
 TEST_CASE("strong_types are assigned", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   SECTION("copy assigned") { STATIC_REQUIRE(std::is_nothrow_copy_assignable_v<test_t>); }
 
@@ -42,7 +48,7 @@ TEST_CASE("strong_types are assigned", "[strong_type]") {
 }
 
 TEST_CASE("strong_types are destroyed", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   STATIC_REQUIRE(std::is_nothrow_destructible_v<test_t>);
 }
@@ -56,13 +62,13 @@ TEST_CASE("strong_types are distinguished by their tag", "[strong_type]") {
 }
 
 TEST_CASE("strong_types are swapped", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   STATIC_REQUIRE(std::is_nothrow_swappable_v<test_t>);
 }
 
 TEST_CASE("strong_types are observed", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   SECTION("operator*") {
     STATIC_REQUIRE(test_t{}.operator*() == 0);
@@ -81,7 +87,7 @@ TEST_CASE("strong_types are observed", "[strong_type]") {
 }
 
 TEST_CASE("strong_types are transformed", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   auto test = []() constexpr {
     auto value = test_t{1};
@@ -93,7 +99,7 @@ TEST_CASE("strong_types are transformed", "[strong_type]") {
 }
 
 TEST_CASE("strong_types are reset", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   auto test = []() constexpr {
     auto value = test_t{1};
@@ -106,20 +112,20 @@ TEST_CASE("strong_types are reset", "[strong_type]") {
 }
 
 TEST_CASE("strong_types are emplaced", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   STATIC_REQUIRE(test_t{}.emplace(1) == 1);
   STATIC_REQUIRE(noexcept(test_t{}.emplace(1)));
 }
 
 TEST_CASE("strong_types are totally ordered", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   STATIC_REQUIRE(std::totally_ordered<test_t>);
 }
 
 TEST_CASE("strong_types are converted", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   SECTION("explicit conversion") {
     STATIC_REQUIRE(static_cast<int>(test_t{}) == 0);
@@ -128,7 +134,7 @@ TEST_CASE("strong_types are converted", "[strong_type]") {
 }
 
 TEST_CASE("strong_types are incremented and decremented", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   SECTION("pre-increment") {
     STATIC_REQUIRE(++test_t{} == test_t{1});
@@ -164,7 +170,7 @@ TEST_CASE("strong_types are incremented and decremented", "[strong_type]") {
 }
 
 TEST_CASE("strong_types are added and subtracted", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   SECTION("strong_type + strong_type") {
     STATIC_REQUIRE(test_t{1} + test_t{1} == test_t{2});
@@ -178,7 +184,7 @@ TEST_CASE("strong_types are added and subtracted", "[strong_type]") {
 }
 
 TEST_CASE("strong_types are multiplied and divided", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   SECTION("strong_type * strong_type") {
     STATIC_REQUIRE(test_t{2} * test_t{2} == test_t{4});
@@ -192,14 +198,14 @@ TEST_CASE("strong_types are multiplied and divided", "[strong_type]") {
 }
 
 TEST_CASE("strong_types are modulo reduced", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   STATIC_REQUIRE(test_t{4} % test_t{3} == test_t{1});
   STATIC_REQUIRE(noexcept(test_t{} % test_t{}));
 }
 
 TEST_CASE("strong_types are added and subtracted with assignment", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   SECTION("strong_type += strong_type") {
     auto test = []() constexpr {
@@ -225,7 +231,7 @@ TEST_CASE("strong_types are added and subtracted with assignment", "[strong_type
 }
 
 TEST_CASE("strong_types are multiplied and divided with assignment", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   SECTION("strong_type *= strong_type") {
     auto test = []() constexpr {
@@ -251,7 +257,7 @@ TEST_CASE("strong_types are multiplied and divided with assignment", "[strong_ty
 }
 
 TEST_CASE("strong_types are bitwise operated", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, unsigned int>;
+  using test_t = gw::strong_type<unsigned int, struct test_tag>;
 
   SECTION("strong_type ~") {
     STATIC_REQUIRE(~test_t{1U} == test_t{~1U});
@@ -275,7 +281,7 @@ TEST_CASE("strong_types are bitwise operated", "[strong_type]") {
 }
 
 TEST_CASE("strong_types are bitwise shifted", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, unsigned int>;
+  using test_t = gw::strong_type<unsigned int, struct test_tag>;
 
   SECTION("strong_type << strong_type") {
     STATIC_REQUIRE((test_t{1U} << test_t{1U}) == test_t{2U});
@@ -289,7 +295,7 @@ TEST_CASE("strong_types are bitwise shifted", "[strong_type]") {
 }
 
 TEST_CASE("strong_types are bitwise operated with assignment", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, unsigned int>;
+  using test_t = gw::strong_type<unsigned int, struct test_tag>;
 
   SECTION("strong_type &= strong_type") {
     auto test = []() constexpr {
@@ -326,7 +332,7 @@ TEST_CASE("strong_types are bitwise operated with assignment", "[strong_type]") 
 }
 
 TEST_CASE("strong_types are bitwise shifted with assignment", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, unsigned int>;
+  using test_t = gw::strong_type<unsigned int, struct test_tag>;
 
   SECTION("strong_type <<= strong_type") {
     auto test = []() constexpr {
@@ -368,13 +374,13 @@ TEST_CASE("strong_types are viewable ranges", "[strong_type]") {
 
 TEST_CASE("strong_types are hashed", "[strong_type]") {
   struct test_tag {};
-  using test_t = gw::strong_type<test_tag, int>;
+  using test_t = gw::strong_type<int, test_tag>;
 
   STATIC_REQUIRE(gw::hashable<test_t>);
 }
 
 TEST_CASE("strong_types are streamed", "[strong_type]") {
-  using test_t = gw::strong_type<struct test_tag, int>;
+  using test_t = gw::strong_type<int, struct test_tag>;
 
   SECTION("ostream strong_type") {
     STATIC_REQUIRE(gw::ostreamable<test_t>);
@@ -397,7 +403,7 @@ TEST_CASE("strong_types are streamed", "[strong_type]") {
 
 TEST_CASE("strong_types are converted to string", "[strong_type]") {
   SECTION("unnamed strong_type") {
-    using test_t = gw::strong_type<struct test_tag, int>;
+    using test_t = gw::strong_type<int, struct test_tag>;
 
     REQUIRE(std::to_string(test_t{1}) == "1");
   }
@@ -406,7 +412,7 @@ TEST_CASE("strong_types are converted to string", "[strong_type]") {
     struct strong_type_named_tag {
       static constexpr auto name() noexcept { return "TestType"; }
     };
-    using strong_type_named = gw::strong_type<strong_type_named_tag, int>;
+    using strong_type_named = gw::strong_type<int, strong_type_named_tag>;
 
     REQUIRE(std::to_string(strong_type_named{1}) == "TestType: 1");
   }

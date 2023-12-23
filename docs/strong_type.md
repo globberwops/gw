@@ -39,8 +39,8 @@ int main() {
 
 | Parameter | Description |
 | --------- | ----------- |
-| `Tag` | tag type used to distinguish between different instantiations of `gw::strong_type` |
 | `T` | the type of the wrapped value |
+| `Tag` | tag type used to distinguish between different instantiations of `gw::strong_type` |
 
 ### Member types
 
