@@ -12,25 +12,41 @@ option(GW_BUILD_TESTS "Build tests" ${PROJECT_IS_TOP_LEVEL})
 option(GW_INSTALL "Generate install target" ON)
 
 #
-# named_type
+# gw::named_type
 #
 add_library(named_type INTERFACE)
 add_library(gw::named_type ALIAS named_type)
-target_sources(named_type INTERFACE FILE_SET HEADERS BASE_DIRS include FILES include/gw/named_type.hpp)
+target_sources(
+  named_type
+  INTERFACE FILE_SET
+            HEADERS
+            BASE_DIRS
+            include
+            FILES
+            include/gw/concepts.hpp
+            include/gw/named_type.hpp)
 target_compile_features(named_type INTERFACE cxx_std_20)
 target_include_directories(named_type INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 
 #
-# strong_type
+# gw::strong_type
 #
 add_library(strong_type INTERFACE)
 add_library(gw::strong_type ALIAS strong_type)
-target_sources(strong_type INTERFACE FILE_SET HEADERS BASE_DIRS include FILES include/gw/strong_type.hpp)
+target_sources(
+  strong_type
+  INTERFACE FILE_SET
+            HEADERS
+            BASE_DIRS
+            include
+            FILES
+            include/gw/concepts.hpp
+            include/gw/strong_type.hpp)
 target_compile_features(strong_type INTERFACE cxx_std_20)
 target_include_directories(strong_type INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 
 #
-# crtp
+# gw::crtp
 #
 add_library(crtp INTERFACE)
 add_library(gw::crtp ALIAS crtp)
@@ -67,7 +83,7 @@ if(GW_INSTALL)
     COMPATIBILITY SameMajorVersion)
 
   install(
-    TARGETS strong_type crtp
+    TARGETS named_type strong_type crtp
     EXPORT gw-targets
     FILE_SET HEADERS
     COMPONENT gw-devel)
