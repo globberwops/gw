@@ -17,6 +17,7 @@
 
 #include "gw/concepts.hpp"
 
+/// \brief GW namespace
 namespace gw {
 
 namespace detail {
@@ -27,11 +28,22 @@ struct strong_type_empty_base {
 
 }  // namespace detail
 
-/// \brief a strong type wrapper
+/// \example strong_type.cpp
+//
+/// \brief Strong type wrapper.
+//
+/// \details The class template `gw::strong_type` is a simple wrapper around a value of some type `T`. It is intended to
+/// be used to create a new type that is distinct from `T`, but which has the same representation and semantics as `T`.
+/// This is useful to distinguish between values that are conceptually different, but which have the same underlying
+/// type. For example, a `std::string` can be used to represent a person's name, but it can also be used to represent a
+/// person's address. Using `gw::strong_type` to create a `name_t` and an `address_t` allows the compiler to catch
+/// errors where a `name_t` is used where an `address_t` is expected, and vice versa.
+//
 template <typename T, typename Tag>
-struct strong_type final
+class strong_type final
     : public std::conditional_t<std::ranges::range<T>, std::ranges::view_interface<strong_type<T, Tag>>,
                                 detail::strong_type_empty_base> {
+ public:
   //
   // Public types
   //
