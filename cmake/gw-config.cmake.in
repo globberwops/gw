@@ -1,7 +1,14 @@
 @PACKAGE_INIT@
 
-if(NOT TARGET gw::StrongType)
-  include("${CMAKE_CURRENT_LIST_DIR}/gw-targets.cmake")
-endif()
+include("${CMAKE_CURRENT_LIST_DIR}/gw-targets.cmake")
 
+macro(check_available_components _NAME)
+  foreach(comp ${${_NAME}_FIND_COMPONENTS})
+    if(TARGET ${_NAME}::${comp})
+      set(${_NAME}_${comp}_FOUND TRUE)
+    endif()
+  endforeach()
+endmacro()
+
+check_available_components(gw)
 check_required_components(gw)
