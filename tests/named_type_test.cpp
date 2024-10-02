@@ -6,6 +6,7 @@
 #include <array>
 #include <catch2/catch_test_macros.hpp>
 #include <concepts>
+#include <format>
 #include <ranges>
 #include <sstream>
 #include <type_traits>
@@ -453,9 +454,15 @@ TEST_CASE("named_types are streamed", "[named_type]") {
 }
 
 TEST_CASE("named_types are converted to string", "[named_type]") {
-  SECTION("unnamed named_type") {
-    using test_t = gw::named_type<int, "TestType">;
+  using test_t = gw::named_type<int, "TestType">;
 
-    REQUIRE(std::to_string(test_t{1}) == "TestType: 1");
-  }
+  REQUIRE(std::to_string(test_t{1}) == "TestType: 1");
+}
+
+TEST_CASE("named_types are formatted", "[named_type]") {
+  using test_t = gw::named_type<int, "TestType">;
+
+  REQUIRE(std::format("{}", test_t{1}) == "TestType: 1");
+
+  STATIC_REQUIRE(std::formattable<test_t, char>);
 }

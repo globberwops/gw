@@ -1,30 +1,29 @@
 {
-  "name": "gw",
-  "dockerFile": "Dockerfile",
+  "name": "Ubuntu Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
   "capAdd": [
     "SYS_PTRACE"
   ],
   "securityOpt": [
     "seccomp=unconfined"
   ],
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.zshrc,target=/home/ubuntu/.zshrc,type=bind"
+  ],
   "remoteUser": "ubuntu",
   "customizations": {
     "vscode": {
-      "extensions": [
-        "cheshirekow.cmake-format",
-        "llvm-vs-code-extensions.vscode-clangd",
-        "ms-azuretools.vscode-docker",
-        "ms-vscode.cmake-tools",
-        "ms-vscode.cpptools",
-        "redhat.vscode-yaml",
-        "twxs.cmake"
-      ],
       "settings": {
         "C_Cpp.intelliSenseEngine": "disabled",
         "clangd.path": "clangd-18",
         "cmake.exportCompileCommandsFile": true,
         "cmake.generator": "Ninja Multi-Config",
         "cmake.installPrefix": "${workspaceFolder}/build/prefix",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2,
         "files.associations": {
           ".clang-format": "yaml",
           ".clang-tidy": "yaml",
@@ -39,6 +38,16 @@
         "files.trimFinalNewlines": true,
         "files.trimTrailingWhitespace": true
       }
-    }
+    },
+    "extensions": [
+      "cheshirekow.cmake-format",
+      "llvm-vs-code-extensions.vscode-clangd",
+      "ms-azuretools.vscode-docker",
+      "ms-vscode.cmake-tools",
+      "ms-vscode.cpptools",
+      "ms-vscode.live-server",
+      "redhat.vscode-yaml",
+      "twxs.cmake"
+    ]
   }
 }

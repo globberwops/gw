@@ -2,3 +2,4 @@
 BasedOnStyle: Google
 ColumnLimit: 120
 DerivePointerAlignment: false
+InsertNewlineAtEOF: true

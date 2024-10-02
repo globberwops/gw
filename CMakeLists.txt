@@ -25,7 +25,7 @@ target_sources(
             FILES
             include/gw/concepts.hpp
             include/gw/named_type.hpp)
-target_compile_features(named_type INTERFACE cxx_std_20)
+target_compile_features(named_type INTERFACE cxx_std_23)
 target_include_directories(named_type INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 
 #
@@ -42,7 +42,7 @@ target_sources(
             FILES
             include/gw/concepts.hpp
             include/gw/strong_type.hpp)
-target_compile_features(strong_type INTERFACE cxx_std_20)
+target_compile_features(strong_type INTERFACE cxx_std_23)
 target_include_directories(strong_type INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 
 #
@@ -51,7 +51,7 @@ target_include_directories(strong_type INTERFACE $<BUILD_INTERFACE:${PROJECT_SOU
 add_library(crtp INTERFACE)
 add_library(gw::crtp ALIAS crtp)
 target_sources(crtp INTERFACE FILE_SET HEADERS BASE_DIRS include FILES include/gw/crtp.hpp)
-target_compile_features(crtp INTERFACE cxx_std_20)
+target_compile_features(crtp INTERFACE cxx_std_23)
 target_include_directories(crtp INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 
 if(GW_BUILD_DOCS)

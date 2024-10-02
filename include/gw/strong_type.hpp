@@ -6,6 +6,7 @@
 #include <compare>
 #include <concepts>
 #include <cstddef>
+#include <format>
 #include <functional>
 #include <initializer_list>
 #include <iostream>
@@ -23,7 +24,7 @@ namespace gw {
 namespace detail {
 
 struct strong_type_empty_base {
-  constexpr auto operator<=>(const strong_type_empty_base&) const noexcept = default;
+  constexpr auto operator<=>(const strong_type_empty_base&) const noexcept -> std::strong_ordering = default;
 };
 
 }  // namespace detail
@@ -48,11 +49,8 @@ class strong_type final
   // Public types
   //
 
-  /// \brief the type of the contained value
-  using value_type = T;
-
-  /// \brief the tag type
-  using tag_type = Tag;
+  using value_type = T;  ///< the type of the contained value
+  using tag_type = Tag;  ///< the tag type
 
   //
   // Constructors
@@ -60,57 +58,57 @@ class strong_type final
 
   /// \brief constructs the gw::strong_type object
   template <typename... Args>
-  constexpr explicit strong_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
-    requires std::constructible_from<T, Args...>
-      : m_value(T{std::forward<Args>(args)...}) {}
+  constexpr explicit strong_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<value_type, Args...>)
+    requires std::constructible_from<value_type, Args...>
+      : m_value(value_type{std::forward<Args>(args)...}) {}
 
   /// \brief constructs the gw::strong_type object
   template <typename U, typename... Args>
-  constexpr strong_type(std::initializer_list<U> ilist,
-                        Args&&... args) noexcept(std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
-    requires std::constructible_from<T, std::initializer_list<U>&, Args...>
-      : m_value(T{ilist, std::forward<Args>(args)...}) {}
+  constexpr strong_type(std::initializer_list<U> ilist, Args&&... args) noexcept(
+      std::is_nothrow_constructible_v<value_type, std::initializer_list<U>&, Args...>)
+    requires std::constructible_from<value_type, std::initializer_list<U>&, Args...>
+      : m_value(value_type{ilist, std::forward<Args>(args)...}) {}
 
   //
   // Destructor
   //
 
   /// \brief destroys the contained value
-  ~strong_type() noexcept(std::is_nothrow_destructible_v<T>) = default;
+  ~strong_type() noexcept(std::is_nothrow_destructible_v<value_type>) = default;
 
   //
   // Observers
   //
 
   /// \brief accesses the contained value
-  constexpr auto operator->() const noexcept -> const T* { return &m_value; }
+  constexpr auto operator->() const noexcept -> const value_type* { return &m_value; }
 
   /// \brief accesses the contained value
-  constexpr auto operator->() noexcept -> T* { return &m_value; }
+  constexpr auto operator->() noexcept -> value_type* { return &m_value; }
 
   /// \brief accesses the contained value
-  constexpr auto operator*() const& noexcept -> const T& { return m_value; }
+  constexpr auto operator*() const& noexcept -> const value_type& { return m_value; }
 
   /// \brief accesses the contained value
-  constexpr auto operator*() & noexcept -> T& { return m_value; }
+  constexpr auto operator*() & noexcept -> value_type& { return m_value; }
 
   /// \brief accesses the contained value
-  constexpr auto operator*() const&& noexcept -> const T&& { return std::move(m_value); }
+  constexpr auto operator*() const&& noexcept -> const value_type&& { return std::move(m_value); }
 
   /// \brief accesses the contained value
-  constexpr auto operator*() && noexcept -> T&& { return std::move(m_value); }
+  constexpr auto operator*() && noexcept -> value_type&& { return std::move(m_value); }
 
   /// \brief returns the contained value
-  constexpr auto value() const& noexcept -> const T& { return m_value; }
+  constexpr auto value() const& noexcept -> const value_type& { return m_value; }
 
   /// \brief returns the contained value
-  constexpr auto value() & noexcept -> T& { return m_value; }
+  constexpr auto value() & noexcept -> value_type& { return m_value; }
 
   /// \brief returns the contained value
-  constexpr auto value() const&& noexcept -> const T&& { return std::move(m_value); }
+  constexpr auto value() const&& noexcept -> const value_type&& { return std::move(m_value); }
 
   /// \brief returns the contained value
-  constexpr auto value() && noexcept -> T&& { return std::move(m_value); }
+  constexpr auto value() && noexcept -> value_type&& { return std::move(m_value); }
 
   //
   // Monadic operations
@@ -118,34 +116,35 @@ class strong_type final
 
   /// \brief returns a gw::strong_type containing the transformed contained value
   template <typename F>
-  constexpr auto transform(F&& func) const& noexcept(noexcept(func(m_value)))
-    requires std::invocable<F, const T&>
+  constexpr auto transform(F&& func) const& noexcept(noexcept(func(m_value))) -> strong_type
+    requires std::invocable<F, const value_type&>
   {
-    return strong_type<std::remove_cv_t<std::invoke_result_t<F, const T&>>, Tag>{func(m_value)};
+    return strong_type<std::remove_cv_t<std::invoke_result_t<F, const value_type&>>, tag_type>{func(m_value)};
   }
 
   /// \brief returns a gw::strong_type containing the transformed contained value
   template <typename F>
-  constexpr auto transform(F&& func) & noexcept(noexcept(func(m_value)))
-    requires std::invocable<F, T&>
+  constexpr auto transform(F&& func) & noexcept(noexcept(func(m_value))) -> strong_type
+    requires std::invocable<F, value_type&>
   {
-    return strong_type<std::remove_cv_t<std::invoke_result_t<F, T&>>, Tag>{func(m_value)};
+    return strong_type<std::remove_cv_t<std::invoke_result_t<F, value_type&>>, tag_type>{func(m_value)};
   }
 
   /// \brief returns a gw::strong_type containing the transformed contained value
   template <typename F>
-  constexpr auto transform(F&& func) const&& noexcept(noexcept(func(m_value)))
-    requires std::invocable<F, const T&&>
+  constexpr auto transform(F&& func) const&& noexcept(noexcept(func(m_value))) -> strong_type
+    requires std::invocable<F, const value_type&&>
   {
-    return strong_type<std::remove_cv_t<std::invoke_result_t<F, const T&&>>, Tag>{func(std::move(m_value))};
+    return strong_type<std::remove_cv_t<std::invoke_result_t<F, const value_type&&>>, tag_type>{
+        func(std::move(m_value))};
   }
 
   /// \brief returns a gw::strong_type containing the transformed contained value
   template <typename F>
-  constexpr auto transform(F&& func) && noexcept(noexcept(func(m_value)))
-    requires std::invocable<F, T&&>
+  constexpr auto transform(F&& func) && noexcept(noexcept(func(m_value))) -> strong_type
+    requires std::invocable<F, value_type&&>
   {
-    return strong_type<std::remove_cv_t<std::invoke_result_t<F, T&&>>, Tag>{func(std::move(m_value))};
+    return strong_type<std::remove_cv_t<std::invoke_result_t<F, value_type&&>>, tag_type>{func(std::move(m_value))};
   }
 
   //
@@ -153,26 +152,26 @@ class strong_type final
   //
 
   /// \brief specializes the std::swap algorithm
-  constexpr void swap(strong_type& rhs) noexcept(std::is_nothrow_swappable_v<T>)
-    requires std::swappable<T>
+  constexpr void swap(strong_type& rhs) noexcept(std::is_nothrow_swappable_v<value_type>)
+    requires std::swappable<value_type>
   {
     using std::swap;
     swap(m_value, rhs.m_value);
   }
 
   /// \brief destroys any contained value
-  constexpr void reset() noexcept(std::is_nothrow_default_constructible_v<T>)
-    requires std::default_initializable<T>
+  constexpr void reset() noexcept(std::is_nothrow_default_constructible_v<value_type>)
+    requires std::default_initializable<value_type>
   {
-    m_value = T{};
+    m_value = value_type{};
   }
 
   /// \brief constructs the contained value in-place
   template <typename... Args>
-  constexpr auto emplace(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>) -> T&
-    requires std::constructible_from<T, Args...>
+  constexpr auto emplace(Args&&... args) noexcept(std::is_nothrow_constructible_v<value_type, Args...>) -> value_type&
+    requires std::constructible_from<value_type, Args...>
   {
-    m_value = T{std::forward<Args>(args)...};
+    m_value = value_type{std::forward<Args>(args)...};
     return m_value;
   }
 
@@ -182,42 +181,42 @@ class strong_type final
 
   /// \brief compares gw::strong_type objects
   constexpr auto operator==(const strong_type& rhs) const& noexcept(noexcept(m_value == rhs.m_value)) -> bool
-    requires std::equality_comparable<T>
+    requires std::equality_comparable<value_type>
   {
     return m_value == rhs.m_value;
   }
 
   /// \brief compares gw::strong_type objects
   constexpr auto operator!=(const strong_type& rhs) const& noexcept(noexcept(m_value != rhs.m_value)) -> bool
-    requires std::equality_comparable<T>
+    requires std::equality_comparable<value_type>
   {
     return m_value != rhs.m_value;
   }
 
   /// \brief compares gw::strong_type objects
   constexpr auto operator<(const strong_type& rhs) const& noexcept(noexcept(m_value < rhs.m_value)) -> bool
-    requires std::totally_ordered<T>
+    requires std::totally_ordered<value_type>
   {
     return m_value < rhs.m_value;
   }
 
   /// \brief compares gw::strong_type objects
   constexpr auto operator>(const strong_type& rhs) const& noexcept(noexcept(m_value > rhs.m_value)) -> bool
-    requires std::totally_ordered<T>
+    requires std::totally_ordered<value_type>
   {
     return m_value > rhs.m_value;
   }
 
   /// \brief compares gw::strong_type objects
   constexpr auto operator<=(const strong_type& rhs) const& noexcept(noexcept(m_value <= rhs.m_value)) -> bool
-    requires std::totally_ordered<T>
+    requires std::totally_ordered<value_type>
   {
     return m_value <= rhs.m_value;
   }
 
   /// \brief compares gw::strong_type objects
   constexpr auto operator>=(const strong_type& rhs) const& noexcept(noexcept(m_value >= rhs.m_value)) -> bool
-    requires std::totally_ordered<T>
+    requires std::totally_ordered<value_type>
   {
     return m_value >= rhs.m_value;
   }
@@ -225,7 +224,7 @@ class strong_type final
   /// \brief compares gw::strong_type objects
   constexpr auto operator<=>(const strong_type& rhs) const& noexcept(noexcept(m_value <=>
                                                                               rhs.m_value)) -> std::strong_ordering
-    requires std::three_way_comparable<T>
+    requires std::three_way_comparable<value_type>
   {
     return m_value <=> rhs.m_value;
   }
@@ -235,16 +234,16 @@ class strong_type final
   //
 
   /// \brief converts the gw::strong_type to its underlying type
-  constexpr explicit operator const T&() const& noexcept { return m_value; }
+  constexpr explicit operator const value_type&() const& noexcept { return m_value; }
 
   /// \brief converts the gw::strong_type to its underlying type
-  constexpr explicit operator T&() & noexcept { return m_value; }
+  constexpr explicit operator value_type&() & noexcept { return m_value; }
 
   /// \brief converts the gw::strong_type to its underlying type
-  constexpr explicit operator const T&&() const&& noexcept { return std::move(m_value); }
+  constexpr explicit operator const value_type&&() const&& noexcept { return std::move(m_value); }
 
   /// \brief converts the gw::strong_type to its underlying type
-  constexpr explicit operator T&&() && noexcept { return std::move(m_value); }
+  constexpr explicit operator value_type&&() && noexcept { return std::move(m_value); }
 
   //
   // Increment and decrement operators
@@ -252,7 +251,7 @@ class strong_type final
 
   /// \brief increments the contained value
   constexpr auto operator++() & noexcept(noexcept(++m_value)) -> strong_type&
-    requires incrementable<T>
+    requires incrementable<value_type>
   {
     ++m_value;
     return *this;
@@ -260,7 +259,7 @@ class strong_type final
 
   /// \brief increments the contained value
   constexpr auto operator++() && noexcept(noexcept(++m_value)) -> strong_type&&
-    requires incrementable<T>
+    requires incrementable<value_type>
   {
     ++m_value;
     return std::move(*this);
@@ -268,21 +267,21 @@ class strong_type final
 
   /// \brief increments the contained value
   constexpr auto operator++(int) & noexcept(noexcept(m_value++)) -> strong_type
-    requires incrementable<T>
+    requires incrementable<value_type>
   {
     return strong_type{m_value++};
   }
 
   /// \brief increments the contained value
   constexpr auto operator++(int) && noexcept(noexcept(m_value++)) -> strong_type
-    requires incrementable<T>
+    requires incrementable<value_type>
   {
     return strong_type{m_value++};
   }
 
   /// \brief decrements the contained value
   constexpr auto operator--() & noexcept(noexcept(--m_value)) -> strong_type&
-    requires decrementable<T>
+    requires decrementable<value_type>
   {
     --m_value;
     return *this;
@@ -290,7 +289,7 @@ class strong_type final
 
   /// \brief decrements the contained value
   constexpr auto operator--() && noexcept(noexcept(--m_value)) -> strong_type&&
-    requires decrementable<T>
+    requires decrementable<value_type>
   {
     --m_value;
     return std::move(*this);
@@ -298,14 +297,14 @@ class strong_type final
 
   /// \brief decrements the contained value
   constexpr auto operator--(int) & noexcept(noexcept(m_value--)) -> strong_type
-    requires decrementable<T>
+    requires decrementable<value_type>
   {
     return strong_type{m_value--};
   }
 
   /// \brief decrements the contained value
   constexpr auto operator--(int) && noexcept(noexcept(m_value--)) -> strong_type
-    requires decrementable<T>
+    requires decrementable<value_type>
   {
     return strong_type{m_value--};
   }
@@ -316,175 +315,175 @@ class strong_type final
 
   /// \brief affirms the contained value
   constexpr auto operator+() const& noexcept(noexcept(+m_value)) -> strong_type
-    requires std::signed_integral<T>
+    requires std::signed_integral<value_type>
   {
     return strong_type{+m_value};
   }
 
   /// \brief affirms the contained value
   constexpr auto operator+() && noexcept(noexcept(+m_value)) -> strong_type
-    requires std::signed_integral<T>
+    requires std::signed_integral<value_type>
   {
     return strong_type{+m_value};
   }
 
   /// \brief negates the contained value
   constexpr auto operator-() const& noexcept(noexcept(-m_value)) -> strong_type
-    requires std::signed_integral<T>
+    requires std::signed_integral<value_type>
   {
     return strong_type{-m_value};
   }
 
   /// \brief negates the contained value
   constexpr auto operator-() && noexcept(noexcept(-m_value)) -> strong_type
-    requires std::signed_integral<T>
+    requires std::signed_integral<value_type>
   {
     return strong_type{-m_value};
   }
 
   /// \brief adds the contained values
   constexpr auto operator+(const strong_type& rhs) const& noexcept(noexcept(m_value + rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value + rhs.m_value};
   }
 
   /// \brief adds the contained values
   constexpr auto operator+(strong_type&& rhs) const& noexcept(noexcept(m_value + rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value + rhs.m_value};
   }
 
   /// \brief adds the contained values
   constexpr auto operator+(const strong_type& rhs) && noexcept(noexcept(m_value + rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value + rhs.m_value};
   }
 
   /// \brief adds the contained values
   constexpr auto operator+(strong_type&& rhs) && noexcept(noexcept(m_value + rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value + rhs.m_value};
   }
 
   /// \brief subtracts the contained values
   constexpr auto operator-(const strong_type& rhs) const& noexcept(noexcept(m_value - rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value - rhs.m_value};
   }
 
   /// \brief subtracts the contained values
   constexpr auto operator-(strong_type&& rhs) const& noexcept(noexcept(m_value - rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value - rhs.m_value};
   }
 
   /// \brief subtracts the contained values
   constexpr auto operator-(const strong_type& rhs) && noexcept(noexcept(m_value - rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value - rhs.m_value};
   }
 
   /// \brief subtracts the contained values
   constexpr auto operator-(strong_type&& rhs) && noexcept(noexcept(m_value - rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value - rhs.m_value};
   }
 
   /// \brief multiplies the contained values
   constexpr auto operator*(const strong_type& rhs) const& noexcept(noexcept(m_value * rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value * rhs.m_value};
   }
 
   /// \brief multiplies the contained values
   constexpr auto operator*(strong_type&& rhs) const& noexcept(noexcept(m_value * rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value * rhs.m_value};
   }
 
   /// \brief multiplies the contained values
   constexpr auto operator*(const strong_type& rhs) && noexcept(noexcept(m_value * rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value * rhs.m_value};
   }
 
   /// \brief multiplies the contained values
   constexpr auto operator*(strong_type&& rhs) && noexcept(noexcept(m_value * rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value * rhs.m_value};
   }
 
   /// \brief devides the contained values
   constexpr auto operator/(const strong_type& rhs) const& noexcept(noexcept(m_value / rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value / rhs.m_value};
   }
 
   /// \brief devides the contained values
   constexpr auto operator/(strong_type&& rhs) const& noexcept(noexcept(m_value / rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value / rhs.m_value};
   }
 
   /// \brief devides the contained values
   constexpr auto operator/(const strong_type& rhs) && noexcept(noexcept(m_value / rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value / rhs.m_value};
   }
 
   /// \brief devides the contained values
   constexpr auto operator/(strong_type&& rhs) && noexcept(noexcept(m_value / rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value / rhs.m_value};
   }
 
   /// \brief calculates the remainder of the contained values
   constexpr auto operator%(const strong_type& rhs) const& noexcept(noexcept(m_value % rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value % rhs.m_value};
   }
 
   /// \brief calculates the remainder of the contained values
   constexpr auto operator%(strong_type&& rhs) const& noexcept(noexcept(m_value % rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value % rhs.m_value};
   }
 
   /// \brief calculates the remainder of the contained values
   constexpr auto operator%(const strong_type& rhs) && noexcept(noexcept(m_value % rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value % rhs.m_value};
   }
 
   /// \brief calculates the remainder of the contained values
   constexpr auto operator%(strong_type&& rhs) && noexcept(noexcept(m_value % rhs.m_value)) -> strong_type
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     return strong_type{m_value % rhs.m_value};
   }
 
   /// \brief adds the contained values and assigns the result
   constexpr auto operator+=(const strong_type& rhs) & noexcept(noexcept(m_value += rhs.m_value)) -> strong_type&
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     m_value += rhs.m_value;
     return *this;
@@ -492,7 +491,7 @@ class strong_type final
 
   /// \brief adds the contained values and assigns the result
   constexpr auto operator+=(strong_type&& rhs) & noexcept(noexcept(m_value += rhs.m_value)) -> strong_type&
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     m_value += rhs.m_value;
     return *this;
@@ -500,7 +499,7 @@ class strong_type final
 
   /// \brief subtracts the contained values and assigns the result
   constexpr auto operator-=(const strong_type& rhs) & noexcept(noexcept(m_value -= rhs.m_value)) -> strong_type&
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     m_value -= rhs.m_value;
     return *this;
@@ -508,7 +507,7 @@ class strong_type final
 
   /// \brief subtracts the contained values and assigns the result
   constexpr auto operator-=(strong_type&& rhs) & noexcept(noexcept(m_value -= rhs.m_value)) -> strong_type&
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     m_value -= rhs.m_value;
     return *this;
@@ -516,7 +515,7 @@ class strong_type final
 
   /// \brief multiplies the contained values and assigns the result
   constexpr auto operator*=(const strong_type& rhs) & noexcept(noexcept(m_value *= rhs.m_value)) -> strong_type&
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     m_value *= rhs.m_value;
     return *this;
@@ -524,7 +523,7 @@ class strong_type final
 
   /// \brief multiplies the contained values and assigns the result
   constexpr auto operator*=(strong_type&& rhs) & noexcept(noexcept(m_value *= rhs.m_value)) -> strong_type&
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     m_value *= rhs.m_value;
     return *this;
@@ -532,7 +531,7 @@ class strong_type final
 
   /// \brief devides the contained values and assigns the result
   constexpr auto operator/=(const strong_type& rhs) & noexcept(noexcept(m_value /= rhs.m_value)) -> strong_type&
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     m_value /= rhs.m_value;
     return *this;
@@ -540,7 +539,7 @@ class strong_type final
 
   /// \brief devides the contained values and assigns the result
   constexpr auto operator/=(strong_type&& rhs) & noexcept(noexcept(m_value /= rhs.m_value)) -> strong_type&
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     m_value /= rhs.m_value;
     return *this;
@@ -548,7 +547,7 @@ class strong_type final
 
   /// \brief calculates the remainder of the contained values and assigns the result
   constexpr auto operator%=(const strong_type& rhs) & noexcept(noexcept(m_value %= rhs.m_value)) -> strong_type&
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     m_value %= rhs.m_value;
     return *this;
@@ -556,7 +555,7 @@ class strong_type final
 
   /// \brief calculates the remainder of the contained values and assigns the result
   constexpr auto operator%=(strong_type&& rhs) & noexcept(noexcept(m_value %= rhs.m_value)) -> strong_type&
-    requires arithmetic<T>
+    requires arithmetic<value_type>
   {
     m_value %= rhs.m_value;
     return *this;
@@ -568,154 +567,154 @@ class strong_type final
 
   /// \brief inverts the contained value
   constexpr auto operator~() const& noexcept(noexcept(~m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{~m_value};
   }
 
   /// \brief performs binary AND on the contained values
   constexpr auto operator&(const strong_type& rhs) const& noexcept(noexcept(m_value & rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value & rhs.m_value};
   }
 
   /// \brief performs binary AND on the contained values
   constexpr auto operator&(strong_type&& rhs) const& noexcept(noexcept(m_value & rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value & rhs.m_value};
   }
 
   /// \brief performs binary AND on the contained values
   constexpr auto operator&(const strong_type& rhs) && noexcept(noexcept(m_value & rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value & rhs.m_value};
   }
 
   /// \brief performs binary AND on the contained values
   constexpr auto operator&(strong_type&& rhs) && noexcept(noexcept(m_value & rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value & rhs.m_value};
   }
 
   /// \brief performs binary OR on the contained values
   constexpr auto operator|(const strong_type& rhs) const& noexcept(noexcept(m_value | rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value | rhs.m_value};
   }
 
   /// \brief performs binary OR on the contained values
   constexpr auto operator|(strong_type&& rhs) const& noexcept(noexcept(m_value | rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value | rhs.m_value};
   }
 
   /// \brief performs binary OR on the contained values
   constexpr auto operator|(const strong_type& rhs) && noexcept(noexcept(m_value | rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value | rhs.m_value};
   }
 
   /// \brief performs binary OR on the contained values
   constexpr auto operator|(strong_type&& rhs) && noexcept(noexcept(m_value | rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value | rhs.m_value};
   }
 
   /// \brief performs binary XOR on the contained values
   constexpr auto operator^(const strong_type& rhs) const& noexcept(noexcept(m_value ^ rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value ^ rhs.m_value};
   }
 
   /// \brief performs binary XOR on the contained values
   constexpr auto operator^(strong_type&& rhs) const& noexcept(noexcept(m_value ^ rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value ^ rhs.m_value};
   }
 
   /// \brief performs binary XOR on the contained values
   constexpr auto operator^(const strong_type& rhs) && noexcept(noexcept(m_value ^ rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value ^ rhs.m_value};
   }
 
   /// \brief performs binary XOR on the contained values
   constexpr auto operator^(strong_type&& rhs) && noexcept(noexcept(m_value ^ rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value ^ rhs.m_value};
   }
 
   /// \brief performs binary left shift on the contained values
   constexpr auto operator<<(const strong_type& rhs) const& noexcept(noexcept(m_value << rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value << rhs.m_value};
   }
 
   /// \brief performs binary left shift on the contained values
   constexpr auto operator<<(strong_type&& rhs) const& noexcept(noexcept(m_value << rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value << rhs.m_value};
   }
 
   /// \brief performs binary left shift on the contained values
   constexpr auto operator<<(const strong_type& rhs) && noexcept(noexcept(m_value << rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value << rhs.m_value};
   }
 
   /// \brief performs binary left shift on the contained values
   constexpr auto operator<<(strong_type&& rhs) && noexcept(noexcept(m_value << rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value << rhs.m_value};
   }
 
   /// \brief performs binary right shift on the contained values
   constexpr auto operator>>(const strong_type& rhs) const& noexcept(noexcept(m_value >> rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value >> rhs.m_value};
   }
 
   /// \brief performs binary right shift on the contained values
   constexpr auto operator>>(strong_type&& rhs) const& noexcept(noexcept(m_value >> rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value >> rhs.m_value};
   }
 
   /// \brief performs binary right shift on the contained values
   constexpr auto operator>>(const strong_type& rhs) && noexcept(noexcept(m_value >> rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value >> rhs.m_value};
   }
 
   /// \brief performs binary right shift on the contained values
   constexpr auto operator>>(strong_type&& rhs) && noexcept(noexcept(m_value >> rhs.m_value)) -> strong_type
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     return strong_type{m_value >> rhs.m_value};
   }
 
   /// \brief performs binary AND on the contained values and assigns the result
   constexpr auto operator&=(const strong_type& rhs) & noexcept(noexcept(m_value &= rhs.m_value)) -> strong_type&
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     m_value &= rhs.m_value;
     return *this;
@@ -723,7 +722,7 @@ class strong_type final
 
   /// \brief performs binary AND on the contained values and assigns the result
   constexpr auto operator&=(strong_type&& rhs) & noexcept(noexcept(m_value &= rhs.m_value)) -> strong_type&
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     m_value &= rhs.m_value;
     return *this;
@@ -731,7 +730,7 @@ class strong_type final
 
   /// \brief performs binary OR on the contained values and assigns the result
   constexpr auto operator|=(const strong_type& rhs) & noexcept(noexcept(m_value |= rhs.m_value)) -> strong_type&
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     m_value |= rhs.m_value;
     return *this;
@@ -739,7 +738,7 @@ class strong_type final
 
   /// \brief performs binary OR on the contained values and assigns the result
   constexpr auto operator|=(strong_type&& rhs) & noexcept(noexcept(m_value |= rhs.m_value)) -> strong_type&
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     m_value |= rhs.m_value;
     return *this;
@@ -747,7 +746,7 @@ class strong_type final
 
   /// \brief performs binary XOR on the contained values and assigns the result
   constexpr auto operator^=(const strong_type& rhs) & noexcept(noexcept(m_value ^= rhs.m_value)) -> strong_type&
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     m_value ^= rhs.m_value;
     return *this;
@@ -755,7 +754,7 @@ class strong_type final
 
   /// \brief performs binary XOR on the contained values and assigns the result
   constexpr auto operator^=(strong_type&& rhs) & noexcept(noexcept(m_value ^= rhs.m_value)) -> strong_type&
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     m_value ^= rhs.m_value;
     return *this;
@@ -763,7 +762,7 @@ class strong_type final
 
   /// \brief performs binary left shift on the contained values and assigns the result
   constexpr auto operator<<=(const strong_type& rhs) & noexcept(noexcept(m_value <<= rhs.m_value)) -> strong_type&
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     m_value <<= rhs.m_value;
     return *this;
@@ -771,7 +770,7 @@ class strong_type final
 
   /// \brief performs binary left shift on the contained values and assigns the result
   constexpr auto operator<<=(strong_type&& rhs) & noexcept(noexcept(m_value <<= rhs.m_value)) -> strong_type&
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     m_value <<= rhs.m_value;
     return *this;
@@ -779,7 +778,7 @@ class strong_type final
 
   /// \brief performs binary right shift on the contained values and assigns the result
   constexpr auto operator>>=(const strong_type& rhs) & noexcept(noexcept(m_value >>= rhs.m_value)) -> strong_type&
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     m_value >>= rhs.m_value;
     return *this;
@@ -787,7 +786,7 @@ class strong_type final
 
   /// \brief performs binary right shift on the contained values and assigns the result
   constexpr auto operator>>=(strong_type&& rhs) & noexcept(noexcept(m_value >>= rhs.m_value)) -> strong_type&
-    requires std::unsigned_integral<T>
+    requires std::unsigned_integral<value_type>
   {
     m_value >>= rhs.m_value;
     return *this;
@@ -799,28 +798,28 @@ class strong_type final
 
   /// \brief returns an iterator to the beginning of the contained value
   constexpr auto begin() const noexcept(noexcept(std::ranges::begin(m_value)))
-    requires std::ranges::range<T>
+    requires std::ranges::range<value_type>
   {
     return std::ranges::begin(m_value);
   }
 
   /// \brief returns an iterator to the beginning of the contained value
   constexpr auto begin() noexcept(noexcept(std::ranges::begin(m_value)))
-    requires std::ranges::range<T>
+    requires std::ranges::range<value_type>
   {
     return std::ranges::begin(m_value);
   }
 
   /// \brief returns an iterator to the end of the contained value
   constexpr auto end() const noexcept(noexcept(std::ranges::end(m_value)))
-    requires std::ranges::range<T>
+    requires std::ranges::range<value_type>
   {
     return std::ranges::end(m_value);
   }
 
   /// \brief returns an iterator to the end of the contained value
   constexpr auto end() noexcept(noexcept(std::ranges::end(m_value)))
-    requires std::ranges::range<T>
+    requires std::ranges::range<value_type>
   {
     return std::ranges::end(m_value);
   }
@@ -832,7 +831,7 @@ class strong_type final
   /// \brief inserts formatted data
   friend inline auto operator<<(std::ostream& ostream,
                                 const strong_type& rhs) noexcept(noexcept(ostream << rhs.m_value)) -> std::ostream&
-    requires ostreamable<T>
+    requires ostreamable<value_type>
   {
     return ostream << rhs.m_value;
   }
@@ -840,13 +839,13 @@ class strong_type final
   /// \brief extracts formatted data
   friend inline auto operator>>(std::istream& istream,
                                 strong_type& rhs) noexcept(noexcept(istream >> rhs.m_value)) -> std::istream&
-    requires istreamable<T>
+    requires istreamable<value_type>
   {
     return istream >> rhs.m_value;
   }
 
  private:
-  T m_value{};
+  value_type m_value{};
 };
 
 //
@@ -906,14 +905,42 @@ struct hash<::gw::strong_type<T, Tag>> {
 template <::gw::string_convertable T, typename Tag>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 [[nodiscard]] auto inline to_string(const ::gw::strong_type<T, Tag>& strong_type) -> string {
+  if constexpr (::gw::named<Tag>) {
+    return string{Tag::name()} + ": " + to_string(strong_type.value());
+  }
+
   return to_string(strong_type.value());
 }
 
-/// \brief string conversion support for gw::strong_type
-template <::gw::string_convertable T, ::gw::named Tag>
+/// \brief formats the gw::strong_type object
+/// \tparam T the type of the contained value
+/// \tparam Tag the tag type
+/// \tparam CharT the character type
+template <std::formattable<char> T, typename Tag, class CharT>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
-[[nodiscard]] auto inline to_string(const ::gw::strong_type<T, Tag>& strong_type) -> string {
-  return string{Tag::name()} + ": " + to_string(strong_type.value());
-}
+struct formatter<::gw::strong_type<T, Tag>, CharT> {
+  /// \brief parses the format string
+  /// \tparam ParseContext the format context type
+  /// \param context the format context
+  /// \return the iterator to the beginning of the format context
+  template <class ParseContext>
+  constexpr auto parse(ParseContext& context) -> ParseContext::iterator {
+    return context.begin();
+  }
+
+  /// \brief formats the gw::strong_type object
+  /// \tparam FormatContext the format context type
+  /// \param strong_type the gw::strong_type object
+  /// \param context the format context
+  /// \return the
+  template <class FormatContext>
+  auto format(const ::gw::strong_type<T, Tag>& strong_type, FormatContext& context) const -> FormatContext::iterator {
+    if constexpr (::gw::named<Tag>) {
+      return format_to(context.out(), "{}: {}", Tag::name(), strong_type.value());
+    }
+
+    return format_to(context.out(), "{}", strong_type.value());
+  }
+};
 
 }  // namespace std

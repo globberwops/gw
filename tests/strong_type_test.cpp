@@ -6,6 +6,7 @@
 #include <array>
 #include <catch2/catch_test_macros.hpp>
 #include <concepts>
+#include <format>
 #include <ranges>
 #include <sstream>
 #include <type_traits>
@@ -447,8 +448,29 @@ TEST_CASE("strong_types are converted to string", "[strong_type]") {
     struct strong_type_named_tag {
       static constexpr auto name() noexcept { return "TestType"; }
     };
-    using strong_type_named = gw::strong_type<int, strong_type_named_tag>;
+    using test_t = gw::strong_type<int, strong_type_named_tag>;
 
-    REQUIRE(std::to_string(strong_type_named{1}) == "TestType: 1");
+    REQUIRE(std::to_string(test_t{1}) == "TestType: 1");
+  }
+}
+
+TEST_CASE("strong_types are formatted", "[strong_type]") {
+  SECTION("unnamed strong_type") {
+    using test_t = gw::strong_type<int, struct test_tag>;
+
+    REQUIRE(std::format("{}", test_t{1}) == "1");
+
+    STATIC_REQUIRE(std::formattable<test_t, char>);
+  }
+
+  SECTION("named strong_type") {
+    struct strong_type_named_tag {
+      static constexpr auto name() noexcept { return "TestType"; }
+    };
+    using test_t = gw::strong_type<int, strong_type_named_tag>;
+
+    REQUIRE(std::format("{}", test_t{1}) == "TestType: 1");
+
+    STATIC_REQUIRE(std::formattable<test_t, char>);
   }
 }

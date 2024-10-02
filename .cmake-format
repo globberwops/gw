@@ -1,3 +1,14 @@
 ---
+parse:
+  additional_commands:
+    target_precompile_headers:
+      pargs:
+        nargs: 1
+      flags: []
+      kwargs:
+        INTERFACE: '*'
+        PUBLIC: '*'
+        PRIVATE: '*'
+        REUSE_FROM: '*'
 format:
   line_width: 120
