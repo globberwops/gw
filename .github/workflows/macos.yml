@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-14
 
     steps:
     - name: Checkout repository
@@ -26,8 +26,8 @@ jobs:
       run: >
         cmake
         -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=g++-12
-        -DCMAKE_C_COMPILER=gcc-12
+        -DCMAKE_CXX_COMPILER=g++-14
+        -DCMAKE_C_COMPILER=gcc-14
         -DCMAKE_BUILD_TYPE=${{ steps.strings.outputs.build-type }}
         -S ${{ github.workspace }}
 
