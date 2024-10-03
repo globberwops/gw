@@ -1,4 +1,6 @@
 InheritParentConfig: true
 Checks: >
   -cppcoreguidelines-avoid-do-while,
-  -readability-function-cognitive-complexity
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-function-cognitive-complexity,
+  -readability-magic-numbers

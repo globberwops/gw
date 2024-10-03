@@ -10,6 +10,14 @@ list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(Catch)
 
 #
+# inplace_string
+#
+add_executable(inplace_string_test)
+target_sources(inplace_string_test PRIVATE inplace_string_test.cpp)
+target_link_libraries(inplace_string_test PRIVATE Catch2::Catch2WithMain gw::inplace_string)
+catch_discover_tests(inplace_string_test)
+
+#
 # named_type
 #
 add_executable(named_type_test)

@@ -12,6 +12,19 @@ option(GW_BUILD_TESTS "Build tests" ${PROJECT_IS_TOP_LEVEL})
 option(GW_INSTALL "Generate install target" ON)
 
 #
+# gw::inplace_string
+#
+add_library(inplace_string INTERFACE)
+add_library(gw::inplace_string ALIAS inplace_string)
+target_sources(
+  inplace_string
+  INTERFACE FILE_SET HEADERS BASE_DIRS include FILES
+            # include/gw/concepts.hpp
+            include/gw/inplace_string.hpp)
+target_compile_features(inplace_string INTERFACE cxx_std_23)
+target_include_directories(inplace_string INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+
+#
 # gw::named_type
 #
 add_library(named_type INTERFACE)
