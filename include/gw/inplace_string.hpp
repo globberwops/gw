@@ -8,7 +8,9 @@
 #include <cstddef>
 #include <iterator>
 #include <stdexcept>
+#include <string>
 #include <string_view>
+#include <utility>
 
 /// \brief GW namespace
 ///
@@ -53,33 +55,35 @@ class basic_inplace_string {
 
   /// \brief Default constructor.
   ///
-  constexpr basic_inplace_string() noexcept { m_data.fill('\0'); }
+  constexpr basic_inplace_string() noexcept = default;
 
   /// \brief Construct the string with count copies of character ch.
   ///
   /// \param count The number of characters to initialize the string with.
   /// \param ch The character to initialize the string with.
+  /// \throw std::length_error If count is greater than max_size.
   ///
   constexpr basic_inplace_string(size_type count, CharT ch) {
     if (count > capacity()) {
-      throw std::length_error{"basic_inplace_string::basic_inplace_string"};
+      throw std::length_error{"basic_inplace_string::basic_inplace_string: count (which is " + std::to_string(count) +
+                              ") > max_size (which is " + std::to_string(max_size()) + ")"};
     }
 
-    m_data.fill('\0');
     std::fill_n(begin(), count, ch);
   }
 
   /// \brief Construct the string with the characters from the character string pointed to by s.
   ///
   /// \param s The character string to initialize the string with.
+  /// \throw std::length_error If the size of the string would exceed max_size.
   ///
   constexpr explicit basic_inplace_string(const CharT* s) {
     const auto k_length = std::char_traits<CharT>::length(s);
     if (k_length > capacity()) {
-      throw std::length_error{"basic_inplace_string::basic_inplace_string"};
+      throw std::length_error{"basic_inplace_string::basic_inplace_string: s (which is " + std::to_string(k_length) +
+                              ") > max_size (which is " + std::to_string(max_size()) + ")"};
     }
 
-    m_data.fill('\0');
     std::copy_n(s, k_length, begin());
   }
 
@@ -100,7 +104,9 @@ class basic_inplace_string {
   /// \throw std::out_of_range If pos is out of range.
   ///
   constexpr auto at(size_type pos) -> reference {
-    return pos < size() ? m_data[pos + 1UZ] : throw std::out_of_range{"basic_inplace_string::at"};
+    return pos < size() ? m_data[pos]
+                        : throw std::out_of_range{"basic_inplace_string::at: pos (which is " + std::to_string(pos) +
+                                                  ") >= max_size (which is " + std::to_string(max_size()) + ")"};
   }
 
   /// \brief Get a const reference to the character at the specified position.
@@ -110,7 +116,9 @@ class basic_inplace_string {
   /// \throw std::out_of_range If pos is out of range.
   ///
   constexpr auto at(size_type pos) const -> const_reference {
-    return pos < size() ? m_data[pos + 1UZ] : throw std::out_of_range{"basic_inplace_string::at"};
+    return pos < size() ? m_data[pos]
+                        : throw std::out_of_range{"basic_inplace_string::at: pos (which is " + std::to_string(pos) +
+                                                  ") >= max_size (which is " + std::to_string(max_size()) + ")"};
   }
 
   /// \brief Get a reference to the character at the specified position.
@@ -118,26 +126,26 @@ class basic_inplace_string {
   /// \param pos The position of the character to get.
   /// \return A reference to the character at the specified position.
   ///
-  constexpr auto operator[](size_type pos) noexcept -> reference { return m_data[pos + 1UZ]; }
+  constexpr auto operator[](size_type pos) noexcept -> reference { return m_data[pos]; }
 
   /// \brief Get a const reference to the character at the specified position.
   ///
   /// \param pos The position of the character to get.
   /// \return A const reference to the character at the specified position.
   ///
-  constexpr auto operator[](size_type pos) const noexcept -> const_reference { return m_data[pos + 1UZ]; }
+  constexpr auto operator[](size_type pos) const noexcept -> const_reference { return m_data[pos]; }
 
   /// \brief Get a reference to the first character in the string.
   ///
   /// \return A reference to the first character in the string.
   ///
-  constexpr auto front() noexcept -> reference { return m_data[1UZ]; }
+  constexpr auto front() noexcept -> reference { return m_data[0UZ]; }
 
   /// \brief Get a const reference to the first character in the string.
   ///
   /// \return A const reference to the first character in the string.
   ///
-  constexpr auto front() const noexcept -> const_reference { return m_data[1UZ]; }
+  constexpr auto front() const noexcept -> const_reference { return m_data[0UZ]; }
 
   /// \brief Get a reference to the last character in the string.
   ///
@@ -149,25 +157,25 @@ class basic_inplace_string {
   ///
   /// \return A const reference to the last character in the string.
   ///
-  constexpr auto back() const noexcept -> const_reference { return m_data[size()]; }
+  constexpr auto back() const noexcept -> const_reference { return m_data[size() - 1UZ]; }
 
   /// \brief Get a pointer to the underlying character array.
   ///
   /// \return A pointer to the underlying character array.
   ///
-  constexpr auto data() noexcept -> pointer { return std::next(m_data.data()); }
+  constexpr auto data() noexcept -> pointer { return m_data.data(); }
 
   /// \brief Get a const pointer to the underlying character array.
   ///
   /// \return A const pointer to the underlying character array.
   ///
-  constexpr auto data() const noexcept -> const_pointer { return std::next(m_data.data()); }
+  constexpr auto data() const noexcept -> const_pointer { return m_data.data(); }
 
   /// \brief Get a const pointer to the underlying character array.
   ///
   /// \return A const pointer to the underlying character array.
   ///
-  constexpr auto c_str() const noexcept -> const_pointer { return std::next(m_data.data()); }
+  constexpr auto c_str() const noexcept -> const_pointer { return m_data.data(); }
 
   /// \brief Get a string view of the string.
   ///
@@ -259,7 +267,7 @@ class basic_inplace_string {
   ///
   /// \return True if the string is empty, false otherwise.
   ///
-  [[nodiscard]] constexpr auto empty() const noexcept -> bool { return m_data[1] == '\0'; }
+  [[nodiscard]] constexpr auto empty() const noexcept -> bool { return size() == 0UZ; }
 
   /// \brief Get the size of the string.
   ///
@@ -277,13 +285,31 @@ class basic_inplace_string {
   ///
   /// \return The maximum size of the string.
   ///
-  [[nodiscard]] constexpr auto max_size() const noexcept -> size_type { return N; }
+  [[nodiscard]] inline constexpr auto max_size() const noexcept -> size_type { return N; }
+
+  /// \brief Reserve storage for the string.
+  ///
+  /// \param new_cap The new capacity of the string.
+  /// \throw std::length_error If new_cap is greater than max_size.
+  ///
+  constexpr void reserve(size_type new_cap) {
+    if (new_cap > max_size()) {
+      throw std::length_error{"basic_inplace_string::reserve: new_cap (which is " + std::to_string(new_cap) +
+                              ") > max_size (which is " + std::to_string(max_size()) + ")"};
+    }
+  }
 
   /// \brief Get the capacity of the string.
   ///
   /// \return The capacity of the string.
   ///
-  [[nodiscard]] constexpr auto capacity() const noexcept -> size_type { return N; }
+  [[nodiscard]] constexpr auto capacity() const noexcept -> size_type { return max_size(); }
+
+  /// \brief Shrink the capacity of the string to fit its size.
+  ///
+  /// \note This function does nothing.
+  ///
+  constexpr void shrink_to_fit() {};
 
   //
   // Modifiers
@@ -298,11 +324,13 @@ class basic_inplace_string {
   /// \param index The position to insert the characters at.
   /// \param count The number of characters to insert.
   /// \param ch The character to insert.
-  /// \throw std::length_error If the size of the string would exceed the capacity.
+  /// \throw std::length_error If the size of the string would exceed max_size.
   ///
   constexpr void insert(size_type index, size_type count, CharT ch) {
-    if (size() + count > N) {
-      throw std::length_error{"basic_inplace_string::insert"};
+    if (size() + count > max_size()) {
+      throw std::length_error{"basic_inplace_string::insert: size() + count (which is " +
+                              std::to_string(size() + count) + ") > max_size (which is " + std::to_string(max_size()) +
+                              ")"};
     }
 
     std::copy_backward(begin() + index, end(), end() + count);
@@ -317,11 +345,12 @@ class basic_inplace_string {
   ///
   constexpr void erase(size_type index = 0UZ, size_type count = npos) {
     if (index + count > size()) {
-      throw std::out_of_range{"basic_inplace_string::erase"};
+      throw std::out_of_range{"basic_inplace_string::erase: index + count (which is " + std::to_string(index + count) +
+                              ") > size() (which is " + std::to_string(size()) + ")"};
     }
 
     std::copy(std::next(begin(), index + count), end(), std::next(begin(), index));
-    m_data[1 + size() - count] = '\0';  // Add null terminator at the new end
+    m_data[size() - count] = '\0';  // Add null terminator at the new end
   }
 
   /// \brief Append a character to the end of the string.
@@ -330,45 +359,155 @@ class basic_inplace_string {
   /// \throw std::length_error If the size of the string would exceed the capacity.
   ///
   constexpr void push_back(CharT ch) {
-    if (size() + 1UZ > N) {
-      throw std::length_error{"basic_inplace_string::push_back"};
+    if (size() + 1UZ > max_size()) {
+      throw std::length_error{"basic_inplace_string::push_back: size() + 1 (which is " + std::to_string(size() + 1UZ) +
+                              ") > N (which is " + std::to_string(N) + ")"};
     }
 
-    m_data[size() + 1UZ] = ch;
-    m_data[size() + 2UZ] = '\0';  // Add null terminator at the new end
+    m_data[size()] = ch;
+    m_data[size() + 1UZ] = '\0';  // Add null terminator at the new end
   }
 
   /// \brief Remove the last character from the string.
   ///
-  constexpr void pop_back() noexcept { m_data[size()] = '\0'; }
+  constexpr void pop_back() noexcept { m_data[size() - 1UZ] = '\0'; }
 
   /// \brief Append a string to the end of the string.
   ///
   /// \param str The string to append.
-  /// \throw std::length_error If the size of the string would exceed the capacity.
+  /// \throw std::length_error If the size of the string would exceed max_size.
   ///
   template <std::size_t N2>
   constexpr void append(const basic_inplace_string<N2, CharT>& str) {
-    if (size() + str.size() > N) {
-      throw std::length_error{"basic_inplace_string::append"};
+    if (size() + str.size() > max_size()) {
+      throw std::length_error{"basic_inplace_string::append: size() + str.size() (which is " +
+                              std::to_string(size() + str.size()) + ") > max_size (which is " +
+                              std::to_string(max_size()) + ")"};
     }
 
     std::copy(str.begin(), str.end(), end());
+    m_data[size() + 1UZ] = '\0';  // Add null terminator at the new end
   }
 
   /// \brief Append a string to the end of the string.
   ///
   /// \param str The string to append.
-  /// \throw std::length_error If the size of the string would exceed the capacity.
+  /// \throw std::length_error If the size of the string would exceed max_size.
   ///
   template <std::size_t N2>
   constexpr auto operator+=(const basic_inplace_string<N2, CharT>& str) -> basic_inplace_string& {
-    if (size() + str.size() > N) {
-      throw std::length_error{"basic_inplace_string::operator+="};
+    if (size() + str.size() > max_size()) {
+      throw std::length_error{"basic_inplace_string::operator+=: size() + str.size() (which is " +
+                              std::to_string(size() + str.size()) + ") > max_size (which is " +
+                              std::to_string(max_size()) + ")"};
     }
 
     std::copy(str.begin(), str.end(), end());
     return *this;
+  }
+
+  constexpr void resize(size_type count) {
+    if (count > max_size()) {
+      throw std::length_error{"basic_inplace_string::resize: count (which is " + std::to_string(count) +
+                              ") > max_size (which is " + std::to_string(max_size()) + ")"};
+    }
+
+    if (count > size()) {
+      std::fill_n(end(), count - size(), '\0');
+    }
+
+    m_data[count] = '\0';  // Add null terminator at the new end
+  }
+
+  constexpr void resize(size_type count, CharT ch) {
+    if (count > max_size()) {
+      throw std::length_error{"basic_inplace_string::resize: count (which is " + std::to_string(count) +
+                              ") > max_size (which is " + std::to_string(max_size()) + ")"};
+    }
+
+    if (count > size()) {
+      std::fill_n(end(), count - size(), ch);
+    }
+
+    m_data[count] = '\0';  // Add null terminator at the new end
+  }
+
+  /// \brief Swap the string with another string.
+  ///
+  /// \param other The string to swap with.
+  ///
+  constexpr void swap(basic_inplace_string& other) noexcept {
+    using std::swap;
+    swap(m_data, other.m_data);
+  }
+
+  //
+  // Search
+  //
+
+  /// \brief Find the first occurrence of an inplace_string in the string.
+  ///
+  /// \tparam N2 The size of the inplace_string to find.
+  /// \param str The inplace_string to find.
+  /// \param pos The position to start searching from.
+  /// \return The position of the first occurrence of the inplace_string, or npos if the inplace_string is not found.
+  ///
+  template <std::size_t N2>
+  constexpr auto find(const basic_inplace_string<N2, CharT>& str, size_type pos = 0UZ) const noexcept -> size_type {
+    return find(static_cast<std::string_view>(str), pos);
+  }
+
+  /// \brief Find the first occurrence of a string view in the string.
+  ///
+  /// \param str The string view to find.
+  /// \param pos The position to start searching from.
+  /// \return The position of the first occurrence of the string view, or npos if the string view is not found.
+  ///
+  constexpr auto find(std::basic_string_view<CharT> str, size_type pos = 0UZ) const noexcept -> size_type {
+    return static_cast<std::string_view>(*this).find(str, pos);
+  }
+
+  /// \brief Find the first occurrence of a character string in the string.
+  ///
+  /// \param str The character string to find.
+  /// \param pos The position to start searching from.
+  /// \return The position of the first occurrence of the character string, or npos if the character string is not
+  /// found.
+  ///
+  constexpr auto find(const char* str, size_type pos = 0UZ) const noexcept -> size_type {
+    return static_cast<std::string_view>(*this).find(str, pos);
+  }
+
+  /// \brief Find the last occurrence of an inplace_string in the string.
+  ///
+  /// \tparam N2 The size of the inplace_string to find.
+  /// \param str The inplace_string to find.
+  /// \param pos The position to start searching from.
+  /// \return The position of the last occurrence of the inplace_string, or npos if the inplace_string is not found.
+  ///
+  template <std::size_t N2>
+  constexpr auto rfind(const basic_inplace_string<N2, CharT>& str, size_type pos = npos) const noexcept -> size_type {
+    return rfind(static_cast<std::string_view>(str), pos);
+  }
+
+  /// \brief Find the last occurrence of a string view in the string.
+  ///
+  /// \param str The string view to find.
+  /// \param pos The position to start searching from.
+  /// \return The position of the last occurrence of the string view, or npos if the string view is not found.
+  ///
+  constexpr auto rfind(std::basic_string_view<CharT> str, size_type pos = npos) const noexcept -> size_type {
+    return static_cast<std::string_view>(*this).rfind(str, pos);
+  }
+
+  /// \brief Find the last occurrence of a character string in the string.
+  ///
+  /// \param str The character string to find.
+  /// \param pos The position to start searching from.
+  /// \return The position of the last occurrence of the character string, or npos if the character string is not found.
+  ///
+  constexpr auto rfind(const char* str, size_type pos = npos) const noexcept -> size_type {
+    return static_cast<std::string_view>(*this).rfind(str, pos);
   }
 
   //
@@ -401,7 +540,7 @@ class basic_inplace_string {
   /// \return True if the strings are equal, false otherwise.
   ///
   friend constexpr auto operator==(const basic_inplace_string& lhs, const basic_inplace_string& rhs) noexcept -> bool {
-    return static_cast<std::string_view>(lhs) == static_cast<std::string_view>(rhs);
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
   }
 
   /// \brief Compare the string to a string view.
@@ -412,7 +551,7 @@ class basic_inplace_string {
   ///
   friend constexpr auto operator==(const basic_inplace_string& lhs,
                                    std::basic_string_view<value_type> rhs) noexcept -> bool {
-    return static_cast<std::string_view>(lhs) == rhs;
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
   }
 
   /// \brief Compare the string to a string view.
@@ -423,7 +562,7 @@ class basic_inplace_string {
   ///
   friend constexpr auto operator==(std::basic_string_view<value_type> lhs,
                                    const basic_inplace_string& rhs) noexcept -> bool {
-    return lhs == static_cast<std::string_view>(rhs);
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
   }
 
   /// \brief Compares the string to a character string.
@@ -445,7 +584,7 @@ class basic_inplace_string {
   }
 
  private:
-  std::array<value_type, N + 2> m_data{};
+  std::array<value_type, N + 1UZ> m_data{};
 };
 
 //
