@@ -39,7 +39,7 @@ struct named_type_empty_base {
 
 }  // namespace detail
 
-/// \example named_type.cpp
+/// \example named_type_example.cpp
 //
 /// \brief Named type wrapper.
 //
@@ -59,20 +59,19 @@ class named_type final
   // Public types
   //
 
-  /// \brief the type of the contained value
-  using value_type = T;
+  using value_type = T;  ///< The type of the contained value.
 
   //
   // Constructors
   //
 
-  /// \brief constructs the gw::named_type object
+  /// \brief Construct the gw::named_type object.
   template <typename... Args>
   constexpr explicit named_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<value_type, Args...>)
     requires std::constructible_from<value_type, Args...>
       : m_value(value_type{std::forward<Args>(args)...}) {}
 
-  /// \brief constructs the gw::named_type object
+  /// \brief Construct the gw::named_type object.
   template <typename U, typename... Args>
   constexpr named_type(std::initializer_list<U> ilist, Args&&... args) noexcept(
       std::is_nothrow_constructible_v<value_type, std::initializer_list<U>&, Args...>)
@@ -83,55 +82,55 @@ class named_type final
   // Destructor
   //
 
-  /// \brief destroys the contained value
+  /// \brief Destroy the contained value.
   ~named_type() noexcept(std::is_nothrow_destructible_v<value_type>) = default;
 
   //
   // Static functions
   //
 
-  /// \brief returns the name of the gw::named_type
+  /// \brief Return the name of the gw::named_type.
   static constexpr auto name() noexcept -> std::string_view { return k_name; }
 
   //
   // Observers
   //
 
-  /// \brief accesses the contained value
+  /// \brief Access the contained value.
   constexpr auto operator->() const noexcept -> const value_type* { return &m_value; }
 
-  /// \brief accesses the contained value
+  /// \brief Access the contained value.
   constexpr auto operator->() noexcept -> value_type* { return &m_value; }
 
-  /// \brief accesses the contained value
+  /// \brief Access the contained value.
   constexpr auto operator*() const& noexcept -> const value_type& { return m_value; }
 
-  /// \brief accesses the contained value
+  /// \brief Access the contained value.
   constexpr auto operator*() & noexcept -> value_type& { return m_value; }
 
-  /// \brief accesses the contained value
+  /// \brief Access the contained value.
   constexpr auto operator*() const&& noexcept -> const value_type&& { return std::move(m_value); }
 
-  /// \brief accesses the contained value
+  /// \brief Access the contained value.
   constexpr auto operator*() && noexcept -> value_type&& { return std::move(m_value); }
 
-  /// \brief returns the contained value
+  /// \brief Return the contained value.
   constexpr auto value() const& noexcept -> const value_type& { return m_value; }
 
-  /// \brief returns the contained value
+  /// \brief Return the contained value.
   constexpr auto value() & noexcept -> value_type& { return m_value; }
 
-  /// \brief returns the contained value
+  /// \brief Return the contained value.
   constexpr auto value() const&& noexcept -> const value_type&& { return std::move(m_value); }
 
-  /// \brief returns the contained value
+  /// \brief Return the contained value.
   constexpr auto value() && noexcept -> value_type&& { return std::move(m_value); }
 
   //
   // Monadic operations
   //
 
-  /// \brief returns a gw::named_type containing the transformed contained value
+  /// \brief Return a gw::named_type containing the transformed contained value.
   template <typename F>
   constexpr auto transform(F&& func) const& noexcept(noexcept(func(m_value))) -> named_type
     requires std::invocable<F, const value_type&>
@@ -139,7 +138,7 @@ class named_type final
     return named_type<std::remove_cv_t<std::invoke_result_t<F, const value_type&>>, Name>{func(m_value)};
   }
 
-  /// \brief returns a gw::named_type containing the transformed contained value
+  /// \brief Return a gw::named_type containing the transformed contained value.
   template <typename F>
   constexpr auto transform(F&& func) & noexcept(noexcept(func(m_value))) -> named_type
     requires std::invocable<F, value_type&>
@@ -147,7 +146,7 @@ class named_type final
     return named_type<std::remove_cv_t<std::invoke_result_t<F, value_type&>>, Name>{func(m_value)};
   }
 
-  /// \brief returns a gw::named_type containing the transformed contained value
+  /// \brief Return a gw::named_type containing the transformed contained value.
   template <typename F>
   constexpr auto transform(F&& func) const&& noexcept(noexcept(func(m_value))) -> named_type
     requires std::invocable<F, const value_type&&>
@@ -155,7 +154,7 @@ class named_type final
     return named_type<std::remove_cv_t<std::invoke_result_t<F, const value_type&&>>, Name>{func(std::move(m_value))};
   }
 
-  /// \brief returns a gw::named_type containing the transformed contained value
+  /// \brief Return a gw::named_type containing the transformed contained value.
   template <typename F>
   constexpr auto transform(F&& func) && noexcept(noexcept(func(m_value))) -> named_type
     requires std::invocable<F, value_type&&>
@@ -167,7 +166,7 @@ class named_type final
   // Modifiers
   //
 
-  /// \brief specializes the std::swap algorithm
+  /// \brief Specialize the std::swap algorithm.
   constexpr void swap(named_type& rhs) noexcept(std::is_nothrow_swappable_v<value_type>)
     requires std::swappable<value_type>
   {
@@ -175,14 +174,14 @@ class named_type final
     swap(m_value, rhs.m_value);
   }
 
-  /// \brief destroys any contained value
+  /// \brief Destroy any contained value.
   constexpr void reset() noexcept(std::is_nothrow_default_constructible_v<value_type>)
     requires std::default_initializable<value_type>
   {
     m_value = value_type{};
   }
 
-  /// \brief constructs the contained value in-place
+  /// \brief Construct the contained value in-place.
   template <typename... Args>
   constexpr auto emplace(Args&&... args) noexcept(std::is_nothrow_constructible_v<value_type, Args...>) -> value_type&
     requires std::constructible_from<value_type, Args...>
@@ -195,49 +194,49 @@ class named_type final
   // Comparison operators
   //
 
-  /// \brief compares gw::named_type objects
+  /// \brief Compare gw::named_type objects.
   constexpr auto operator==(const named_type& rhs) const& noexcept(noexcept(m_value == rhs.m_value)) -> bool
     requires std::equality_comparable<value_type>
   {
     return m_value == rhs.m_value;
   }
 
-  /// \brief compares gw::named_type objects
+  /// \brief Compare gw::named_type objects.
   constexpr auto operator!=(const named_type& rhs) const& noexcept(noexcept(m_value != rhs.m_value)) -> bool
     requires std::equality_comparable<value_type>
   {
     return m_value != rhs.m_value;
   }
 
-  /// \brief compares gw::named_type objects
+  /// \brief Compare gw::named_type objects.
   constexpr auto operator<(const named_type& rhs) const& noexcept(noexcept(m_value < rhs.m_value)) -> bool
     requires std::totally_ordered<value_type>
   {
     return m_value < rhs.m_value;
   }
 
-  /// \brief compares gw::named_type objects
+  /// \brief Compare gw::named_type objects.
   constexpr auto operator>(const named_type& rhs) const& noexcept(noexcept(m_value > rhs.m_value)) -> bool
     requires std::totally_ordered<value_type>
   {
     return m_value > rhs.m_value;
   }
 
-  /// \brief compares gw::named_type objects
+  /// \brief Compare gw::named_type objects.
   constexpr auto operator<=(const named_type& rhs) const& noexcept(noexcept(m_value <= rhs.m_value)) -> bool
     requires std::totally_ordered<value_type>
   {
     return m_value <= rhs.m_value;
   }
 
-  /// \brief compares gw::named_type objects
+  /// \brief Compare gw::named_type objects.
   constexpr auto operator>=(const named_type& rhs) const& noexcept(noexcept(m_value >= rhs.m_value)) -> bool
     requires std::totally_ordered<value_type>
   {
     return m_value >= rhs.m_value;
   }
 
-  /// \brief compares gw::named_type objects
+  /// \brief Compare gw::named_type objects.
   constexpr auto operator<=>(const named_type& rhs) const& noexcept(noexcept(m_value <=>
                                                                              rhs.m_value)) -> std::strong_ordering
     requires std::three_way_comparable<value_type>
@@ -249,16 +248,16 @@ class named_type final
   // Conversion operators
   //
 
-  /// \brief converts the gw::named_type to its underlying type
+  /// \brief Convert the gw::named_type to its underlying type.
   constexpr explicit operator const value_type&() const& noexcept { return m_value; }
 
-  /// \brief converts the gw::named_type to its underlying type
+  /// \brief Convert the gw::named_type to its underlying type.
   constexpr explicit operator value_type&() & noexcept { return m_value; }
 
-  /// \brief converts the gw::named_type to its underlying type
+  /// \brief Convert the gw::named_type to its underlying type.
   constexpr explicit operator const value_type&&() const&& noexcept { return std::move(m_value); }
 
-  /// \brief converts the gw::named_type to its underlying type
+  /// \brief Convert the gw::named_type to its underlying type.
   constexpr explicit operator value_type&&() && noexcept { return std::move(m_value); }
 
   //

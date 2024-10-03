@@ -8,6 +8,7 @@ project(
   LANGUAGES CXX)
 
 option(GW_BUILD_DOCS "Build documentation" ${PROJECT_IS_TOP_LEVEL})
+option(GW_BUILD_EXAMPLES "Build examples" ${PROJECT_IS_TOP_LEVEL})
 option(GW_BUILD_TESTS "Build tests" ${PROJECT_IS_TOP_LEVEL})
 option(GW_INSTALL "Generate install target" ON)
 
@@ -69,6 +70,10 @@ target_include_directories(crtp INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR
 
 if(GW_BUILD_DOCS)
   add_subdirectory(docs)
+endif()
+
+if(GW_BUILD_EXAMPLES)
+  add_subdirectory(examples)
 endif()
 
 if(GW_BUILD_TESTS)

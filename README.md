@@ -8,5 +8,6 @@
 
 A bunch of small C++ utilities
 
- * [`gw::named_type`](https://globberwops.github.io/gw/classgw_1_1named__type.html#details) ([example](https://globberwops.github.io/gw/named_type_8cpp-example.html))
- * [`gw::strong_type`](https://globberwops.github.io/gw/classgw_1_1strong__type.html#details) ([example](https://globberwops.github.io/gw/strong_type_8cpp-example.html))
+ * [`gw::inplace_string`](classgw_1_1basic__inplace__string.html#details) ([example](inplace_string_example_8cpp-example.html))
+ * [`gw::named_type`](classgw_1_1named__type.html#details) ([example](named_type_example_8cpp-example.html))
+ * [`gw::strong_type`](classgw_1_1strong__type.html#details) ([example](strong_type_example_8cpp-example.html))

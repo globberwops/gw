@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <format>
 #include <iterator>
 #include <stdexcept>
 #include <string>
@@ -16,12 +17,14 @@
 ///
 namespace gw {
 
+/// \example inplace_string_example.cpp
+//
 /// \brief A fixed-size string that stores the data in-place.
-///
+//
 /// \tparam N The size of the string.
 /// \tparam CharT The character type.
 /// \tparam Traits The character traits type.
-///
+//
 template <std::size_t N, class CharT, class Traits = std::char_traits<CharT>>
 class basic_inplace_string {
  public:
@@ -627,3 +630,28 @@ template <std::size_t N>
 using inplace_u32string = basic_inplace_string<N, char32_t>;
 
 }  // namespace gw
+
+namespace std {
+
+/// \brief Format the inplace_string object.
+///
+template <std::size_t N, class CharT>
+// NOLINTNEXTLINE(cert-dcl58-cpp)
+struct formatter<::gw::basic_inplace_string<N, CharT>, CharT> {
+  /// \brief Parse the format string.
+  ///
+  template <class ParseContext>
+  constexpr auto parse(ParseContext& context) -> ParseContext::iterator {
+    return context.begin();
+  }
+
+  /// \brief Format the inplace_string object.
+  ///
+  template <class FormatContext>
+  auto format(const ::gw::basic_inplace_string<N, CharT>& str,
+              FormatContext& context) const -> FormatContext::iterator {
+    return format_to(context.out(), "{}", std::basic_string_view{str.data(), str.size()});
+  }
+};
+
+}  // namespace std

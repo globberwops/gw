@@ -29,7 +29,7 @@ struct strong_type_empty_base {
 
 }  // namespace detail
 
-/// \example strong_type.cpp
+/// \example strong_type_example.cpp
 //
 /// \brief Strong type wrapper.
 //
@@ -49,14 +49,14 @@ class strong_type final
   // Public types
   //
 
-  using value_type = T;  ///< the type of the contained value
-  using tag_type = Tag;  ///< the tag type
+  using value_type = T;  ///< The type of the contained value.
+  using tag_type = Tag;  ///< The tag type.
 
   //
   // Constructors
   //
 
-  /// \brief constructs the gw::strong_type object
+  /// \brief Construct the gw::strong_type object
   template <typename... Args>
   constexpr explicit strong_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<value_type, Args...>)
     requires std::constructible_from<value_type, Args...>
