@@ -902,10 +902,13 @@ namespace std {
 // Hash calculation
 //
 
-/// \brief hash support for gw::named_type
+/// \brief Hash support for `gw::named_type`.
+///
 template <::gw::hashable T, ::gw::detail::fixed_string Name>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 struct hash<::gw::named_type<T, Name>> {
+  /// \brief Calculate the hash of the `gw::named_type` object.
+  ///
   [[nodiscard]] auto inline operator()(const ::gw::named_type<T, Name>& named_type) const noexcept -> size_t {
     auto value_hash = hash<T>{}(named_type.value());
     auto name_hash = hash<string_view>{}(named_type.name());
@@ -917,37 +920,45 @@ struct hash<::gw::named_type<T, Name>> {
 // String conversion
 //
 
-/// \brief string conversion support for gw::named_type
-template <::gw::string_convertable T, ::gw::detail::fixed_string Name>
-// NOLINTNEXTLINE(cert-dcl58-cpp)
-[[nodiscard]] auto inline to_string(const ::gw::named_type<T, Name>& named_type) -> string {
-  return string{named_type.name()} + ": " + to_string(named_type.value());
-}
-
-/// \brief formats the gw::named_type object
-/// \tparam T the type of the contained value
-/// \tparam Name the name of the gw::named_type
-/// \tparam CharT the character type
-template <std::formattable<char> T, ::gw::detail::fixed_string Name, class CharT>
+/// \brief Format the `gw::named_type` object.
+///
+template <typename T, ::gw::detail::fixed_string Name, class CharT>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 struct formatter<::gw::named_type<T, Name>, CharT> {
-  /// \brief parses the format string
-  /// \tparam ParseContext the format context type
-  /// \param context the format context
-  /// \return the iterator to the beginning of the format context
+  bool with_name{};  ///< Include the name in the output.
+
+  /// \brief Parse the format string.
+  ///
   template <class ParseContext>
   constexpr auto parse(ParseContext& context) -> ParseContext::iterator {
-    return context.begin();
+    auto it = context.begin();
+    if (it == context.end()) {
+      return it;
+    }
+
+    if (*it == '#') {
+      with_name = true;
+      ++it;
+    }
+
+    if (it != context.end() && *it != '}') {
+      throw std::format_error("Invalid format args for gw::named_type.");
+    }
+
+    return it;
   }
 
-  /// \brief formats the gw::named_type object
-  /// \tparam FormatContext the format context type
-  /// \param named_type the gw::named_type object
-  /// \param context the format context
-  /// \return the
+  /// \brief Format the `gw::named_type` object.
+  ///
   template <class FormatContext>
-  auto format(const ::gw::named_type<T, Name>& named_type, FormatContext& context) const -> FormatContext::iterator {
-    return format_to(context.out(), "{}: {}", named_type.name(), named_type.value());
+  auto format(const ::gw::named_type<T, Name>& named_type, FormatContext& context) const -> FormatContext::iterator
+    requires std::formattable<T, CharT>
+  {
+    if (with_name) {
+      return format_to(context.out(), "{}: {}", named_type.name(), named_type.value());
+    }
+
+    return format_to(context.out(), "{}", named_type.value());
   }
 };
 

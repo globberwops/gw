@@ -719,7 +719,27 @@ using inplace_u32string = basic_inplace_string<N, char32_t>;
 
 namespace std {
 
-/// \brief Format the inplace_string object.
+//
+// Hash calculation
+//
+
+/// \brief Hash support for `inplace_string`.
+///
+template <std::size_t N, class CharT>
+// NOLINTNEXTLINE(cert-dcl58-cpp)
+struct hash<::gw::basic_inplace_string<N, CharT>> {
+  /// \brief Calculate the hash of the `inplace_string` object.
+  ///
+  [[nodiscard]] auto inline operator()(const ::gw::basic_inplace_string<N, CharT>& str) const noexcept -> size_t {
+    return hash<string_view>{}(static_cast<std::basic_string_view<CharT>>(str));
+  }
+};
+
+//
+// String conversion
+//
+
+/// \brief Format the `inplace_string` object.
 ///
 template <std::size_t N, class CharT>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
@@ -727,16 +747,16 @@ struct formatter<::gw::basic_inplace_string<N, CharT>, CharT> {
   /// \brief Parse the format string.
   ///
   template <class ParseContext>
-  constexpr auto parse(ParseContext& context) -> ParseContext::iterator {
+  constexpr auto parse(ParseContext& context) const -> ParseContext::iterator {
     return context.begin();
   }
 
-  /// \brief Format the inplace_string object.
+  /// \brief Format the `inplace_string` object.
   ///
   template <class FormatContext>
-  auto format(const ::gw::basic_inplace_string<N, CharT>& str,
-              FormatContext& context) const -> FormatContext::iterator {
-    return format_to(context.out(), "{}", std::basic_string_view{str.data(), str.size()});
+  constexpr auto format(const ::gw::basic_inplace_string<N, CharT>& str,
+                        FormatContext& context) const -> FormatContext::iterator {
+    return std::ranges::copy(static_cast<std::basic_string_view<CharT>>(str), context.out()).out;
   }
 };
 

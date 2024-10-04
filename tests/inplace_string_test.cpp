@@ -7,6 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <cstdio>
 #include <cstring>
+#include <format>
 #include <string_view>
 #include <type_traits>
 
@@ -326,6 +327,30 @@ TEST_CASE("inplace_string is searched for any character", "[inplace_string]") {
     STATIC_REQUIRE(k_value.find_first_of("Hello") == 0U);
     STATIC_REQUIRE(k_value.find_first_of("World") == 2U);
     STATIC_REQUIRE(k_value.find_first_of("Goodbye") == 1U);
+  }
+}
+
+TEST_CASE("inplace_string is hashed", "[inplace_string]") {
+  constexpr auto k_value = inplace_string<13U>{"Hello, World!"};
+
+  REQUIRE(std::hash<inplace_string<13U>>{}(k_value) == std::hash<std::string_view>{}("Hello, World!"));
+}
+
+TEST_CASE("inplace_string is formatted", "[inplace_string]") {
+  SECTION("with char") {
+    constexpr auto k_value = inplace_string<13U>{"Hello, World!"};
+
+    STATIC_REQUIRE(std::formattable<inplace_string<13U>, char>);
+
+    REQUIRE(std::format("{}", k_value) == "Hello, World!");
+  }
+
+  SECTION("with wchar_t") {
+    constexpr auto k_value = inplace_wstring<13U>{L"Hello, World!"};
+
+    STATIC_REQUIRE(std::formattable<inplace_wstring<13U>, wchar_t>);
+
+    REQUIRE(std::format(L"{}", k_value) == L"Hello, World!");
   }
 }
 
