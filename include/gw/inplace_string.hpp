@@ -60,11 +60,11 @@ class basic_inplace_string {
   ///
   constexpr basic_inplace_string() noexcept = default;
 
-  /// \brief Construct the string with count copies of character ch.
+  /// \brief Construct the string with `count` copies of character `ch`.
   ///
   /// \param count The number of characters to initialize the string with.
   /// \param ch The character to initialize the string with.
-  /// \throw std::length_error If count is greater than max_size.
+  /// \throw std::length_error If count is greater than `max_size`.
   ///
   constexpr basic_inplace_string(size_type count, CharT ch) {
     if (count > capacity()) {
@@ -75,10 +75,10 @@ class basic_inplace_string {
     std::fill_n(begin(), count, ch);
   }
 
-  /// \brief Construct the string with the characters from the character string pointed to by s.
+  /// \brief Construct the string with the characters from the character string pointed to by `s`.
   ///
   /// \param s The character string to initialize the string with.
-  /// \throw std::length_error If the size of the string would exceed max_size.
+  /// \throw std::length_error If the size of the string would exceed `max_size`.
   ///
   constexpr explicit basic_inplace_string(const CharT* s) {
     const auto k_length = std::char_traits<CharT>::length(s);
@@ -104,7 +104,7 @@ class basic_inplace_string {
   ///
   /// \param pos The position of the character to get.
   /// \return A reference to the character at the specified position.
-  /// \throw std::out_of_range If pos is out of range.
+  /// \throw std::out_of_range If `pos` is out of range.
   ///
   constexpr auto at(size_type pos) -> reference {
     return pos < size() ? m_data[pos]
@@ -116,7 +116,7 @@ class basic_inplace_string {
   ///
   /// \param pos The position of the character to get.
   /// \return A const reference to the character at the specified position.
-  /// \throw std::out_of_range If pos is out of range.
+  /// \throw std::out_of_range If `pos` is out of range.
   ///
   constexpr auto at(size_type pos) const -> const_reference {
     return pos < size() ? m_data[pos]
@@ -142,13 +142,13 @@ class basic_inplace_string {
   ///
   /// \return A reference to the first character in the string.
   ///
-  constexpr auto front() noexcept -> reference { return m_data[0UZ]; }
+  constexpr auto front() noexcept -> reference { return m_data[0U]; }
 
   /// \brief Get a const reference to the first character in the string.
   ///
   /// \return A const reference to the first character in the string.
   ///
-  constexpr auto front() const noexcept -> const_reference { return m_data[0UZ]; }
+  constexpr auto front() const noexcept -> const_reference { return m_data[0U]; }
 
   /// \brief Get a reference to the last character in the string.
   ///
@@ -160,7 +160,7 @@ class basic_inplace_string {
   ///
   /// \return A const reference to the last character in the string.
   ///
-  constexpr auto back() const noexcept -> const_reference { return m_data[size() - 1UZ]; }
+  constexpr auto back() const noexcept -> const_reference { return m_data[size() - 1U]; }
 
   /// \brief Get a pointer to the underlying character array.
   ///
@@ -270,7 +270,7 @@ class basic_inplace_string {
   ///
   /// \return True if the string is empty, false otherwise.
   ///
-  [[nodiscard]] constexpr auto empty() const noexcept -> bool { return size() == 0UZ; }
+  [[nodiscard]] constexpr auto empty() const noexcept -> bool { return size() == 0U; }
 
   /// \brief Get the size of the string.
   ///
@@ -293,7 +293,7 @@ class basic_inplace_string {
   /// \brief Reserve storage for the string.
   ///
   /// \param new_cap The new capacity of the string.
-  /// \throw std::length_error If new_cap is greater than max_size.
+  /// \throw std::length_error If `new_cap` is greater than `max_size`.
   ///
   constexpr void reserve(size_type new_cap) {
     if (new_cap > max_size()) {
@@ -322,12 +322,12 @@ class basic_inplace_string {
   ///
   constexpr void clear() noexcept { m_data.fill('\0'); }
 
-  /// \brief Insert count copies of character ch at the position index.
+  /// \brief Insert `count` copies of character `ch` at the position `index`.
   ///
   /// \param index The position to insert the characters at.
   /// \param count The number of characters to insert.
   /// \param ch The character to insert.
-  /// \throw std::length_error If the size of the string would exceed max_size.
+  /// \throw std::length_error If the size of the string would exceed `max_size`.
   ///
   constexpr void insert(size_type index, size_type count, CharT ch) {
     if (size() + count > max_size()) {
@@ -340,13 +340,13 @@ class basic_inplace_string {
     std::fill_n(begin() + index, count, ch);
   }
 
-  /// \brief Erase count characters from the position index.
+  /// \brief Erase `count` characters from the position `index`.
   ///
   /// \param index The position to erase the characters from.
   /// \param count The number of characters to erase.
-  /// \throw std::out_of_range If the index and count would exceed the size of the string.
+  /// \throw std::out_of_range If the `index` and `count` would exceed the size of the string.
   ///
-  constexpr void erase(size_type index = 0UZ, size_type count = npos) {
+  constexpr void erase(size_type index = 0U, size_type count = npos) {
     if (index + count > size()) {
       throw std::out_of_range{"basic_inplace_string::erase: index + count (which is " + std::to_string(index + count) +
                               ") > size() (which is " + std::to_string(size()) + ")"};
@@ -359,26 +359,26 @@ class basic_inplace_string {
   /// \brief Append a character to the end of the string.
   ///
   /// \param ch The character to append.
-  /// \throw std::length_error If the size of the string would exceed the capacity.
+  /// \throw std::length_error If the size of the string would exceed `max_size`.
   ///
   constexpr void push_back(CharT ch) {
-    if (size() + 1UZ > max_size()) {
-      throw std::length_error{"basic_inplace_string::push_back: size() + 1 (which is " + std::to_string(size() + 1UZ) +
+    if (size() + 1U > max_size()) {
+      throw std::length_error{"basic_inplace_string::push_back: size() + 1 (which is " + std::to_string(size() + 1U) +
                               ") > N (which is " + std::to_string(N) + ")"};
     }
 
     m_data[size()] = ch;
-    m_data[size() + 1UZ] = '\0';  // Add null terminator at the new end
+    m_data[size() + 1U] = '\0';  // Add null terminator at the new end
   }
 
   /// \brief Remove the last character from the string.
   ///
-  constexpr void pop_back() noexcept { m_data[size() - 1UZ] = '\0'; }
+  constexpr void pop_back() noexcept { m_data[size() - 1U] = '\0'; }
 
   /// \brief Append a string to the end of the string.
   ///
   /// \param str The string to append.
-  /// \throw std::length_error If the size of the string would exceed max_size.
+  /// \throw std::length_error If the size of the string would exceed `max_size`.
   ///
   template <std::size_t N2>
   constexpr void append(const basic_inplace_string<N2, CharT>& str) {
@@ -389,13 +389,13 @@ class basic_inplace_string {
     }
 
     std::copy(str.begin(), str.end(), end());
-    m_data[size() + 1UZ] = '\0';  // Add null terminator at the new end
+    m_data[size() + 1U] = '\0';  // Add null terminator at the new end
   }
 
   /// \brief Append a string to the end of the string.
   ///
   /// \param str The string to append.
-  /// \throw std::length_error If the size of the string would exceed max_size.
+  /// \throw std::length_error If the size of the string would exceed `max_size`.
   ///
   template <std::size_t N2>
   constexpr auto operator+=(const basic_inplace_string<N2, CharT>& str) -> basic_inplace_string& {
@@ -409,6 +409,11 @@ class basic_inplace_string {
     return *this;
   }
 
+  /// \brief Resize the string to `count` characters.
+  ///
+  /// \param count The new size of the string.
+  /// \throw std::length_error If `count` is greater than `max_size`.
+  ///
   constexpr void resize(size_type count) {
     if (count > max_size()) {
       throw std::length_error{"basic_inplace_string::resize: count (which is " + std::to_string(count) +
@@ -422,6 +427,12 @@ class basic_inplace_string {
     m_data[count] = '\0';  // Add null terminator at the new end
   }
 
+  /// \brief Resize the string to `count` characters.
+  ///
+  /// \param count The new size of the string.
+  /// \param ch The character to fill the string with.
+  /// \throw std::length_error If `count` is greater than `max_size`.
+  ///
   constexpr void resize(size_type count, CharT ch) {
     if (count > max_size()) {
       throw std::length_error{"basic_inplace_string::resize: count (which is " + std::to_string(count) +
@@ -448,69 +459,140 @@ class basic_inplace_string {
   // Search
   //
 
-  /// \brief Find the first occurrence of an inplace_string in the string.
+  /// \brief Find the first substring equal to `str`.
   ///
-  /// \tparam N2 The size of the inplace_string to find.
-  /// \param str The inplace_string to find.
+  /// \param str The string to find.
   /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of the inplace_string, or npos if the inplace_string is not found.
+  /// \return The position of the first occurrence of the string, or `npos` if the string is not found.
   ///
   template <std::size_t N2>
-  constexpr auto find(const basic_inplace_string<N2, CharT>& str, size_type pos = 0UZ) const noexcept -> size_type {
+  constexpr auto find(const basic_inplace_string<N2, CharT>& str, size_type pos = 0U) const noexcept -> size_type {
     return find(static_cast<std::string_view>(str), pos);
   }
 
-  /// \brief Find the first occurrence of a string view in the string.
+  /// \brief Find the first substring equal to `str`.
   ///
   /// \param str The string view to find.
   /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of the string view, or npos if the string view is not found.
+  /// \return The position of the first occurrence of the string, or `npos` if the string is not found.
   ///
-  constexpr auto find(std::basic_string_view<CharT> str, size_type pos = 0UZ) const noexcept -> size_type {
+  constexpr auto find(std::basic_string_view<CharT> str, size_type pos = 0U) const noexcept -> size_type {
     return static_cast<std::string_view>(*this).find(str, pos);
   }
 
-  /// \brief Find the first occurrence of a character string in the string.
+  /// \brief Find the first substring equal to the range [`str`, `str + count`).
   ///
-  /// \param str The character string to find.
+  /// \param str The string to find.
   /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of the character string, or npos if the character string is not
-  /// found.
+  /// \param count The number of characters to search for.
+  /// \return The position of the first occurrence of the string, or `npos` if the string is not found.
   ///
-  constexpr auto find(const char* str, size_type pos = 0UZ) const noexcept -> size_type {
+  constexpr auto find(const char* str, size_type pos, size_type count) const noexcept -> size_type {
+    return static_cast<std::string_view>(*this).find(str, pos, count);
+  }
+
+  /// \brief Find the first substring equal to the character string pointed to by `s`.
+  ///
+  /// \param str The string to find.
+  /// \param pos The position to start searching from.
+  /// \return The position of the first occurrence of the string, or `npos` if the string is not found.
+  ///
+  constexpr auto find(const char* str, size_type pos = 0U) const noexcept -> size_type {
     return static_cast<std::string_view>(*this).find(str, pos);
   }
 
-  /// \brief Find the last occurrence of an inplace_string in the string.
+  /// \brief Finds the first character `ch`.
   ///
-  /// \tparam N2 The size of the inplace_string to find.
-  /// \param str The inplace_string to find.
+  /// \param ch The character to find.
   /// \param pos The position to start searching from.
-  /// \return The position of the last occurrence of the inplace_string, or npos if the inplace_string is not found.
+  /// \return The position of the first occurrence of the character, or `npos` if the character is not found.
+  ///
+  constexpr auto find(CharT ch, size_type pos = npos) const noexcept -> size_type {
+    return static_cast<std::string_view>(*this).rfind(ch, pos);
+  }
+
+  /// \brief Find the last substring equal to `str`.
+  ///
+  /// \param str The string to find.
+  /// \param pos The position to start searching from.
+  /// \return The position of the last occurrence of the string, or `npos` if the string is not found.
   ///
   template <std::size_t N2>
   constexpr auto rfind(const basic_inplace_string<N2, CharT>& str, size_type pos = npos) const noexcept -> size_type {
     return rfind(static_cast<std::string_view>(str), pos);
   }
 
-  /// \brief Find the last occurrence of a string view in the string.
+  /// \brief Find the last substring equal to `str`.
   ///
-  /// \param str The string view to find.
+  /// \param str The string to find.
   /// \param pos The position to start searching from.
-  /// \return The position of the last occurrence of the string view, or npos if the string view is not found.
+  /// \return The position of the last occurrence of the string, or `npos` if the string is not found.
   ///
   constexpr auto rfind(std::basic_string_view<CharT> str, size_type pos = npos) const noexcept -> size_type {
     return static_cast<std::string_view>(*this).rfind(str, pos);
   }
 
-  /// \brief Find the last occurrence of a character string in the string.
+  /// \brief Find the last substring equal to the range [`str`, `str + count`).
   ///
-  /// \param str The character string to find.
+  /// \param str The string to find.
   /// \param pos The position to start searching from.
-  /// \return The position of the last occurrence of the character string, or npos if the character string is not found.
+  /// \param count The number of characters to search for.
+  /// \return The position of the last occurrence of the string, or `npos` if the string is not found.
+  ///
+  constexpr auto rfind(const char* str, size_type pos, size_type count) const noexcept -> size_type {
+    return static_cast<std::string_view>(*this).rfind(str, pos, count);
+  }
+
+  /// \brief Find the last substring equal to the character string pointed to by `s`.
+  ///
+  /// \param str The string to find.
+  /// \param pos The position to start searching from.
+  /// \return The position of the last occurrence of the string, or `npos` if the string is not found.
   ///
   constexpr auto rfind(const char* str, size_type pos = npos) const noexcept -> size_type {
     return static_cast<std::string_view>(*this).rfind(str, pos);
+  }
+
+  /// \brief Find the last character `ch`.
+  ///
+  /// \param ch The character to find.
+  /// \param pos The position to start searching from.
+  /// \return The position of the last occurrence of the character, or `npos` if the character is not found.
+  ///
+  constexpr auto rfind(CharT ch, size_type pos = npos) const noexcept -> size_type {
+    return static_cast<std::string_view>(*this).rfind(ch, pos);
+  }
+
+  /// \brief Find the first character equal to one of the characters in `str`.
+  ///
+  /// \param str The string to search for.
+  /// \param pos The position to start searching from.
+  /// \return The position of the first occurrence of any character in the string, or `npos` if no character is found.
+  ///
+  template <std::size_t N2>
+  constexpr auto find_first_of(const basic_inplace_string<N2, CharT>& str,
+                               size_type pos = 0U) const noexcept -> size_type {
+    return find_first_of(static_cast<std::string_view>(str), pos);
+  }
+
+  /// \brief Find the first character equal to one of the characters in `str`.
+  ///
+  /// \param str The string view to search for.
+  /// \param pos The position to start searching from.
+  /// \return The position of the first occurrence of any character in the string, or `npos` if no character is found.
+  ///
+  constexpr auto find_first_of(std::basic_string_view<CharT> str, size_type pos = 0U) const noexcept -> size_type {
+    return static_cast<std::string_view>(*this).find_first_of(str, pos);
+  }
+
+  /// \brief Find the first character equal to one of the characters in `str`.
+  ///
+  /// \param str The character string to search for.
+  /// \param pos The position to start searching from.
+  /// \return The position of the first occurrence of any character in the string, or `npos` if no character is found.
+  ///
+  constexpr auto find_first_of(const char* str, size_type pos = 0U) const noexcept -> size_type {
+    return static_cast<std::string_view>(*this).find_first_of(str, pos);
   }
 
   //
@@ -519,8 +601,8 @@ class basic_inplace_string {
 
   /// \brief Concatenate two strings.
   ///
-  /// \param lhs The string to concatenate.
-  /// \param rhs The string to concatenate.
+  /// \param lhs The first string to concatenate.
+  /// \param rhs The second string to concatenate.
   /// \return The concatenated string.
   ///
   template <std::size_t N2>
@@ -538,8 +620,8 @@ class basic_inplace_string {
 
   /// \brief Compare the string to another string.
   ///
-  /// \param lhs The string to compare.
-  /// \param rhs The string to compare.
+  /// \param lhs The first string to compare.
+  /// \param rhs The second string to compare.
   /// \return True if the strings are equal, false otherwise.
   ///
   friend constexpr auto operator==(const basic_inplace_string& lhs, const basic_inplace_string& rhs) noexcept -> bool {
@@ -548,8 +630,8 @@ class basic_inplace_string {
 
   /// \brief Compare the string to a string view.
   ///
-  /// \param lhs The string to compare.
-  /// \param rhs The string view to compare.
+  /// \param lhs The first string to compare.
+  /// \param rhs The second string to compare.
   /// \return True if the strings are equal, false otherwise.
   ///
   friend constexpr auto operator==(const basic_inplace_string& lhs,
@@ -559,8 +641,8 @@ class basic_inplace_string {
 
   /// \brief Compare the string to a string view.
   ///
-  /// \param lhs The string view to compare.
-  /// \param rhs The string to compare.
+  /// \param lhs The first string to compare.
+  /// \param rhs The second string to compare.
   /// \return True if the strings are equal, false otherwise.
   ///
   friend constexpr auto operator==(std::basic_string_view<value_type> lhs,
@@ -570,8 +652,9 @@ class basic_inplace_string {
 
   /// \brief Compares the string to a character string.
   ///
-  /// \param lhs The string to compare.
-  /// \param rhs The character string to compare.
+  /// \param lhs The first string to compare.
+  /// \param rhs The second string to compare.
+  /// \return True if the strings are equal, false otherwise.
   ///
   friend constexpr auto operator==(const basic_inplace_string& lhs, const value_type* rhs) noexcept -> bool {
     return static_cast<std::string_view>(lhs) == std::string_view{rhs};
@@ -579,23 +662,26 @@ class basic_inplace_string {
 
   /// \brief Compares the string to a character string.
   ///
-  /// \param lhs The character string to compare.
-  /// \param rhs The string to compare.
+  /// \param lhs The first string to compare.
+  /// \param rhs The second string to compare.
+  /// \return True if the strings are equal, false otherwise.
   ///
   friend constexpr auto operator==(const value_type* lhs, const basic_inplace_string& rhs) noexcept -> bool {
     return std::string_view{lhs} == static_cast<std::string_view>(rhs);
   }
 
  private:
-  std::array<value_type, N + 1UZ> m_data{};
+  std::array<value_type, N + 1U> m_data{};
 };
 
 //
 // Deduction guides
 //
 
+/// \brief Deduction guide for basic_inplace_string.
+///
 template <typename CharT, std::size_t N>
-basic_inplace_string(const CharT (&)[N]) -> basic_inplace_string<N - 1UZ, CharT>;
+basic_inplace_string(const CharT (&)[N]) -> basic_inplace_string<N - 1U, CharT>;
 
 //
 // Type aliases

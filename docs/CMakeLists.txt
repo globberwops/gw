@@ -9,8 +9,7 @@ include(FetchContent)
 FetchContent_Declare(
   doxygen_awesome_css
   GIT_REPOSITORY https://github.com/jothepro/doxygen-awesome-css.git
-  GIT_TAG df88fe4fdd97714fadfd3ef17de0b4401f804052 # v2.3.1
-)
+  GIT_TAG v2.3.4)
 FetchContent_MakeAvailable(doxygen_awesome_css)
 
 set(DOXYGEN_BUILTIN_STL_SUPPORT YES)
@@ -32,6 +31,6 @@ set(DOXYGEN_HTML_EXTRA_STYLESHEET
     ${doxygen_awesome_css_SOURCE_DIR}/doxygen-awesome-sidebar-only.css
     ${doxygen_awesome_css_SOURCE_DIR}/doxygen-awesome-sidebar-only-darkmode-toggle.css)
 set(DOXYGEN_HTML_HEADER header.html)
-set(DOXYGEN_USE_MDFILE_AS_MAINPAGE README.md)
+set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${PROJECT_SOURCE_DIR}/README.md)
 
 doxygen_add_docs(gw_docs ${PROJECT_SOURCE_DIR}/README.md ${PROJECT_SOURCE_DIR}/include COMMENT "Build documentation")
