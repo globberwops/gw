@@ -901,38 +901,20 @@ struct hash<::gw::strong_type<T, Tag>> {
 // String conversion
 //
 
-/// \brief string conversion support for gw::strong_type
-template <::gw::string_convertable T, typename Tag>
-// NOLINTNEXTLINE(cert-dcl58-cpp)
-[[nodiscard]] auto inline to_string(const ::gw::strong_type<T, Tag>& strong_type) -> string {
-  if constexpr (::gw::named<Tag>) {
-    return string{Tag::name()} + ": " + to_string(strong_type.value());
-  }
-
-  return to_string(strong_type.value());
-}
-
-/// \brief formats the gw::strong_type object
-/// \tparam T the type of the contained value
-/// \tparam Tag the tag type
-/// \tparam CharT the character type
+/// \brief Format the `gw::strong_type` object.
+///
 template <std::formattable<char> T, typename Tag, class CharT>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 struct formatter<::gw::strong_type<T, Tag>, CharT> {
-  /// \brief parses the format string
-  /// \tparam ParseContext the format context type
-  /// \param context the format context
-  /// \return the iterator to the beginning of the format context
+  /// \brief Parse the format string.
+  ///
   template <class ParseContext>
   constexpr auto parse(ParseContext& context) -> ParseContext::iterator {
     return context.begin();
   }
 
-  /// \brief formats the gw::strong_type object
-  /// \tparam FormatContext the format context type
-  /// \param strong_type the gw::strong_type object
-  /// \param context the format context
-  /// \return the
+  /// \brief Format the `gw::strong_type` object.
+  ///
   template <class FormatContext>
   auto format(const ::gw::strong_type<T, Tag>& strong_type, FormatContext& context) const -> FormatContext::iterator {
     if constexpr (::gw::named<Tag>) {

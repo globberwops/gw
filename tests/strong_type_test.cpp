@@ -5,6 +5,7 @@
 
 #include <array>
 #include <catch2/catch_test_macros.hpp>
+#include <compare>
 #include <concepts>
 #include <format>
 #include <ranges>
@@ -434,23 +435,6 @@ TEST_CASE("strong_types are streamed", "[strong_type]") {
     auto value = test_t{};
     sstream >> value;
     REQUIRE(value == test_t{1});
-  }
-}
-
-TEST_CASE("strong_types are converted to string", "[strong_type]") {
-  SECTION("unnamed strong_type") {
-    using test_t = gw::strong_type<int, struct test_tag>;
-
-    REQUIRE(std::to_string(test_t{1}) == "1");
-  }
-
-  SECTION("named strong_type") {
-    struct strong_type_named_tag {
-      static constexpr auto name() noexcept { return "TestType"; }
-    };
-    using test_t = gw::strong_type<int, strong_type_named_tag>;
-
-    REQUIRE(std::to_string(test_t{1}) == "TestType: 1");
   }
 }
 
