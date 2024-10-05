@@ -10,6 +10,7 @@
 #include <format>
 #include <iostream>
 #include <iterator>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -42,7 +43,7 @@ class basic_inplace_string {
 
   /// \brief The character array.
   /// \note The array has to be public to allow use of `basic_inplace_string` as a non-type template parameter.
-  std::array<value_type, N + 1U> m_data{};
+  std::array<value_type, N + 1U> m_data;
 
   // NOLINTNEXTLINE(readability-identifier-naming)
   static constexpr size_type npos = -1;  ///< The maximum value for size_type.
@@ -50,12 +51,12 @@ class basic_inplace_string {
   /// \brief Default constructor.
   constexpr basic_inplace_string() noexcept = default;
 
-  /// \brief Construct the string with the characters from the character string pointed to by `s`.
+  /// \brief Construct the string with the characters from the character string pointed to by `str`.
   template <std::size_t N2>
   // NOLINTNEXTLINE
   consteval explicit(false) basic_inplace_string(const value_type (&str)[N2]) noexcept
     requires(N2 <= N + 1)
-  {
+      : m_data{} {
     traits_type::copy(data(), str, N2 - 1);
   }
 
@@ -63,7 +64,7 @@ class basic_inplace_string {
   /// \param count The number of characters to initialize the string with.
   /// \param ch The character to initialize the string with.
   /// \throw std::length_error If count is greater than `max_size`.
-  constexpr basic_inplace_string(size_type count, value_type ch) {
+  constexpr basic_inplace_string(size_type count, value_type ch) : m_data{} {
     if (count > max_size()) {
       throw std::length_error{
           std::format("basic_inplace_string::basic_inplace_string: count (which is {}) > max_size (which is {})", count,
@@ -75,7 +76,7 @@ class basic_inplace_string {
   /// \brief Construct the string with the characters from the character string pointed to by `str`.
   /// \param str The character string to initialize the string with.
   /// \throw std::length_error If the size of `str` would exceed `max_size`.
-  constexpr explicit basic_inplace_string(const value_type* str) {
+  constexpr explicit basic_inplace_string(const value_type* str) : m_data{} {
     const auto str_size = traits_type::length(str);
 
     if (str_size > max_size()) {
@@ -87,8 +88,65 @@ class basic_inplace_string {
     traits_type::copy(begin(), str, str_size);
   }
 
+  /// \brief Construct the string with the contents of the range [str, str + count).
+  /// \param str The beginning of the range.
+  /// \param count The number of characters to initialize the string with.
+  /// \throw std::length_error If `count` is greater than `max_size`.
+  constexpr explicit basic_inplace_string(const value_type* str, size_type count) : m_data{} {
+    if (count > max_size()) {
+      throw std::length_error{
+          std::format("basic_inplace_string::basic_inplace_string: count (which is {}) > max_size (which is {})", count,
+                      max_size())};
+    }
+    traits_type::copy(begin(), str, count);
+  }
+
+  /// \brief Construct the string with the contents of the range [first, last).
+  /// \tparam InputIt The type of the iterators.
+  /// \param first The beginning of the range.
+  /// \param last The end of the range.
+  /// \throw std::length_error If the size of the range would exceed `max_size`.
+  template <std::input_iterator InputIt>
+  constexpr explicit basic_inplace_string(InputIt first, InputIt last) : m_data{} {
+    const auto str_size = std::distance(first, last);
+
+    if (str_size > max_size()) {
+      throw std::length_error{
+          std::format("basic_inplace_string::basic_inplace_string: str_size (which is {}) > max_size (which is {})",
+                      str_size, max_size())};
+    }
+
+    std::copy(first, last, begin());
+  }
+
+  /// \brief Construct the string with the contents of the string view.
+  /// \param str The string view to initialize the string with.
+  /// \throw std::length_error If the size of the string view would exceed `max_size`.
+  constexpr explicit basic_inplace_string(const std::basic_string_view<value_type, traits_type>& str)
+      : basic_inplace_string(str.data(), str.size()) {}
+
+  /// \brief Construct the string with the contents of the range.
+  /// \tparam R The type of the range.
+  /// \param range The range to initialize the string with.
+  template <std::ranges::range R>
+    requires(!std::is_convertible_v<const R&, std::basic_string_view<value_type, traits_type>> &&
+             std::convertible_to<std::ranges::range_value_t<R>, value_type>)
+  constexpr explicit basic_inplace_string(const R& range) : basic_inplace_string(std::begin(range), std::end(range)) {}
+
+  /// \brief Copy constructor.
+  constexpr basic_inplace_string(const basic_inplace_string& other) noexcept = default;
+
+  /// \brief Move constructor.
+  constexpr basic_inplace_string(basic_inplace_string&& other) noexcept = default;
+
   /// \brief Destructor.
   ~basic_inplace_string() noexcept = default;
+
+  /// \brief Copy assignment operator.
+  constexpr auto operator=(const basic_inplace_string& other) noexcept -> basic_inplace_string& = default;
+
+  /// \brief Move assignment operator.
+  constexpr auto operator=(basic_inplace_string&& other) noexcept -> basic_inplace_string& = default;
 
   /// \brief Get a reference to the character at the specified position.
   /// \param pos The position of the character to get.

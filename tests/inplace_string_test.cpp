@@ -15,49 +15,122 @@
 
 namespace gw {
 
-TEST_CASE("inplace_string is trivially copyable", "[inplace_string]") {
-  STATIC_REQUIRE(std::is_trivially_copyable_v<inplace_string<13U>>);
-  STATIC_REQUIRE(std::is_trivially_copyable_v<inplace_wstring<13U>>);
-  STATIC_REQUIRE(std::is_trivially_copyable_v<inplace_u16string<13U>>);
-  STATIC_REQUIRE(std::is_trivially_copyable_v<inplace_u32string<13U>>);
+TEST_CASE("inplace_string is a trivial type", "[inplace_string]") {
+  STATIC_REQUIRE(std::is_trivial_v<inplace_string<13U>>);
+  STATIC_REQUIRE(std::is_trivial_v<inplace_wstring<13U>>);
+  STATIC_REQUIRE(std::is_trivial_v<inplace_u16string<13U>>);
+  STATIC_REQUIRE(std::is_trivial_v<inplace_u32string<13U>>);
+}
+
+TEST_CASE("inplace_string is a standard layout type", "[inplace_string]") {
+  STATIC_REQUIRE(std::is_standard_layout_v<inplace_string<13U>>);
+  STATIC_REQUIRE(std::is_standard_layout_v<inplace_wstring<13U>>);
+  STATIC_REQUIRE(std::is_standard_layout_v<inplace_u16string<13U>>);
+  STATIC_REQUIRE(std::is_standard_layout_v<inplace_u32string<13U>>);
 }
 
 TEST_CASE("inplace_string is constructed", "[inplace_string]") {
   SECTION("with a default constructor") {  //
-    constexpr auto value = inplace_string<13U>{};
-    constexpr auto wvalue = inplace_wstring<13U>{};
-    constexpr auto u16value = inplace_u16string<13U>{};
-    constexpr auto u32value = inplace_u32string<13U>{};
+    STATIC_REQUIRE(std::is_nothrow_default_constructible_v<inplace_string<13U>>);
+    STATIC_REQUIRE(std::is_nothrow_default_constructible_v<inplace_wstring<13U>>);
+    STATIC_REQUIRE(std::is_nothrow_default_constructible_v<inplace_u16string<13U>>);
+    STATIC_REQUIRE(std::is_nothrow_default_constructible_v<inplace_u32string<13U>>);
   }
 
   SECTION("from a string literal") {
+    STATIC_REQUIRE(std::constructible_from<inplace_string<13U>, const char*>);
+
     constexpr auto value = basic_inplace_string{"Hello, World!"};
 
     STATIC_REQUIRE(value == "Hello, World!");
   }
 
   SECTION("from a wstring literal") {
+    STATIC_REQUIRE(std::constructible_from<inplace_wstring<13U>, const wchar_t*>);
+
     constexpr auto value = basic_inplace_string{L"Hello, World!"};
 
     STATIC_REQUIRE(value == L"Hello, World!");
   }
 
   SECTION("from a u16string literal") {
+    STATIC_REQUIRE(std::constructible_from<inplace_u16string<13U>, const char16_t*>);
+
     constexpr auto value = basic_inplace_string{u"Hello, World!"};
 
     STATIC_REQUIRE(value == u"Hello, World!");
   }
 
   SECTION("from a u32string literal") {
+    STATIC_REQUIRE(std::constructible_from<inplace_u32string<13U>, const char32_t*>);
+
     constexpr auto value = basic_inplace_string{U"Hello, World!"};
 
     STATIC_REQUIRE(value == U"Hello, World!");
   }
 
-  SECTION("from a character") {
+  SECTION("from a count and a character") {
+    STATIC_REQUIRE(std::constructible_from<inplace_string<13U>, int, char>);
+
     constexpr auto value = inplace_string<13U>{5, 'X'};
 
     STATIC_REQUIRE(value == "XXXXX");
+  }
+
+  SECTION("from a count and a wide character") {
+    STATIC_REQUIRE(std::constructible_from<inplace_wstring<13U>, int, wchar_t>);
+
+    constexpr auto value = inplace_wstring<13U>{5, L'X'};
+
+    STATIC_REQUIRE(value == L"XXXXX");
+  }
+
+  SECTION("from a count and a u16 character") {
+    STATIC_REQUIRE(std::constructible_from<inplace_u16string<13U>, int, char16_t>);
+
+    constexpr auto value = inplace_u16string<13U>{5, u'X'};
+
+    STATIC_REQUIRE(value == u"XXXXX");
+  }
+
+  SECTION("from a count and a u32 character") {
+    STATIC_REQUIRE(std::constructible_from<inplace_u32string<13U>, int, char32_t>);
+
+    constexpr auto value = inplace_u32string<13U>{5, U'X'};
+
+    STATIC_REQUIRE(value == U"XXXXX");
+  }
+
+  SECTION("from iterators") {
+    using namespace std::string_view_literals;
+    static constexpr auto input = "Hello, World!"sv;
+
+    STATIC_REQUIRE(std::constructible_from<inplace_string<13U>, decltype(input)::iterator, decltype(input)::iterator>);
+
+    constexpr auto value = inplace_string<13U>{input.begin(), input.end()};
+
+    STATIC_REQUIRE(value == "Hello, World!");
+  }
+
+  SECTION("from a string view") {
+    using namespace std::string_view_literals;
+    static constexpr auto input = "Hello, World!"sv;
+
+    STATIC_REQUIRE(std::constructible_from<inplace_string<13U>, decltype(input)>);
+
+    constexpr auto value = inplace_string<13U>{input};
+
+    STATIC_REQUIRE(value == "Hello, World!");
+  }
+
+  SECTION("from a range of characters") {
+    constexpr auto input = std::array{'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
+
+    STATIC_REQUIRE(std::constructible_from<inplace_string<13U>, decltype(input)::iterator, decltype(input)::iterator>);
+
+    constexpr auto value = inplace_string<13U>{input.begin(), input.end()};
+
+    STATIC_REQUIRE(value == "Hello, World!");
   }
 }
 
