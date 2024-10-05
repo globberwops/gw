@@ -1,0 +1,7 @@
+{
+  "cmake.configureArgs": [
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "-DGW_USE_CLANG_TIDY=ON",
+    "-DGW_USE_CPPCHECK=ON"
+  ]
+}

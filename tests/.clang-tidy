@@ -3,4 +3,5 @@ Checks: >
   -cppcoreguidelines-avoid-do-while,
   -cppcoreguidelines-avoid-magic-numbers,
   -readability-function-cognitive-complexity,
+  -readability-container-size-empty,
   -readability-magic-numbers
