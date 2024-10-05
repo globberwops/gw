@@ -15,6 +15,9 @@
 
 namespace gw {
 
+using namespace std::string_view_literals;
+using namespace std::string_literals;
+
 TEST_CASE("inplace_string is a trivial type", "[inplace_string]") {
   STATIC_REQUIRE(std::is_trivial_v<inplace_string<13U>>);
   STATIC_REQUIRE(std::is_trivial_v<inplace_wstring<13U>>);
@@ -39,97 +42,91 @@ TEST_CASE("inplace_string is constructed", "[inplace_string]") {
 
   SECTION("from a string literal") {
     STATIC_REQUIRE(std::constructible_from<inplace_string<13U>, const char*>);
-
     constexpr auto value = basic_inplace_string{"Hello, World!"};
-
     STATIC_REQUIRE(value == "Hello, World!");
   }
 
   SECTION("from a wstring literal") {
     STATIC_REQUIRE(std::constructible_from<inplace_wstring<13U>, const wchar_t*>);
-
     constexpr auto value = basic_inplace_string{L"Hello, World!"};
-
     STATIC_REQUIRE(value == L"Hello, World!");
   }
 
   SECTION("from a u16string literal") {
     STATIC_REQUIRE(std::constructible_from<inplace_u16string<13U>, const char16_t*>);
-
     constexpr auto value = basic_inplace_string{u"Hello, World!"};
-
     STATIC_REQUIRE(value == u"Hello, World!");
   }
 
   SECTION("from a u32string literal") {
     STATIC_REQUIRE(std::constructible_from<inplace_u32string<13U>, const char32_t*>);
-
     constexpr auto value = basic_inplace_string{U"Hello, World!"};
-
     STATIC_REQUIRE(value == U"Hello, World!");
   }
 
   SECTION("from a count and a character") {
     STATIC_REQUIRE(std::constructible_from<inplace_string<13U>, int, char>);
-
     constexpr auto value = inplace_string<13U>{5, 'X'};
-
     STATIC_REQUIRE(value == "XXXXX");
   }
 
   SECTION("from a count and a wide character") {
     STATIC_REQUIRE(std::constructible_from<inplace_wstring<13U>, int, wchar_t>);
-
     constexpr auto value = inplace_wstring<13U>{5, L'X'};
-
     STATIC_REQUIRE(value == L"XXXXX");
   }
 
   SECTION("from a count and a u16 character") {
     STATIC_REQUIRE(std::constructible_from<inplace_u16string<13U>, int, char16_t>);
-
     constexpr auto value = inplace_u16string<13U>{5, u'X'};
-
     STATIC_REQUIRE(value == u"XXXXX");
   }
 
   SECTION("from a count and a u32 character") {
     STATIC_REQUIRE(std::constructible_from<inplace_u32string<13U>, int, char32_t>);
-
     constexpr auto value = inplace_u32string<13U>{5, U'X'};
-
     STATIC_REQUIRE(value == U"XXXXX");
   }
 
   SECTION("from iterators") {
-    using namespace std::string_view_literals;
     static constexpr auto input = "Hello, World!"sv;
-
     STATIC_REQUIRE(std::constructible_from<inplace_string<13U>, decltype(input)::iterator, decltype(input)::iterator>);
-
     constexpr auto value = inplace_string<13U>{input.begin(), input.end()};
-
     STATIC_REQUIRE(value == "Hello, World!");
   }
 
   SECTION("from a string view") {
-    using namespace std::string_view_literals;
     static constexpr auto input = "Hello, World!"sv;
-
     STATIC_REQUIRE(std::constructible_from<inplace_string<13U>, decltype(input)>);
-
     constexpr auto value = inplace_string<13U>{input};
-
     STATIC_REQUIRE(value == "Hello, World!");
+  }
+
+  SECTION("from a wide string view") {
+    static constexpr auto input = L"Hello, World!"sv;
+    STATIC_REQUIRE(std::constructible_from<inplace_wstring<13U>, decltype(input)>);
+    constexpr auto value = inplace_wstring<13U>{input};
+    STATIC_REQUIRE(value == L"Hello, World!");
+  }
+
+  SECTION("from a string") {
+    auto input = "Hello, World!"s;
+    STATIC_REQUIRE(std::constructible_from<inplace_string<13U>, decltype(input)>);
+    auto value = inplace_string<13U>{input};
+    REQUIRE(value == "Hello, World!");
+  }
+
+  SECTION("from a wide string") {
+    auto input = L"Hello, World!"s;
+    STATIC_REQUIRE(std::constructible_from<inplace_wstring<13U>, decltype(input)>);
+    auto value = inplace_wstring<13U>{input};
+    REQUIRE(value == L"Hello, World!");
   }
 
   SECTION("from a range of characters") {
     constexpr auto input = std::array{'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
-
-    STATIC_REQUIRE(std::constructible_from<inplace_string<13U>, decltype(input)::iterator, decltype(input)::iterator>);
-
-    constexpr auto value = inplace_string<13U>{input.begin(), input.end()};
-
+    STATIC_REQUIRE(std::constructible_from<inplace_string<13U>, decltype(input)>);
+    constexpr auto value = inplace_string<13U>{input};
     STATIC_REQUIRE(value == "Hello, World!");
   }
 }
@@ -145,7 +142,6 @@ struct test_struct {
 
 TEST_CASE("inplace_string is used as NTTP", "[inplace_string]") {
   constexpr auto value = test_struct<"Hello, World!">{};
-
   STATIC_REQUIRE(value.k_str == "Hello, World!");
   STATIC_REQUIRE(value.k_str.size() == 13U);
   STATIC_REQUIRE(value.k_str.max_size() == 13U);
@@ -168,7 +164,6 @@ TEST_CASE("inplace_string elements are accessed ", "[inplace_string]") {
     STATIC_REQUIRE(value.at(10) == 'l');
     STATIC_REQUIRE(value.at(11) == 'd');
     STATIC_REQUIRE(value.at(12) == '!');
-
     REQUIRE_THROWS_AS(value.at(13), std::out_of_range);
   }
 
@@ -186,7 +181,6 @@ TEST_CASE("inplace_string elements are accessed ", "[inplace_string]") {
     STATIC_REQUIRE(value[10] == 'l');
     STATIC_REQUIRE(value[11] == 'd');
     STATIC_REQUIRE(value[12] == '!');
-
     REQUIRE_NOTHROW(value[13U]);
   }
 
@@ -203,7 +197,6 @@ TEST_CASE("inplace_string elements are accessed ", "[inplace_string]") {
 
 TEST_CASE("inplace_string is converted to std::basic_string_view", "[inplace_string]") {
   constexpr auto value = basic_inplace_string{"Hello, World!"};
-
   STATIC_REQUIRE(static_cast<std::basic_string_view<decltype(value)::value_type>>(value) == "Hello, World!");
 }
 
@@ -307,9 +300,7 @@ TEST_CASE("inplace_string is erased from", "[inplace_string]") {
 TEST_CASE("inplace_string is concatenated", "[inplace_string]") {
   constexpr auto value1 = inplace_string<7U>{"Hello, "};
   constexpr auto value2 = inplace_string<6U>{"World!"};
-
   constexpr auto value3 = value1 + value2;
-
   STATIC_REQUIRE(value3 == "Hello, World!");
 }
 
@@ -329,9 +320,7 @@ TEST_CASE("inplace_string is pushed back into", "[inplace_string]") {
 
 TEST_CASE("inplace_string is popped back from", "[inplace_string]") {
   auto value = inplace_string<13U>{"Hello, World!"};
-
   value.pop_back();
-
   REQUIRE(value == "Hello, World");
 }
 
@@ -350,11 +339,8 @@ TEST_CASE("inplace_string is appended to", "[inplace_string]") {
 
 TEST_CASE("inplace_string is concatenated with the += operator", "[inplace_string]") {
   auto value = inplace_string<13U>{"Hello, "};
-
   value += inplace_string<6U>{"World!"};
-
   REQUIRE(value == "Hello, World!");
-
   REQUIRE_THROWS_AS(value += inplace_string<1U>{"!"}, std::length_error);
 }
 
@@ -379,9 +365,7 @@ TEST_CASE("inplace_string is resized", "[inplace_string]") {
 TEST_CASE("inplace_string is swapped", "[inplace_string]") {
   auto value1 = inplace_string<15U>{"Hello, World!"};
   auto value2 = inplace_string<15U>{"Goodbye, World!"};
-
   value1.swap(value2);
-
   REQUIRE(value1 == "Goodbye, World!");
   REQUIRE(value2 == "Hello, World!");
 }
@@ -392,14 +376,11 @@ TEST_CASE("inplace_string is searched for a substring", "[inplace_string]") {
   SECTION("with an inplace_string") {
     constexpr auto k_hello = inplace_string<5U>{"Hello"};
     constexpr auto k_world = inplace_string<5U>{"World"};
-
     STATIC_REQUIRE(value.find(k_hello) == 0U);
     STATIC_REQUIRE(value.find(k_world) == 7U);
   }
 
   SECTION("with a string_view") {
-    using namespace std::string_view_literals;
-
     STATIC_REQUIRE(value.find("Hello"sv) == 0U);
     STATIC_REQUIRE(value.find("World"sv) == 7U);
     STATIC_REQUIRE(value.find("Goodbye"sv) == value.npos);
@@ -430,14 +411,11 @@ TEST_CASE("inplace_string is searched for a substring in reverse", "[inplace_str
   SECTION("with an inplace_string") {
     constexpr auto k_hello = inplace_string<5U>{"Hello"};
     constexpr auto k_world = inplace_string<5U>{"World"};
-
     STATIC_REQUIRE(value.rfind(k_hello) == 0U);
     REQUIRE(value.rfind(k_world) == 7U);
   }
 
   SECTION("with a string_view") {
-    using namespace std::string_view_literals;
-
     STATIC_REQUIRE(value.rfind("Hello"sv) == 0U);
     STATIC_REQUIRE(value.rfind("World"sv) == 7U);
     STATIC_REQUIRE(value.rfind("Goodbye"sv) == value.npos);
@@ -468,14 +446,11 @@ TEST_CASE("inplace_string is searched for any character", "[inplace_string]") {
   SECTION("with an inplace_string") {
     constexpr auto k_hello = inplace_string<5U>{"Hello"};
     constexpr auto k_world = inplace_string<5U>{"World"};
-
     STATIC_REQUIRE(value.find_first_of(k_hello) == 0U);
     STATIC_REQUIRE(value.find_first_of(k_world) == 2U);
   }
 
   SECTION("with a string_view") {
-    using namespace std::string_view_literals;
-
     STATIC_REQUIRE(value.find_first_of("Hello"sv) == 0U);
     STATIC_REQUIRE(value.find_first_of("World"sv) == 2U);
     STATIC_REQUIRE(value.find_first_of("Goodbye"sv) == 1U);
@@ -490,42 +465,33 @@ TEST_CASE("inplace_string is searched for any character", "[inplace_string]") {
 
 TEST_CASE("inplace_string is streamed out", "[inplace_string]") {
   constexpr auto value = inplace_string<13U>{"Hello, World!"};
-
   auto stream = std::ostringstream{};
   stream << value;
-
   REQUIRE(stream.str() == "Hello, World!");
 }
 
 TEST_CASE("inplace_string is streamed in", "[inplace_string]") {
   auto value = inplace_string<13U>{};
-
   auto stream = std::istringstream{"Hello, World!"};
   stream >> value;
-
   REQUIRE(value == "Hello, World!");
 }
 
 TEST_CASE("inplace_string is hashed", "[inplace_string]") {
   constexpr auto value = inplace_string<13U>{"Hello, World!"};
-
   REQUIRE(std::hash<inplace_string<13U>>{}(value) == std::hash<std::string_view>{}("Hello, World!"));
 }
 
 TEST_CASE("inplace_string is formatted", "[inplace_string]") {
   SECTION("with char") {
     constexpr auto value = inplace_string<13U>{"Hello, World!"};
-
     STATIC_REQUIRE(std::formattable<inplace_string<13U>, char>);
-
     REQUIRE(std::format("{}", value) == "Hello, World!");
   }
 
   SECTION("with wchar_t") {
     constexpr auto value = inplace_wstring<13U>{L"Hello, World!"};
-
     STATIC_REQUIRE(std::formattable<inplace_wstring<13U>, wchar_t>);
-
     REQUIRE(std::format(L"{}", value) == L"Hello, World!");
   }
 }
