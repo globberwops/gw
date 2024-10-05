@@ -594,45 +594,24 @@ class basic_inplace_string {
   }
 };
 
-//
-// Deduction guides
-//
-
 /// \brief Deduction guide for basic_inplace_string.
-///
 template <typename CharT, std::size_t N>
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)
 basic_inplace_string(const CharT (&)[N]) -> basic_inplace_string<N - 1U, CharT>;
 
-//
-// Type aliases
-//
-
 /// \brief A fixed-size string of `char` that stores the data in-place.
-///
-/// \tparam N The size of the string.
-///
 template <std::size_t N>
 using inplace_string = basic_inplace_string<N, char>;
 
 /// \brief A fixed-size string of `wchar_t` that stores the data in-place.
-///
-/// \tparam N The size of the string.
-///
 template <std::size_t N>
 using inplace_wstring = basic_inplace_string<N, wchar_t>;
 
 /// \brief A fixed-size string of `char16_t` that stores the data in-place.
-///
-/// \tparam N The size of the string.
-///
 template <std::size_t N>
 using inplace_u16string = basic_inplace_string<N, char16_t>;
 
 /// \brief A fixed-size string of `char32_t` that stores the data in-place.
-///
-/// \tparam N The size of the string.
-///
 template <std::size_t N>
 using inplace_u32string = basic_inplace_string<N, char32_t>;
 
@@ -640,40 +619,27 @@ using inplace_u32string = basic_inplace_string<N, char32_t>;
 
 namespace std {
 
-//
-// Hash calculation
-//
-
 /// \brief Hash support for `inplace_string`.
-///
 template <std::size_t N, class CharT>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 struct hash<::gw::basic_inplace_string<N, CharT>> {
   /// \brief Calculate the hash of the `inplace_string` object.
-  ///
   [[nodiscard]] auto inline operator()(const ::gw::basic_inplace_string<N, CharT>& str) const noexcept -> size_t {
     return hash<string_view>{}(static_cast<std::basic_string_view<CharT>>(str));
   }
 };
 
-//
-// String conversion
-//
-
 /// \brief Format the `inplace_string` object.
-///
 template <std::size_t N, class CharT>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 struct formatter<::gw::basic_inplace_string<N, CharT>, CharT> {
   /// \brief Parse the format string.
-  ///
   template <class ParseContext>
   constexpr auto parse(ParseContext& context) const -> ParseContext::iterator {
     return context.begin();
   }
 
   /// \brief Format the `inplace_string` object.
-  ///
   template <class FormatContext>
   constexpr auto format(const ::gw::basic_inplace_string<N, CharT>& str,
                         FormatContext& context) const -> FormatContext::iterator {
