@@ -444,7 +444,9 @@ TEST_CASE("strong_types are formatted", "[strong_type]") {
 
     REQUIRE(std::format("{}", test_t{1}) == "1");
 
+#if __cplusplus > 202002L
     STATIC_REQUIRE(std::formattable<test_t, char>);
+#endif  // __cplusplus > 202002L
   }
 
   SECTION("named strong_type") {
@@ -455,6 +457,8 @@ TEST_CASE("strong_types are formatted", "[strong_type]") {
 
     REQUIRE(std::format("{}", test_t{1}) == "TestType: 1");
 
+#if __cplusplus > 202002L
     STATIC_REQUIRE(std::formattable<test_t, char>);
+#endif  // __cplusplus > 202002L
   }
 }

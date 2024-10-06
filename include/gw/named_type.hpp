@@ -951,7 +951,9 @@ struct formatter<::gw::named_type<T, Name>, CharT> {
   ///
   template <class FormatContext>
   auto format(const ::gw::named_type<T, Name>& named_type, FormatContext& context) const -> FormatContext::iterator
+#if __cplusplus > 202002L
     requires std::formattable<T, CharT>
+#endif  // __cplusplus > 202002L
   {
     if (with_name) {
       return format_to(context.out(), "{}: {}", named_type.name(), named_type.value());

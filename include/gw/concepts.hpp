@@ -59,10 +59,4 @@ concept named = requires(T value) {
   { value.name() } -> std::convertible_to<std::string>;
 };
 
-/// \brief Concept for string convertable types.
-template <typename T>
-concept string_convertable = requires(T value) {
-  { std::to_string(value) } -> std::same_as<std::string>;
-};
-
 }  // namespace gw

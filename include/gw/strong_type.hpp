@@ -903,7 +903,7 @@ struct hash<::gw::strong_type<T, Tag>> {
 
 /// \brief Format the `gw::strong_type` object.
 ///
-template <std::formattable<char> T, typename Tag, class CharT>
+template <typename T, typename Tag, class CharT>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 struct formatter<::gw::strong_type<T, Tag>, CharT> {
   /// \brief Parse the format string.
@@ -916,7 +916,11 @@ struct formatter<::gw::strong_type<T, Tag>, CharT> {
   /// \brief Format the `gw::strong_type` object.
   ///
   template <class FormatContext>
-  auto format(const ::gw::strong_type<T, Tag>& strong_type, FormatContext& context) const -> FormatContext::iterator {
+  auto format(const ::gw::strong_type<T, Tag>& strong_type, FormatContext& context) const -> FormatContext::iterator
+#if __cplusplus > 202002L
+    requires std::formattable<T, CharT>
+#endif  // __cplusplus > 202002L
+  {
     if constexpr (::gw::named<Tag>) {
       return format_to(context.out(), "{}: {}", Tag::name(), strong_type.value());
     }

@@ -457,8 +457,10 @@ TEST_CASE("named_types are streamed", "[named_type]") {
 TEST_CASE("named_types are formatted", "[named_type]") {
   using test_t = gw::named_type<int, "TestType">;
 
+#if __cplusplus > 202002L
   STATIC_REQUIRE(std::formattable<test_t, char>);
   STATIC_REQUIRE(std::formattable<test_t, wchar_t>);
+#endif  // __cplusplus > 202002L
 
   SECTION("value only") {  //
     REQUIRE(std::format("{}", test_t{1}) == "1");

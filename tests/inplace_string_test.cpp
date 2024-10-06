@@ -568,13 +568,17 @@ TEST_CASE("inplace_string is hashed", "[inplace_string]") {
 TEST_CASE("inplace_string is formatted", "[inplace_string]") {
   SECTION("with char") {
     constexpr auto value = inplace_string<13U>{"Hello, World!"};
+#if __cplusplus > 202002L
     STATIC_REQUIRE(std::formattable<inplace_string<13U>, char>);
+#endif  // __cplusplus > 202002L
     REQUIRE(std::format("{}", value) == "Hello, World!");
   }
 
   SECTION("with wchar_t") {
     constexpr auto value = inplace_wstring<13U>{L"Hello, World!"};
+#if __cplusplus > 202002L
     STATIC_REQUIRE(std::formattable<inplace_wstring<13U>, wchar_t>);
+#endif  // __cplusplus > 202002L
     REQUIRE(std::format(L"{}", value) == L"Hello, World!");
   }
 }

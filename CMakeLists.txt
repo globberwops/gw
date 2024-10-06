@@ -14,6 +14,10 @@ option(GW_INSTALL "Generate install target" ON)
 option(GW_USE_CLANG_TIDY "Use clang-tidy for static analysis" OFF)
 option(GW_USE_CPPCHECK "Use cppcheck for static analysis" OFF)
 option(GW_VERIFY_INTERFACE_HEADER_SETS "Verify interface header sets" ${PROJECT_IS_TOP_LEVEL})
+set(GW_CXX_STANDARD
+    20
+    CACHE STRING "C++ standard to use")
+set_property(CACHE GW_CXX_STANDARD PROPERTY STRINGS 20 23)
 
 if(GW_USE_CLANG_TIDY)
   find_program(CLANG_TIDY_EXE NAMES clang-tidy clang-tidy-18)
@@ -39,7 +43,7 @@ endif()
 add_library(inplace_string INTERFACE)
 add_library(gw::inplace_string ALIAS inplace_string)
 target_sources(inplace_string INTERFACE FILE_SET HEADERS BASE_DIRS include FILES include/gw/inplace_string.hpp)
-target_compile_features(inplace_string INTERFACE cxx_std_23)
+target_compile_features(inplace_string INTERFACE cxx_std_${GW_CXX_STANDARD})
 target_include_directories(inplace_string INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 set_target_properties(inplace_string PROPERTIES VERIFY_INTERFACE_HEADER_SETS ${GW_VERIFY_INTERFACE_HEADER_SETS})
 
@@ -57,7 +61,7 @@ target_sources(
             FILES
             include/gw/concepts.hpp
             include/gw/named_type.hpp)
-target_compile_features(named_type INTERFACE cxx_std_23)
+target_compile_features(named_type INTERFACE cxx_std_${GW_CXX_STANDARD})
 target_include_directories(named_type INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 set_target_properties(named_type PROPERTIES VERIFY_INTERFACE_HEADER_SETS ${GW_VERIFY_INTERFACE_HEADER_SETS})
 
@@ -75,7 +79,7 @@ target_sources(
             FILES
             include/gw/concepts.hpp
             include/gw/strong_type.hpp)
-target_compile_features(strong_type INTERFACE cxx_std_23)
+target_compile_features(strong_type INTERFACE cxx_std_${GW_CXX_STANDARD})
 target_include_directories(strong_type INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 set_target_properties(strong_type PROPERTIES VERIFY_INTERFACE_HEADER_SETS ${GW_VERIFY_INTERFACE_HEADER_SETS})
 
