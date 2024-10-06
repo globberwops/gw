@@ -71,7 +71,7 @@ class basic_inplace_string {
           std::format("basic_inplace_string::basic_inplace_string: count (which is {}) > max_size (which is {})", count,
                       max_size())};
     }
-    std::fill_n(begin(), count, ch);
+    std::ranges::fill_n(begin(), count, ch);
   }
 
   /// \brief Construct the string with the characters from the character string pointed to by `str`.
@@ -109,7 +109,7 @@ class basic_inplace_string {
   /// \throw std::length_error If the size of the range would exceed `max_size`.
   template <std::input_iterator InputIt>
   constexpr explicit basic_inplace_string(InputIt first, InputIt last) : m_data{} {
-    const auto str_size = std::distance(first, last);
+    const auto str_size = std::ranges::distance(first, last);
 
     if (str_size > max_size()) {
       throw std::length_error{
@@ -117,7 +117,7 @@ class basic_inplace_string {
                       str_size, max_size())};
     }
 
-    std::copy(first, last, begin());
+    std::ranges::copy(first, last, begin());
   }
 
   /// \brief Construct the string with the contents of the string view.
@@ -132,7 +132,8 @@ class basic_inplace_string {
   template <std::ranges::range R>
     requires(!std::is_convertible_v<const R&, std::basic_string_view<value_type, traits_type>> &&
              std::convertible_to<std::ranges::range_value_t<R>, value_type>)
-  constexpr explicit basic_inplace_string(const R& range) : basic_inplace_string(std::begin(range), std::end(range)) {}
+  constexpr explicit basic_inplace_string(const R& range)
+      : basic_inplace_string(std::ranges::begin(range), std::ranges::end(range)) {}
 
   /// \brief Copy constructor.
   constexpr basic_inplace_string(const basic_inplace_string& other) noexcept = default;
@@ -141,7 +142,7 @@ class basic_inplace_string {
   constexpr basic_inplace_string(basic_inplace_string&& other) noexcept = default;
 
   /// \brief Destructor.
-  ~basic_inplace_string() noexcept = default;
+  constexpr ~basic_inplace_string() noexcept = default;
 
   /// \brief Copy assignment operator.
   constexpr auto operator=(const basic_inplace_string& other) noexcept -> basic_inplace_string& = default;
@@ -227,15 +228,15 @@ class basic_inplace_string {
 
   /// \brief Get an iterator to the end of the string.
   /// \return An iterator to the end of the string.
-  constexpr auto end() noexcept -> iterator { return std::next(data(), size()); }
+  constexpr auto end() noexcept -> iterator { return std::ranges::next(data(), size()); }
 
   /// \brief Get a const iterator to the end of the string.
   /// \return A const iterator to the end of the string.
-  constexpr auto end() const noexcept -> const_iterator { return std::next(data(), size()); }
+  constexpr auto end() const noexcept -> const_iterator { return std::ranges::next(data(), size()); }
 
   /// \brief Get a const iterator to the end of the string.
   /// \return A const iterator to the end of the string.
-  constexpr auto cend() const noexcept -> const_iterator { return std::next(data(), size()); }
+  constexpr auto cend() const noexcept -> const_iterator { return std::ranges::next(data(), size()); }
 
   /// \brief Get a reverse iterator to the end of the string.
   /// \return A reverse iterator to the end of the string.
@@ -280,6 +281,7 @@ class basic_inplace_string {
   /// \brief Reserve storage for the string.
   /// \param new_cap The new capacity of the string.
   /// \throw std::length_error If `new_cap` is greater than `max_size`.
+  /// \note This function does nothing.
   constexpr void reserve(size_type new_cap) {
     if (new_cap > max_size()) {
       throw std::length_error{std::format(
@@ -304,15 +306,107 @@ class basic_inplace_string {
   /// \param ch The character to insert.
   /// \throw std::length_error If the size of the string would exceed `max_size`.
   constexpr void insert(size_type index, size_type count, CharT ch) {
-    const auto projected_size = size() + count;
-    if (projected_size > max_size()) {
-      throw std::length_error{
-          std::format("basic_inplace_string::insert: projected_size (which is {}) > max_size (which is {})",
-                      projected_size, max_size())};
+    const auto new_size = size() + count;
+    if (new_size > max_size()) {
+      throw std::length_error{std::format(
+          "basic_inplace_string::insert: new_size (which is {}) > max_size (which is {})", new_size, max_size())};
     }
-    std::copy_backward(std::next(begin(), index), end(), std::next(end(), count));
-    std::fill_n(std::next(begin(), index), count, ch);
-    m_data[projected_size] = value_type{};  // Ensure null termination
+    std::ranges::copy_backward(std::ranges::next(begin(), index), end(), std::ranges::next(end(), count));
+    std::ranges::fill_n(std::ranges::next(begin(), index), count, ch);
+    m_data[new_size] = value_type{};  // Ensure null termination
+  }
+
+  /// \brief Insert the null-terminated character string pointed to by `str` at the position `index`.
+  /// \param index The position to insert the characters at.
+  /// \param str The character string to insert.
+  /// \return A reference to the string.
+  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  auto insert(size_type index, const value_type* str) -> basic_inplace_string& {
+    const auto str_size = traits_type::length(str);
+    return insert(index, str, str_size);
+  }
+
+  /// \brief Insert the characters in the range [str, str + count) at the position `index`.
+  /// \param index The position to insert the characters at.
+  /// \param str The character string to insert.
+  /// \param count The number of characters to insert.
+  /// \return A reference to the string.
+  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  auto insert(size_type index, const value_type* str, size_type count) -> basic_inplace_string& {
+    const auto new_size = size() + count;
+    if (new_size > max_size()) {
+      throw std::length_error{std::format(
+          "basic_inplace_string::insert: new_size (which is {}) > max_size (which is {})", new_size, max_size())};
+    }
+    std::ranges::copy_backward(std::ranges::next(begin(), index), end(), std::ranges::next(end(), count));
+    traits_type::copy(std::ranges::next(begin(), index), str, count);
+    m_data[new_size] = value_type{};  // Ensure null termination
+    return *this;
+  }
+
+  /// \brief Insert the inplace string at the position `index`.
+  /// \tparam N2 The size of the string.
+  /// \param index The position to insert the characters at.
+  /// \param str The string to insert.
+  /// \return A reference to the string.
+  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  template <std::size_t N2>
+  auto insert(size_type index, const basic_inplace_string<N2, value_type, traits_type>& str) -> basic_inplace_string& {
+    return insert(index, str.data(), str.size());
+  }
+
+  /// \brief Insert the character `ch` before the element (if any) pointed by `pos`.
+  /// \param pos The position to insert the characters before.
+  /// \param ch The character to insert.
+  /// \return An iterator to the first inserted character.
+  auto insert(const_iterator pos, value_type ch) -> iterator { return insert(pos, 1U, ch); }
+
+  /// \brief Insert `count` copies of character `ch` before the element (if any) pointed by `pos`.
+  /// \param pos The position to insert the characters before.
+  /// \param count The number of characters to insert.
+  /// \param ch The character to insert.
+  /// \return An iterator to the first inserted character.
+  auto insert(const_iterator pos, size_type count, value_type ch) -> iterator {
+    const auto index = std::ranges::distance(cbegin(), pos);
+    insert(index, count, ch);
+    return std::ranges::next(begin(), index);
+  }
+
+  /// \brief Insert the characters from the range [`first`, `last`) before the element (if any) pointed by `pos`.
+  /// \tparam InputIt The type of the iterators.
+  /// \param pos The position to insert the characters before.
+  /// \param first The beginning of the range.
+  /// \param last The end of the range.
+  /// \return An iterator to the first inserted character or `pos` if no characters were inserted.
+  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  template <std::input_iterator InputIt>
+  auto insert(const_iterator pos, InputIt first, InputIt last) -> iterator
+    requires std::convertible_to<std::iter_value_t<InputIt>, value_type>
+  {
+    const auto index = std::ranges::distance(cbegin(), pos);
+    const auto count = std::ranges::distance(first, last);
+    const auto new_size = size() + count;
+    if (new_size > max_size()) {
+      throw std::length_error{std::format(
+          "basic_inplace_string::insert: new_size (which is {}) > max_size (which is {})", new_size, max_size())};
+    }
+    std::ranges::copy_backward(std::ranges::next(begin(), index), end(), std::ranges::next(end(), count));
+    std::ranges::copy(first, last, std::ranges::next(begin(), index));
+    m_data[new_size] = value_type{};  // Ensure null termination
+    return std::ranges::next(begin(), index);
+  }
+
+  /// \brief Insert the characters from the range before the element (if any) pointed by `pos`.
+  /// \tparam R The type of the range.
+  /// \param pos The position to insert the characters before.
+  /// \param range The range to insert.
+  /// \return An iterator to the first inserted character or `pos` if no characters were inserted.
+  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  template <std::ranges::input_range R>
+  constexpr auto insert_range(const_iterator pos, R&& range) -> iterator
+    requires std::convertible_to<std::ranges::range_value_t<R>, value_type>
+  {
+    return insert(pos, std::ranges::begin(range), std::ranges::end(range));
   }
 
   /// \brief Erase `count` characters from the position `index`.
@@ -324,24 +418,23 @@ class basic_inplace_string {
       throw std::out_of_range{
           std::format("basic_inplace_string::erase: index (which is {}) >= size (which is {})", index, size())};
     }
-    const auto no_of_chars_to_erase = std::min(count, size() - index);
-    const auto projected_size = size() - no_of_chars_to_erase;
-    std::copy(std::next(begin(), index + count), end(), std::next(begin(), index));
-    m_data[projected_size] = value_type{};  // Ensure null termination
+    const auto no_of_chars_to_erase = std::ranges::min(count, size() - index);
+    const auto new_size = size() - no_of_chars_to_erase;
+    std::ranges::copy(std::ranges::next(begin(), index + count), end(), std::ranges::next(begin(), index));
+    m_data[new_size] = value_type{};  // Ensure null termination
   }
 
   /// \brief Append a character to the end of the string.
   /// \param ch The character to append.
   /// \throw std::length_error If the size of the string would exceed `max_size`.
   constexpr void push_back(value_type ch) {
-    const auto projected_size = size() + 1;
-    if (projected_size > max_size()) {
-      throw std::length_error{
-          std::format("basic_inplace_string::push_back: projected_size (which is {}) > max_size (which is {})",
-                      projected_size, max_size())};
+    const auto new_size = size() + 1;
+    if (new_size > max_size()) {
+      throw std::length_error{std::format(
+          "basic_inplace_string::push_back: new_size (which is {}) > max_size (which is {})", new_size, max_size())};
     }
     m_data[size()] = ch;
-    m_data[projected_size] = value_type{};  // Ensure null termination
+    m_data[new_size] = value_type{};  // Ensure null termination
   }
 
   /// \brief Remove the last character from the string.
@@ -353,14 +446,13 @@ class basic_inplace_string {
   /// \throw std::length_error If the size of the string would exceed `max_size`.
   template <std::size_t N2>
   constexpr void append(const basic_inplace_string<N2, value_type, traits_type>& str) {
-    const auto projected_size = size() + str.size();
-    if (projected_size > max_size()) {
-      throw std::length_error{
-          std::format("basic_inplace_string::append: projected_size (which is {}) > max_size (which is {})",
-                      projected_size, max_size())};
+    const auto new_size = size() + str.size();
+    if (new_size > max_size()) {
+      throw std::length_error{std::format(
+          "basic_inplace_string::append: new_size (which is {}) > max_size (which is {})", new_size, max_size())};
     }
     traits_type::copy(end(), str.data(), str.size());
-    m_data[projected_size] = value_type{};  // Ensure null termination
+    m_data[new_size] = value_type{};  // Ensure null termination
   }
 
   /// \brief Append a string to the end of the string.
@@ -369,14 +461,13 @@ class basic_inplace_string {
   /// \throw std::length_error If the size of the string would exceed `max_size`.
   template <std::size_t N2>
   constexpr auto operator+=(const basic_inplace_string<N2, value_type, traits_type>& str) -> basic_inplace_string& {
-    const auto projected_size = size() + str.size();
-    if (projected_size > max_size()) {
-      throw std::length_error{
-          std::format("basic_inplace_string::operator+=: projected_size (which is {}) > max_size (which is {})",
-                      projected_size, max_size())};
+    const auto new_size = size() + str.size();
+    if (new_size > max_size()) {
+      throw std::length_error{std::format(
+          "basic_inplace_string::operator+=: new_size (which is {}) > max_size (which is {})", new_size, max_size())};
     }
     traits_type::copy(end(), str.data(), str.size());
-    m_data[projected_size] = value_type{};  // Ensure null termination
+    m_data[new_size] = value_type{};  // Ensure null termination
     return *this;
   }
 
@@ -401,7 +492,7 @@ class basic_inplace_string {
           std::format("basic_inplace_string::resize: count (which is {}) > max_size (which is {})", count, max_size())};
     }
     if (count > size()) {
-      std::fill_n(end(), count - size(), ch);
+      std::ranges::fill_n(end(), count - size(), ch);
     }
     m_data[count] = value_type{};  // Ensure null termination
   }
@@ -454,8 +545,8 @@ class basic_inplace_string {
   /// \param ch The character to find.
   /// \param pos The position to start searching from.
   /// \return The position of the first occurrence of the character, or `npos` if the character is not found.
-  constexpr auto find(value_type ch, size_type pos = npos) const noexcept -> size_type {
-    return static_cast<std::basic_string_view<value_type, traits_type>>(*this).rfind(ch, pos);
+  constexpr auto find(value_type ch, size_type pos = 0) const noexcept -> size_type {
+    return static_cast<std::basic_string_view<value_type, traits_type>>(*this).find(ch, pos);
   }
 
   /// \brief Find the last substring equal to `str`.
@@ -540,10 +631,11 @@ class basic_inplace_string {
   friend constexpr auto operator+(const basic_inplace_string& lhs,
                                   const basic_inplace_string<N2, value_type, traits_type>& rhs)
       -> basic_inplace_string<N + N2, value_type, traits_type> {
+    const auto new_size = lhs.size() + rhs.size();
     basic_inplace_string<N + N2, value_type, traits_type> result;
     traits_type::copy(result.data(), lhs.data(), lhs.size());
-    traits_type::copy(std::next(result.data(), lhs.size()), rhs.data(), rhs.size());
-    result[lhs.size() + rhs.size()] = value_type{};  // Ensure null termination
+    traits_type::copy(std::ranges::next(result.data(), lhs.size()), rhs.data(), rhs.size());
+    result[new_size] = value_type{};  // Ensure null termination
     return result;
   }
 
@@ -552,7 +644,7 @@ class basic_inplace_string {
   /// \param rhs The second string to compare.
   /// \return True if the strings are equal, false otherwise.
   friend constexpr auto operator==(const basic_inplace_string& lhs, const basic_inplace_string& rhs) noexcept -> bool {
-    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    return std::ranges::equal(lhs.begin(), lhs.end(), rhs.begin());
   }
 
   /// \brief Compare the string to a string view.
@@ -561,7 +653,7 @@ class basic_inplace_string {
   /// \return True if the strings are equal, false otherwise.
   friend constexpr auto operator==(const basic_inplace_string& lhs,
                                    std::basic_string_view<value_type, traits_type> rhs) noexcept -> bool {
-    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    return std::ranges::equal(lhs.begin(), lhs.end(), rhs.begin());
   }
 
   /// \brief Compare the string to a string view.
@@ -646,16 +738,16 @@ class basic_inplace_string {
   /// \return The input stream.
   friend inline auto operator>>(std::basic_istream<value_type, traits_type>& istream,
                                 basic_inplace_string& rhs) -> std::basic_istream<value_type, traits_type>& {
-    const auto projected_size = rhs.size() + istream.rdbuf()->in_avail();
-    if (projected_size > rhs.max_size()) {
+    const auto new_size = rhs.size() + istream.rdbuf()->in_avail();
+    if (new_size > rhs.max_size()) {
       throw std::length_error{
-          std::format("basic_inplace_string::operator>>: projected_size (which is {}) > max_size (which is {})",
-                      projected_size, rhs.max_size())};
+          std::format("basic_inplace_string::operator>>: new_size (which is {}) > max_size (which is {})", new_size,
+                      rhs.max_size())};
     }
     const auto it = std::istreambuf_iterator<value_type, traits_type>{istream};
     const auto end = std::istreambuf_iterator<value_type, traits_type>{};
-    std::copy(it, end, rhs.end());
-    rhs[projected_size] = value_type{};  // Ensure null termination
+    std::ranges::copy(it, end, rhs.end());
+    rhs[new_size] = value_type{};  // Ensure null termination
     return istream;
   }
 };
@@ -691,7 +783,7 @@ template <std::size_t N, class CharT>
 struct hash<::gw::basic_inplace_string<N, CharT>> {
   /// \brief Calculate the hash of the `inplace_string` object.
   [[nodiscard]] auto inline operator()(const ::gw::basic_inplace_string<N, CharT>& str) const noexcept -> size_t {
-    return hash<string_view>{}(static_cast<std::basic_string_view<CharT>>(str));
+    return hash<basic_string_view<CharT>>{}(static_cast<basic_string_view<CharT>>(str));
   }
 };
 
@@ -709,7 +801,7 @@ struct formatter<::gw::basic_inplace_string<N, CharT>, CharT> {
   template <class FormatContext>
   constexpr auto format(const ::gw::basic_inplace_string<N, CharT>& str,
                         FormatContext& context) const -> FormatContext::iterator {
-    return std::ranges::copy(static_cast<std::basic_string_view<CharT>>(str), context.out()).out;
+    return ranges::copy(str, context.out()).out;
   }
 };
 

@@ -264,13 +264,96 @@ TEST_CASE("inplace_string's size is modified", "[inplace_string]") {
 TEST_CASE("inplace_string is inserted into", "[inplace_string]") {
   auto value = inplace_string<18U>{"Hello, World!"};
 
-  SECTION("in bounds") {
-    value.insert(7U, 5U, 'X');
+  SECTION("with an index, a count, and a character - in bounds") {
+    static constexpr auto index = 7U;
+    static constexpr auto count = 5U;
+    static constexpr auto ch = 'X';
+    value.insert(index, count, ch);
     REQUIRE(value == "Hello, XXXXXWorld!");
   }
 
-  SECTION("out of bounds") {  //
-    REQUIRE_THROWS_AS(value.insert(7U, 7U, 'X'), std::length_error);
+  SECTION("with an index, a count, and a character - out of bounds") {
+    static constexpr auto index = 7U;
+    static constexpr auto count = 7U;
+    static constexpr auto ch = 'X';
+    REQUIRE_THROWS_AS(value.insert(index, count, ch), std::length_error);
+  }
+
+  SECTION("with an index and a character string - in bounds") {
+    static constexpr auto index = 7U;
+    static constexpr auto str = "XXXXX";
+    value.insert(index, str);
+    REQUIRE(value == "Hello, XXXXXWorld!");
+  }
+
+  SECTION("with an index and a character string - out of bounds") {
+    static constexpr auto index = 7U;
+    static constexpr auto str = "XXXXXX";
+    REQUIRE_THROWS_AS(value.insert(index, str), std::length_error);
+  }
+
+  SECTION("with an index, a character string, and a count - in bounds") {
+    static constexpr auto index = 7U;
+    static constexpr auto str = "XXXXXX";
+    static constexpr auto count = 5U;
+    value.insert(index, str, count);
+    REQUIRE(value == "Hello, XXXXXWorld!");
+  }
+
+  SECTION("with an index, a character string, and a count - out of bounds") {
+    static constexpr auto index = 7U;
+    static constexpr auto str = "XXXXXX";
+    static constexpr auto count = 6U;
+    REQUIRE_THROWS_AS(value.insert(index, str, count), std::length_error);
+  }
+
+  SECTION("with a position and a character") {
+    static constexpr auto ch = 'X';
+    const auto* const pos = value.insert(value.cbegin(), ch);
+    REQUIRE(pos == value.cbegin());
+    REQUIRE(value == "XHello, World!");
+  }
+
+  SECTION("with a position, a count, and a character  - in bounds") {
+    static constexpr auto count = 5U;
+    static constexpr auto ch = 'X';
+    const auto* const pos = value.insert(value.cbegin(), count, ch);
+    REQUIRE(pos == value.cbegin());
+    REQUIRE(value == "XXXXXHello, World!");
+  }
+
+  SECTION("with a position, a count, and a character  - out of bounds") {
+    static constexpr auto count = 6U;
+    static constexpr auto ch = 'X';
+    REQUIRE_THROWS_AS(value.insert(value.cbegin(), count, ch), std::length_error);
+  }
+
+  SECTION("with a position and iterators - in bounds") {
+    static constexpr auto range = "XXXXX"sv;
+    static constexpr auto index = 7U;
+    const auto* const pos_iter = std::ranges::next(value.begin(), index);
+    const auto* const pos = value.insert(pos_iter, range.begin(), range.end());
+    REQUIRE(pos == pos_iter);
+    REQUIRE(value == "Hello, XXXXXWorld!");
+  }
+
+  SECTION("with a position and iterators - out of bounds") {
+    static constexpr auto range = "XXXXXX"sv;
+    static constexpr auto index = 7U;
+    const auto* const pos_iter = std::ranges::next(value.begin(), index);
+    REQUIRE_THROWS_AS(value.insert(pos_iter, range.begin(), range.end()), std::length_error);
+  }
+
+  SECTION("with a range - in bounds") {
+    static constexpr auto range = "XXXXX"sv;
+    const auto* const pos = value.insert_range(value.cbegin(), range);
+    REQUIRE(pos == value.cbegin());
+    REQUIRE(value == "XXXXXHello, World!");
+  }
+
+  SECTION("with a range - out of bounds") {
+    static constexpr auto range = "XXXXXX"sv;
+    REQUIRE_THROWS_AS(value.insert_range(value.cbegin(), range), std::length_error);
   }
 }
 

@@ -17,8 +17,8 @@ CheckOptions:
   cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor: true
   hicpp-special-member-functions.AllowSoleDefaultDtor: true
   misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
-  readability-identifier-length.IgnoredParameterNames: ^os|ch$
-  readability-identifier-length.IgnoredVariableNames: ^it$
+  readability-identifier-length.IgnoredParameterNames: ^ch|os$
+  readability-identifier-length.IgnoredVariableNames: ^ch|it$
   readability-identifier-naming.ClassCase: lower_case
   readability-identifier-naming.ConceptCase: lower_case
   readability-identifier-naming.ConstantCase: lower_case
