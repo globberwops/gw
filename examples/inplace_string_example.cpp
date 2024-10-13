@@ -14,6 +14,7 @@ auto main() -> int {
   print(name);
   print(address);
 
-  static_assert(std::is_trivially_copyable_v<decltype(name)>);
-  static_assert(std::is_trivially_copyable_v<decltype(address)>);
+  // gw::inplace_strings are trivial
+  static_assert(std::is_trivial_v<decltype(name)>);
+  static_assert(std::is_trivial_v<decltype(address)>);
 }
