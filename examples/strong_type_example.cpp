@@ -1,23 +1,30 @@
 #include <format>
+#include <gw/inplace_string.hpp>
 #include <gw/strong_type.hpp>
 #include <iostream>
-#include <string>
+#include <stdexcept>
 #include <type_traits>
 
-using name_t = gw::strong_type<std::string, struct name_tag>;
-using address_t = gw::strong_type<std::string, struct address_tag>;
+static constexpr auto k_string_size = 20U;
+using name_t = gw::strong_type<gw::inplace_string<k_string_size>, struct name_tag>;
+using address_t = gw::strong_type<gw::inplace_string<k_string_size>, struct address_tag>;
+
+// gw::strong_types are distinct types
+static_assert(!std::is_same_v<name_t, address_t>);
 
 void print_name(const name_t& name) { std::cout << std::format("{}\n", name); }
 
 void print_address(const address_t& address) { std::cout << std::format("{}\n", address); }
 
 auto main() -> int {
-  auto name = name_t{"John Doe"};
-  auto address = address_t{"123 Main St."};
+  try {
+    constexpr auto name = name_t{"John Doe"};
+    constexpr auto address = address_t{"123 Main St."};
 
-  print_name(name);
-  print_address(address);
+    print_name(name);
+    print_address(address);
 
-  // gw::strong_types are distinct types
-  static_assert(!std::is_same_v<name_t, address_t>);
+  } catch (const std::length_error& ex) {
+    std::cerr << ex.what() << '\n';
+  }
 }

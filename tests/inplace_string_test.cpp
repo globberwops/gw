@@ -196,8 +196,15 @@ TEST_CASE("inplace_string elements are accessed ", "[inplace_string]") {
 }
 
 TEST_CASE("inplace_string is converted to std::basic_string_view", "[inplace_string]") {
-  constexpr auto value = basic_inplace_string{"Hello, World!"};
-  STATIC_REQUIRE(static_cast<std::basic_string_view<decltype(value)::value_type>>(value) == "Hello, World!");
+  SECTION("with the conversion operator") {
+    constexpr auto value = basic_inplace_string{"Hello, World!"};
+    STATIC_REQUIRE(static_cast<std::basic_string_view<decltype(value)::value_type>>(value) == "Hello, World!");
+  }
+
+  SECTION("with the view method") {
+    constexpr auto value = basic_inplace_string{"Hello, World!"};
+    STATIC_REQUIRE(value.view() == "Hello, World!"sv);
+  }
 }
 
 TEST_CASE("inplace_string is iterated over", "[inplace_string]") {

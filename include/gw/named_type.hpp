@@ -17,20 +17,12 @@
 #include <utility>
 
 #include "gw/concepts.hpp"
+#include "gw/inplace_string.hpp"
 
 /// \brief GW namespace
 namespace gw {
 
 namespace detail {
-
-template <std::size_t N>
-struct fixed_string {
-  // NOLINTNEXTLINE
-  constexpr fixed_string(const char (&str)[N]) { std::copy_n(str, N, value); }
-
-  // NOLINTNEXTLINE
-  char value[N]{};
-};
 
 struct named_type_empty_base {
   constexpr auto operator<=>(const named_type_empty_base&) const noexcept -> std::strong_ordering = default;
@@ -49,7 +41,7 @@ struct named_type_empty_base {
 /// person's address. Using `gw::named_type` to create a `name_t` and an `address_t` allows the compiler to catch errors
 /// where a `name_t` is used where an `address_t` is expected, and vice versa.
 //
-template <typename T, detail::fixed_string Name>
+template <typename T, basic_inplace_string Name>
 class named_type final
     : public std::conditional_t<std::ranges::range<T>, std::ranges::view_interface<named_type<T, Name>>,
                                 detail::named_type_empty_base> {
@@ -58,7 +50,11 @@ class named_type final
   // Public types
   //
 
-  using value_type = T;  ///< The type of the contained value.
+  using value_type = T;                       ///< The type of the contained value.
+  using reference = value_type&;              ///< The type of the reference to the contained value.
+  using const_reference = const value_type&;  ///< The type of the const reference to the contained value.
+  using pointer = value_type*;                ///< The type of the pointer to the contained value.
+  using const_pointer = const value_type*;    ///< The type of the const pointer to the contained value.
 
   //
   // Constructors
@@ -89,23 +85,23 @@ class named_type final
   //
 
   /// \brief Return the name of the gw::named_type.
-  static constexpr auto name() noexcept -> std::string_view { return k_name; }
+  static constexpr auto name() noexcept { return Name.view(); }
 
   //
   // Observers
   //
 
   /// \brief Access the contained value.
-  constexpr auto operator->() const noexcept -> const value_type* { return &m_value; }
+  constexpr auto operator->() const noexcept -> const_pointer { return &m_value; }
 
   /// \brief Access the contained value.
-  constexpr auto operator->() noexcept -> value_type* { return &m_value; }
+  constexpr auto operator->() noexcept -> pointer { return &m_value; }
 
   /// \brief Access the contained value.
-  constexpr auto operator*() const& noexcept -> const value_type& { return m_value; }
+  constexpr auto operator*() const& noexcept -> const_reference { return m_value; }
 
   /// \brief Access the contained value.
-  constexpr auto operator*() & noexcept -> value_type& { return m_value; }
+  constexpr auto operator*() & noexcept -> reference { return m_value; }
 
   /// \brief Access the contained value.
   constexpr auto operator*() const&& noexcept -> const value_type&& { return std::move(m_value); }
@@ -114,10 +110,10 @@ class named_type final
   constexpr auto operator*() && noexcept -> value_type&& { return std::move(m_value); }
 
   /// \brief Return the contained value.
-  constexpr auto value() const& noexcept -> const value_type& { return m_value; }
+  constexpr auto value() const& noexcept -> const_reference { return m_value; }
 
   /// \brief Return the contained value.
-  constexpr auto value() & noexcept -> value_type& { return m_value; }
+  constexpr auto value() & noexcept -> reference { return m_value; }
 
   /// \brief Return the contained value.
   constexpr auto value() const&& noexcept -> const value_type&& { return std::move(m_value); }
@@ -132,17 +128,17 @@ class named_type final
   /// \brief Return a gw::named_type containing the transformed contained value.
   template <typename F>
   constexpr auto transform(F&& func) const& noexcept(noexcept(func(m_value))) -> named_type
-    requires std::invocable<F, const value_type&>
+    requires std::invocable<F, const_reference>
   {
-    return named_type<std::remove_cv_t<std::invoke_result_t<F, const value_type&>>, Name>{func(m_value)};
+    return named_type<std::remove_cv_t<std::invoke_result_t<F, const_reference>>, Name>{func(m_value)};
   }
 
   /// \brief Return a gw::named_type containing the transformed contained value.
   template <typename F>
   constexpr auto transform(F&& func) & noexcept(noexcept(func(m_value))) -> named_type
-    requires std::invocable<F, value_type&>
+    requires std::invocable<F, reference>
   {
-    return named_type<std::remove_cv_t<std::invoke_result_t<F, value_type&>>, Name>{func(m_value)};
+    return named_type<std::remove_cv_t<std::invoke_result_t<F, reference>>, Name>{func(m_value)};
   }
 
   /// \brief Return a gw::named_type containing the transformed contained value.
@@ -182,7 +178,7 @@ class named_type final
 
   /// \brief Construct the contained value in-place.
   template <typename... Args>
-  constexpr auto emplace(Args&&... args) noexcept(std::is_nothrow_constructible_v<value_type, Args...>) -> value_type&
+  constexpr auto emplace(Args&&... args) noexcept(std::is_nothrow_constructible_v<value_type, Args...>) -> reference
     requires std::constructible_from<value_type, Args...>
   {
     m_value = value_type{std::forward<Args>(args)...};
@@ -248,10 +244,10 @@ class named_type final
   //
 
   /// \brief Convert the gw::named_type to its underlying type.
-  constexpr explicit operator const value_type&() const& noexcept { return m_value; }
+  constexpr explicit operator const_reference() const& noexcept { return m_value; }
 
   /// \brief Convert the gw::named_type to its underlying type.
-  constexpr explicit operator value_type&() & noexcept { return m_value; }
+  constexpr explicit operator reference() & noexcept { return m_value; }
 
   /// \brief Convert the gw::named_type to its underlying type.
   constexpr explicit operator const value_type&&() const&& noexcept { return std::move(m_value); }
@@ -860,23 +856,18 @@ class named_type final
 
  private:
   value_type m_value{};
-  static constexpr auto k_name = Name.value;
 };
 
-//
-// Creation functions
-//
-
-/// \brief creates a gw::named_type object
-template <detail::fixed_string Name, typename T, typename... Args>
+/// \brief Create a gw::named_type object
+template <basic_inplace_string Name, typename T, typename... Args>
 constexpr auto make_named_type(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>)
   requires std::constructible_from<std::remove_cvref_t<T>, Args...>
 {
   return named_type<std::remove_cvref_t<T>, Name>{std::forward<Args>(args)...};
 }
 
-/// \brief creates a gw::named_type object
-template <detail::fixed_string Name, typename T, typename U, typename... Args>
+/// \brief Create a gw::named_type object
+template <basic_inplace_string Name, typename T, typename U, typename... Args>
 constexpr auto make_named_type(std::initializer_list<U> ilist, Args&&... args) noexcept(
     std::is_nothrow_constructible_v<T, std::initializer_list<U>&, Args...>)
   requires std::constructible_from<T, std::initializer_list<U>&, Args...>
@@ -884,8 +875,8 @@ constexpr auto make_named_type(std::initializer_list<U> ilist, Args&&... args) n
   return named_type<std::remove_cvref_t<T>, Name>{ilist, std::forward<Args>(args)...};
 }
 
-/// \brief creates a gw::named_type object
-template <detail::fixed_string Name, typename T>
+/// \brief Create a gw::named_type object
+template <basic_inplace_string Name, typename T>
 constexpr auto make_named_type(T&& value) noexcept(
     std::is_nothrow_constructible_v<named_type<std::remove_cvref_t<T>, Name>, T>)
   requires std::constructible_from<std::remove_cvref_t<T>, T>
@@ -897,37 +888,27 @@ constexpr auto make_named_type(T&& value) noexcept(
 
 namespace std {
 
-//
-// Hash calculation
-//
-
 /// \brief Hash support for `gw::named_type`.
-///
-template <::gw::hashable T, ::gw::detail::fixed_string Name>
+template <::gw::hashable T, ::gw::basic_inplace_string Name>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 struct hash<::gw::named_type<T, Name>> {
   /// \brief Calculate the hash of the `gw::named_type` object.
-  ///
   [[nodiscard]] auto inline operator()(const ::gw::named_type<T, Name>& named_type) const noexcept -> size_t {
-    auto value_hash = hash<T>{}(named_type.value());
-    auto name_hash = hash<string_view>{}(named_type.name());
+    using value_type = std::remove_cvref_t<T>;
+    using name_type = std::remove_cvref_t<decltype(Name)>;
+    auto value_hash = hash<value_type>{}(named_type.value());
+    auto name_hash = hash<name_type>{}(named_type.name());
     return value_hash ^ name_hash;
   }
 };
 
-//
-// String conversion
-//
-
 /// \brief Format the `gw::named_type` object.
-///
-template <typename T, ::gw::detail::fixed_string Name, class CharT>
+template <typename T, ::gw::basic_inplace_string Name, class CharT>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 struct formatter<::gw::named_type<T, Name>, CharT> {
   bool with_name{};  ///< Include the name in the output.
 
   /// \brief Parse the format string.
-  ///
   template <class ParseContext>
   constexpr auto parse(ParseContext& context) -> ParseContext::iterator {
     auto it = context.begin();
@@ -948,7 +929,6 @@ struct formatter<::gw::named_type<T, Name>, CharT> {
   }
 
   /// \brief Format the `gw::named_type` object.
-  ///
   template <class FormatContext>
   auto format(const ::gw::named_type<T, Name>& named_type, FormatContext& context) const -> FormatContext::iterator
 #if __cplusplus > 202002L

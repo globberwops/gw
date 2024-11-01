@@ -212,7 +212,13 @@ class basic_inplace_string {
 
   /// \brief Get a string view of the string.
   /// \return A string view of the string.
-  constexpr explicit operator std::basic_string_view<value_type>() const noexcept { return {data(), size()}; }
+  constexpr explicit operator std::basic_string_view<value_type, traits_type>() const noexcept {
+    return {data(), size()};
+  }
+
+  /// \brief Get a string view of the string.
+  /// \return A string view of the string.
+  constexpr auto view() const noexcept -> std::basic_string_view<value_type, traits_type> { return {data(), size()}; }
 
   /// \brief Get an iterator to the beginning of the string.
   /// \return An iterator to the beginning of the string.
@@ -512,7 +518,7 @@ class basic_inplace_string {
   template <std::size_t N2>
   constexpr auto find(const basic_inplace_string<N2, value_type, traits_type>& str,
                       size_type pos = 0) const noexcept -> size_type {
-    return find(static_cast<std::basic_string_view<value_type, traits_type>>(str), pos);
+    return find(str.view(), pos);
   }
 
   /// \brief Find the first substring equal to `str`.
@@ -521,7 +527,7 @@ class basic_inplace_string {
   /// \return The position of the first occurrence of the string, or `npos` if the string is not found.
   constexpr auto find(std::basic_string_view<value_type, traits_type> str,
                       size_type pos = 0) const noexcept -> size_type {
-    return static_cast<std::basic_string_view<value_type, traits_type>>(*this).find(str, pos);
+    return view().find(str, pos);
   }
 
   /// \brief Find the first substring equal to the range [`str`, `str + count`).
@@ -530,7 +536,7 @@ class basic_inplace_string {
   /// \param count The number of characters to search for.
   /// \return The position of the first occurrence of the string, or `npos` if the string is not found.
   constexpr auto find(const value_type* str, size_type pos, size_type count) const noexcept -> size_type {
-    return static_cast<std::basic_string_view<value_type, traits_type>>(*this).find(str, pos, count);
+    return view().find(str, pos, count);
   }
 
   /// \brief Find the first substring equal to the character string pointed to by `str`.
@@ -538,16 +544,14 @@ class basic_inplace_string {
   /// \param pos The position to start searching from.
   /// \return The position of the first occurrence of the string, or `npos` if the string is not found.
   constexpr auto find(const value_type* str, size_type pos = 0) const noexcept -> size_type {
-    return static_cast<std::basic_string_view<value_type, traits_type>>(*this).find(str, pos);
+    return view().find(str, pos);
   }
 
   /// \brief Find the first character `ch`.
   /// \param ch The character to find.
   /// \param pos The position to start searching from.
   /// \return The position of the first occurrence of the character, or `npos` if the character is not found.
-  constexpr auto find(value_type ch, size_type pos = 0) const noexcept -> size_type {
-    return static_cast<std::basic_string_view<value_type, traits_type>>(*this).find(ch, pos);
-  }
+  constexpr auto find(value_type ch, size_type pos = 0) const noexcept -> size_type { return view().find(ch, pos); }
 
   /// \brief Find the last substring equal to `str`.
   /// \tparam N2 The size of the string.
@@ -557,7 +561,7 @@ class basic_inplace_string {
   template <std::size_t N2>
   constexpr auto rfind(const basic_inplace_string<N2, value_type, traits_type>& str,
                        size_type pos = npos) const noexcept -> size_type {
-    return rfind(static_cast<std::basic_string_view<value_type, traits_type>>(str), pos);
+    return rfind(str.view(), pos);
   }
 
   /// \brief Find the last substring equal to `str`.
@@ -566,7 +570,7 @@ class basic_inplace_string {
   /// \return The position of the last occurrence of the string, or `npos` if the string is not found.
   constexpr auto rfind(std::basic_string_view<value_type, traits_type> str,
                        size_type pos = npos) const noexcept -> size_type {
-    return static_cast<std::basic_string_view<value_type, traits_type>>(*this).rfind(str, pos);
+    return view().rfind(str, pos);
   }
 
   /// \brief Find the last substring equal to the range [`str`, `str + count`).
@@ -575,7 +579,7 @@ class basic_inplace_string {
   /// \param count The number of characters to search for.
   /// \return The position of the last occurrence of the string, or `npos` if the string is not found.
   constexpr auto rfind(const value_type* str, size_type pos, size_type count) const noexcept -> size_type {
-    return static_cast<std::basic_string_view<value_type, traits_type>>(*this).rfind(str, pos, count);
+    return view().rfind(str, pos, count);
   }
 
   /// \brief Find the last substring equal to the character string pointed to by `str`.
@@ -583,7 +587,7 @@ class basic_inplace_string {
   /// \param pos The position to start searching from.
   /// \return The position of the last occurrence of the string, or `npos` if the string is not found.
   constexpr auto rfind(const value_type* str, size_type pos = npos) const noexcept -> size_type {
-    return static_cast<std::basic_string_view<value_type, traits_type>>(*this).rfind(str, pos);
+    return view().rfind(str, pos);
   }
 
   /// \brief Find the last character `ch`.
@@ -591,7 +595,7 @@ class basic_inplace_string {
   /// \param pos The position to start searching from.
   /// \return The position of the last occurrence of the character, or `npos` if the character is not found.
   constexpr auto rfind(value_type ch, size_type pos = npos) const noexcept -> size_type {
-    return static_cast<std::basic_string_view<value_type, traits_type>>(*this).rfind(ch, pos);
+    return view().rfind(ch, pos);
   }
 
   /// \brief Find the first character equal to one of the characters in `str`.
@@ -602,7 +606,7 @@ class basic_inplace_string {
   template <std::size_t N2>
   constexpr auto find_first_of(const basic_inplace_string<N2, value_type, traits_type>& str,
                                size_type pos = 0) const noexcept -> size_type {
-    return find_first_of(static_cast<std::basic_string_view<value_type, traits_type>>(str), pos);
+    return find_first_of(str.view(), pos);
   }
 
   /// \brief Find the first character equal to one of the characters in `str`.
@@ -611,7 +615,7 @@ class basic_inplace_string {
   /// \return The position of the first occurrence of any character in the string, or `npos` if no character is found.
   constexpr auto find_first_of(std::basic_string_view<value_type, traits_type> str,
                                size_type pos = 0) const noexcept -> size_type {
-    return static_cast<std::basic_string_view<value_type, traits_type>>(*this).find_first_of(str, pos);
+    return view().find_first_of(str, pos);
   }
 
   /// \brief Find the first character equal to one of the characters in `str`.
@@ -619,7 +623,7 @@ class basic_inplace_string {
   /// \param pos The position to start searching from.
   /// \return The position of the first occurrence of any character in the string, or `npos` if no character is found.
   constexpr auto find_first_of(const value_type* str, size_type pos = 0) const noexcept -> size_type {
-    return static_cast<std::basic_string_view<value_type, traits_type>>(*this).find_first_of(str, pos);
+    return view().find_first_of(str, pos);
   }
 
   /// \brief Concatenate two strings.
@@ -729,7 +733,7 @@ class basic_inplace_string {
   /// \return The output stream.
   friend inline auto operator<<(std::basic_ostream<value_type, traits_type>& ostream,
                                 const basic_inplace_string& rhs) -> std::basic_ostream<value_type, traits_type>& {
-    return ostream << static_cast<std::basic_string_view<value_type, traits_type>>(rhs);
+    return ostream << rhs.view();
   }
 
   /// \brief Read the string from an input stream.
@@ -778,19 +782,20 @@ using inplace_u32string = basic_inplace_string<N, char32_t>;
 namespace std {
 
 /// \brief Hash support for `inplace_string`.
-template <std::size_t N, class CharT>
+template <std::size_t N, class CharT, class Traits>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
-struct hash<::gw::basic_inplace_string<N, CharT>> {
+struct hash<::gw::basic_inplace_string<N, CharT, Traits>> {
   /// \brief Calculate the hash of the `inplace_string` object.
-  [[nodiscard]] auto inline operator()(const ::gw::basic_inplace_string<N, CharT>& str) const noexcept -> size_t {
-    return hash<basic_string_view<CharT>>{}(static_cast<basic_string_view<CharT>>(str));
+  [[nodiscard]] auto inline operator()(const ::gw::basic_inplace_string<N, CharT, Traits>& str) const noexcept
+      -> size_t {
+    return hash<basic_string_view<CharT, Traits>>{}(static_cast<basic_string_view<CharT, Traits>>(str));
   }
 };
 
 /// \brief Format the `inplace_string` object.
-template <std::size_t N, class CharT>
+template <std::size_t N, class CharT, class Traits>
 // NOLINTNEXTLINE(cert-dcl58-cpp)
-struct formatter<::gw::basic_inplace_string<N, CharT>, CharT> {
+struct formatter<::gw::basic_inplace_string<N, CharT, Traits>, CharT> {
   /// \brief Parse the format string.
   template <class ParseContext>
   constexpr auto parse(ParseContext& context) const -> ParseContext::iterator {
@@ -799,7 +804,7 @@ struct formatter<::gw::basic_inplace_string<N, CharT>, CharT> {
 
   /// \brief Format the `inplace_string` object.
   template <class FormatContext>
-  constexpr auto format(const ::gw::basic_inplace_string<N, CharT>& str,
+  constexpr auto format(const ::gw::basic_inplace_string<N, CharT, Traits>& str,
                         FormatContext& context) const -> FormatContext::iterator {
     return ranges::copy(str, context.out()).out;
   }
