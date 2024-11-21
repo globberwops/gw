@@ -32,6 +32,11 @@ TEST_CASE("inplace_string is a standard layout type", "[inplace_string]") {
   STATIC_REQUIRE(std::is_standard_layout_v<inplace_u32string<13U>>);
 }
 
+TEST_CASE("inplace_string is string_view_like", "[inplace_string]") {
+  using type = inplace_string<13U>;
+  STATIC_REQUIRE(string_view_like<type>);
+}
+
 TEST_CASE("inplace_string is constructed", "[inplace_string]") {
   SECTION("with a default constructor") {  //
     STATIC_REQUIRE(std::is_nothrow_default_constructible_v<inplace_string<13U>>);
@@ -470,12 +475,6 @@ TEST_CASE("inplace_string is searched for a substring", "[inplace_string]") {
     STATIC_REQUIRE(value.find(k_world) == 7U);
   }
 
-  SECTION("with a string_view") {
-    STATIC_REQUIRE(value.find("Hello"sv) == 0U);
-    STATIC_REQUIRE(value.find("World"sv) == 7U);
-    STATIC_REQUIRE(value.find("Goodbye"sv) == value.npos);
-  }
-
   SECTION("with a character string, a position, and a count") {
     STATIC_REQUIRE(value.find("Hello!", 0U, 5U) == 0U);
     STATIC_REQUIRE(value.find("World.", 7U, 5U) == 7U);
@@ -492,6 +491,18 @@ TEST_CASE("inplace_string is searched for a substring", "[inplace_string]") {
     STATIC_REQUIRE(value.find('H') == 0U);
     STATIC_REQUIRE(value.find('W') == 7U);
     STATIC_REQUIRE(value.find('G') == value.npos);
+  }
+
+  SECTION("with a string_view") {
+    STATIC_REQUIRE(value.find("Hello"sv) == 0U);
+    STATIC_REQUIRE(value.find("World"sv) == 7U);
+    STATIC_REQUIRE(value.find("Goodbye"sv) == value.npos);
+  }
+
+  SECTION("with a string") {
+    REQUIRE(value.find("Hello"s) == 0U);
+    REQUIRE(value.find("World"s) == 7U);
+    REQUIRE(value.find("Goodbye"s) == value.npos);
   }
 }
 

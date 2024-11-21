@@ -20,6 +20,9 @@
 /// \brief GW namespace
 namespace gw {
 
+template <typename T, class CharT = T::value_type, class Traits = T::traits_type>
+concept string_view_like = std::convertible_to<T, std::basic_string_view<CharT, Traits>>;
+
 /// \example inplace_string_example.cpp
 //
 /// \brief A fixed-size string that stores the data in-place.
@@ -44,7 +47,7 @@ class basic_inplace_string {
 
   /// \brief The character array.
   /// \note The array must be public to allow use of `basic_inplace_string` as a non-type template parameter.
-  std::array<value_type, N + 1U> m_data;
+  std::array<value_type, N + 1> m_data;
 
   // NOLINTNEXTLINE(readability-identifier-naming)
   static constexpr size_type npos = -1;  ///< The maximum value for size_type.
@@ -64,7 +67,7 @@ class basic_inplace_string {
   /// \brief Construct the string with `count` copies of character `ch`.
   /// \param count The number of characters to initialize the string with.
   /// \param ch The character to initialize the string with.
-  /// \throw std::length_error If count is greater than `max_size`.
+  /// \throw std::length_error If count is greater than max_size().
   constexpr basic_inplace_string(size_type count, value_type ch) : m_data{} {
     if (count > max_size()) {
       throw std::length_error{
@@ -76,7 +79,7 @@ class basic_inplace_string {
 
   /// \brief Construct the string with the characters from the character string pointed to by `str`.
   /// \param str The character string to initialize the string with.
-  /// \throw std::length_error If the size of `str` would exceed `max_size`.
+  /// \throw std::length_error If the size of `str` would exceed max_size().
   constexpr explicit basic_inplace_string(const value_type* str) : m_data{} {
     const auto str_size = traits_type::length(str);
 
@@ -89,10 +92,10 @@ class basic_inplace_string {
     traits_type::copy(begin(), str, str_size);
   }
 
-  /// \brief Construct the string with the contents of the range [str, str + count).
+  /// \brief Construct the string with the contents of the range [`str`, `str + count`).
   /// \param str The beginning of the range.
   /// \param count The number of characters to initialize the string with.
-  /// \throw std::length_error If `count` is greater than `max_size`.
+  /// \throw std::length_error If `count` is greater than max_size().
   constexpr explicit basic_inplace_string(const value_type* str, size_type count) : m_data{} {
     if (count > max_size()) {
       throw std::length_error{
@@ -106,7 +109,7 @@ class basic_inplace_string {
   /// \tparam InputIt The type of the iterators.
   /// \param first The beginning of the range.
   /// \param last The end of the range.
-  /// \throw std::length_error If the size of the range would exceed `max_size`.
+  /// \throw std::length_error If the size of the range would exceed max_size().
   template <std::input_iterator InputIt>
   constexpr explicit basic_inplace_string(InputIt first, InputIt last) : m_data{} {
     const auto str_size = std::ranges::distance(first, last);
@@ -122,7 +125,7 @@ class basic_inplace_string {
 
   /// \brief Construct the string with the contents of the string view.
   /// \param str The string view to initialize the string with.
-  /// \throw std::length_error If the size of the string view would exceed `max_size`.
+  /// \throw std::length_error If the size of the string view would exceed max_size().
   constexpr explicit basic_inplace_string(const std::basic_string_view<value_type, traits_type>& str)
       : basic_inplace_string(str.data(), str.size()) {}
 
@@ -212,9 +215,8 @@ class basic_inplace_string {
 
   /// \brief Get a string view of the string.
   /// \return A string view of the string.
-  constexpr explicit operator std::basic_string_view<value_type, traits_type>() const noexcept {
-    return {data(), size()};
-  }
+  // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
+  constexpr operator std::basic_string_view<value_type, traits_type>() const noexcept { return {data(), size()}; }
 
   /// \brief Get a string view of the string.
   /// \return A string view of the string.
@@ -286,7 +288,7 @@ class basic_inplace_string {
 
   /// \brief Reserve storage for the string.
   /// \param new_cap The new capacity of the string.
-  /// \throw std::length_error If `new_cap` is greater than `max_size`.
+  /// \throw std::length_error If `new_cap` is greater than max_size().
   /// \note This function does nothing.
   constexpr void reserve(size_type new_cap) {
     if (new_cap > max_size()) {
@@ -310,7 +312,7 @@ class basic_inplace_string {
   /// \param index The position to insert the characters at.
   /// \param count The number of characters to insert.
   /// \param ch The character to insert.
-  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  /// \throw std::length_error If the size of the string would exceed max_size().
   constexpr void insert(size_type index, size_type count, CharT ch) {
     const auto new_size = size() + count;
     if (new_size > max_size()) {
@@ -326,18 +328,18 @@ class basic_inplace_string {
   /// \param index The position to insert the characters at.
   /// \param str The character string to insert.
   /// \return A reference to the string.
-  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  /// \throw std::length_error If the size of the string would exceed max_size().
   auto insert(size_type index, const value_type* str) -> basic_inplace_string& {
     const auto str_size = traits_type::length(str);
     return insert(index, str, str_size);
   }
 
-  /// \brief Insert the characters in the range [str, str + count) at the position `index`.
+  /// \brief Insert the characters in the range [`str`, `str + count`) at the position `index`.
   /// \param index The position to insert the characters at.
   /// \param str The character string to insert.
   /// \param count The number of characters to insert.
   /// \return A reference to the string.
-  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  /// \throw std::length_error If the size of the string would exceed max_size().
   auto insert(size_type index, const value_type* str, size_type count) -> basic_inplace_string& {
     const auto new_size = size() + count;
     if (new_size > max_size()) {
@@ -355,7 +357,7 @@ class basic_inplace_string {
   /// \param index The position to insert the characters at.
   /// \param str The string to insert.
   /// \return A reference to the string.
-  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  /// \throw std::length_error If the size of the string would exceed max_size().
   template <std::size_t N2>
   auto insert(size_type index, const basic_inplace_string<N2, value_type, traits_type>& str) -> basic_inplace_string& {
     return insert(index, str.data(), str.size());
@@ -384,7 +386,7 @@ class basic_inplace_string {
   /// \param first The beginning of the range.
   /// \param last The end of the range.
   /// \return An iterator to the first inserted character or `pos` if no characters were inserted.
-  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  /// \throw std::length_error If the size of the string would exceed max_size().
   template <std::input_iterator InputIt>
   auto insert(const_iterator pos, InputIt first, InputIt last) -> iterator
     requires std::convertible_to<std::iter_value_t<InputIt>, value_type>
@@ -407,7 +409,7 @@ class basic_inplace_string {
   /// \param pos The position to insert the characters before.
   /// \param range The range to insert.
   /// \return An iterator to the first inserted character or `pos` if no characters were inserted.
-  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  /// \throw std::length_error If the size of the string would exceed max_size().
   template <std::ranges::input_range R>
   constexpr auto insert_range(const_iterator pos, R&& range) -> iterator
     requires std::convertible_to<std::ranges::range_value_t<R>, value_type>
@@ -432,7 +434,7 @@ class basic_inplace_string {
 
   /// \brief Append a character to the end of the string.
   /// \param ch The character to append.
-  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  /// \throw std::length_error If the size of the string would exceed max_size().
   constexpr void push_back(value_type ch) {
     const auto new_size = size() + 1;
     if (new_size > max_size()) {
@@ -449,7 +451,7 @@ class basic_inplace_string {
   /// \brief Append a string to the end of the string.
   /// \tparam N2 The size of the string.
   /// \param str The string to append.
-  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  /// \throw std::length_error If the size of the string would exceed max_size().
   template <std::size_t N2>
   constexpr void append(const basic_inplace_string<N2, value_type, traits_type>& str) {
     const auto new_size = size() + str.size();
@@ -464,7 +466,7 @@ class basic_inplace_string {
   /// \brief Append a string to the end of the string.
   /// \tparam N2 The size of the string.
   /// \param str The string to append.
-  /// \throw std::length_error If the size of the string would exceed `max_size`.
+  /// \throw std::length_error If the size of the string would exceed max_size().
   template <std::size_t N2>
   constexpr auto operator+=(const basic_inplace_string<N2, value_type, traits_type>& str) -> basic_inplace_string& {
     const auto new_size = size() + str.size();
@@ -479,7 +481,7 @@ class basic_inplace_string {
 
   /// \brief Resize the string to `count` characters.
   /// \param count The new size of the string.
-  /// \throw std::length_error If `count` is greater than `max_size`.
+  /// \throw std::length_error If `count` is greater than max_size().
   constexpr void resize(size_type count) {
     if (count > max_size()) {
       throw std::length_error{
@@ -491,7 +493,7 @@ class basic_inplace_string {
   /// \brief Resize the string to `count` characters.
   /// \param count The new size of the string.
   /// \param ch The character to fill the string with.
-  /// \throw std::length_error If `count` is greater than `max_size`.
+  /// \throw std::length_error If `count` is greater than max_size().
   constexpr void resize(size_type count, value_type ch) {
     if (count > max_size()) {
       throw std::length_error{
@@ -514,27 +516,18 @@ class basic_inplace_string {
   /// \tparam N2 The size of the string.
   /// \param str The string to find.
   /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of the string, or `npos` if the string is not found.
+  /// \return The position of the first occurrence of the string, or #npos if the string is not found.
   template <std::size_t N2>
   constexpr auto find(const basic_inplace_string<N2, value_type, traits_type>& str,
                       size_type pos = 0) const noexcept -> size_type {
     return find(str.view(), pos);
   }
 
-  /// \brief Find the first substring equal to `str`.
-  /// \param str The string view to find.
-  /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of the string, or `npos` if the string is not found.
-  constexpr auto find(std::basic_string_view<value_type, traits_type> str,
-                      size_type pos = 0) const noexcept -> size_type {
-    return view().find(str, pos);
-  }
-
   /// \brief Find the first substring equal to the range [`str`, `str + count`).
   /// \param str The string to find.
   /// \param pos The position to start searching from.
   /// \param count The number of characters to search for.
-  /// \return The position of the first occurrence of the string, or `npos` if the string is not found.
+  /// \return The position of the first occurrence of the string, or #npos if the string is not found.
   constexpr auto find(const value_type* str, size_type pos, size_type count) const noexcept -> size_type {
     return view().find(str, pos, count);
   }
@@ -542,7 +535,7 @@ class basic_inplace_string {
   /// \brief Find the first substring equal to the character string pointed to by `str`.
   /// \param str The string to find.
   /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of the string, or `npos` if the string is not found.
+  /// \return The position of the first occurrence of the string, or #npos if the string is not found.
   constexpr auto find(const value_type* str, size_type pos = 0) const noexcept -> size_type {
     return view().find(str, pos);
   }
@@ -550,14 +543,23 @@ class basic_inplace_string {
   /// \brief Find the first character `ch`.
   /// \param ch The character to find.
   /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of the character, or `npos` if the character is not found.
+  /// \return The position of the first occurrence of the character, or #npos if the character is not found.
   constexpr auto find(value_type ch, size_type pos = 0) const noexcept -> size_type { return view().find(ch, pos); }
+
+  /// \brief Find the first substring equal to `str`.
+  /// \param str The string view to find.
+  /// \param pos The position to start searching from.
+  /// \return The position of the first occurrence of the string, or #npos if the string is not found.
+  constexpr auto find(string_view_like<value_type, traits_type> auto str,
+                      size_type pos = 0) const noexcept -> size_type {
+    return view().find(std::basic_string_view<value_type, traits_type>{str}, pos);
+  }
 
   /// \brief Find the last substring equal to `str`.
   /// \tparam N2 The size of the string.
   /// \param str The string to find.
   /// \param pos The position to start searching from.
-  /// \return The position of the last occurrence of the string, or `npos` if the string is not found.
+  /// \return The position of the last occurrence of the string, or #npos if the string is not found.
   template <std::size_t N2>
   constexpr auto rfind(const basic_inplace_string<N2, value_type, traits_type>& str,
                        size_type pos = npos) const noexcept -> size_type {
@@ -567,7 +569,7 @@ class basic_inplace_string {
   /// \brief Find the last substring equal to `str`.
   /// \param str The string to find.
   /// \param pos The position to start searching from.
-  /// \return The position of the last occurrence of the string, or `npos` if the string is not found.
+  /// \return The position of the last occurrence of the string, or #npos if the string is not found.
   constexpr auto rfind(std::basic_string_view<value_type, traits_type> str,
                        size_type pos = npos) const noexcept -> size_type {
     return view().rfind(str, pos);
@@ -577,7 +579,7 @@ class basic_inplace_string {
   /// \param str The string to find.
   /// \param pos The position to start searching from.
   /// \param count The number of characters to search for.
-  /// \return The position of the last occurrence of the string, or `npos` if the string is not found.
+  /// \return The position of the last occurrence of the string, or #npos if the string is not found.
   constexpr auto rfind(const value_type* str, size_type pos, size_type count) const noexcept -> size_type {
     return view().rfind(str, pos, count);
   }
@@ -585,7 +587,7 @@ class basic_inplace_string {
   /// \brief Find the last substring equal to the character string pointed to by `str`.
   /// \param str The string to find.
   /// \param pos The position to start searching from.
-  /// \return The position of the last occurrence of the string, or `npos` if the string is not found.
+  /// \return The position of the last occurrence of the string, or #npos if the string is not found.
   constexpr auto rfind(const value_type* str, size_type pos = npos) const noexcept -> size_type {
     return view().rfind(str, pos);
   }
@@ -593,7 +595,7 @@ class basic_inplace_string {
   /// \brief Find the last character `ch`.
   /// \param ch The character to find.
   /// \param pos The position to start searching from.
-  /// \return The position of the last occurrence of the character, or `npos` if the character is not found.
+  /// \return The position of the last occurrence of the character, or #npos if the character is not found.
   constexpr auto rfind(value_type ch, size_type pos = npos) const noexcept -> size_type {
     return view().rfind(ch, pos);
   }
@@ -602,7 +604,7 @@ class basic_inplace_string {
   /// \tparam N2 The size of the string.
   /// \param str The string to search for.
   /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of any character in the string, or `npos` if no character is found.
+  /// \return The position of the first occurrence of any character in the string, or #npos if no character is found.
   template <std::size_t N2>
   constexpr auto find_first_of(const basic_inplace_string<N2, value_type, traits_type>& str,
                                size_type pos = 0) const noexcept -> size_type {
@@ -612,7 +614,7 @@ class basic_inplace_string {
   /// \brief Find the first character equal to one of the characters in `str`.
   /// \param str The string view to search for.
   /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of any character in the string, or `npos` if no character is found.
+  /// \return The position of the first occurrence of any character in the string, or #npos if no character is found.
   constexpr auto find_first_of(std::basic_string_view<value_type, traits_type> str,
                                size_type pos = 0) const noexcept -> size_type {
     return view().find_first_of(str, pos);
@@ -621,7 +623,7 @@ class basic_inplace_string {
   /// \brief Find the first character equal to one of the characters in `str`.
   /// \param str The character string to search for.
   /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of any character in the string, or `npos` if no character is found.
+  /// \return The position of the first occurrence of any character in the string, or #npos if no character is found.
   constexpr auto find_first_of(const value_type* str, size_type pos = 0) const noexcept -> size_type {
     return view().find_first_of(str, pos);
   }
@@ -740,6 +742,7 @@ class basic_inplace_string {
   /// \param istream The input stream to read from.
   /// \param rhs The string to read into.
   /// \return The input stream.
+  /// \throw std::length_error If the size of the string would exceed max_size().
   friend inline auto operator>>(std::basic_istream<value_type, traits_type>& istream,
                                 basic_inplace_string& rhs) -> std::basic_istream<value_type, traits_type>& {
     const auto new_size = rhs.size() + istream.rdbuf()->in_avail();
