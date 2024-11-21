@@ -399,6 +399,33 @@ TEST_CASE("inplace_string is concatenated", "[inplace_string]") {
   STATIC_REQUIRE(value3 == "Hello, World!");
 }
 
+TEST_CASE("inplace_string is compared", "[inplace_string]") {
+  constexpr auto value1 = inplace_string<13U>{"Hello, World!"};
+  constexpr auto value2 = inplace_string<13U>{"Hello, World!"};
+  constexpr auto value3 = inplace_string<13U>{"Hola, Mundo!"};
+
+  SECTION("with an inplace_string") {
+    STATIC_REQUIRE(value1 == value2);
+    STATIC_REQUIRE(value1 != value3);
+    STATIC_REQUIRE(value2 != value3);
+  }
+
+  SECTION("with a string_view") {
+    STATIC_REQUIRE(value1 == "Hello, World!"sv);
+    STATIC_REQUIRE("Hola, Mundo!"sv != value1);
+  }
+
+  SECTION("with a character string") {
+    STATIC_REQUIRE(value1 == "Hello, World!");
+    STATIC_REQUIRE("Hola, Mundo!" != value1);
+  }
+
+  SECTION("with a string") {
+    REQUIRE(value1 == "Hello, World!"s);
+    REQUIRE("Hola, Mundo!"s != value1);
+  }
+}
+
 TEST_CASE("inplace_string is pushed back into", "[inplace_string]") {
   auto value = inplace_string<13U>{"Hello, World"};
 

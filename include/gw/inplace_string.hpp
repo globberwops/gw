@@ -86,13 +86,11 @@ class basic_inplace_string {
   /// \throw std::length_error If the size of `str` would exceed max_size().
   constexpr explicit basic_inplace_string(const value_type* str) : m_data{} {
     const auto str_size = traits_type::length(str);
-
     if (str_size > max_size()) {
       throw std::length_error{
           std::format("basic_inplace_string::basic_inplace_string: str_size (which is {}) > max_size (which is {})",
                       str_size, max_size())};
     }
-
     traits_type::copy(begin(), str, str_size);
   }
 
@@ -106,7 +104,6 @@ class basic_inplace_string {
           std::format("basic_inplace_string::basic_inplace_string: count (which is {}) > max_size (which is {})", count,
                       max_size())};
     }
-
     traits_type::copy(begin(), str, count);
   }
 
@@ -119,13 +116,11 @@ class basic_inplace_string {
     requires std::convertible_to<std::iter_value_t<InputIt>, value_type>
   constexpr explicit basic_inplace_string(InputIt first, InputIt last) : m_data{} {
     const auto str_size = std::ranges::distance(first, last);
-
     if (str_size > max_size()) {
       throw std::length_error{
           std::format("basic_inplace_string::basic_inplace_string: str_size (which is {}) > max_size (which is {})",
                       str_size, max_size())};
     }
-
     std::ranges::copy(first, last, begin());
   }
 
@@ -406,8 +401,9 @@ class basic_inplace_string {
   /// \return An iterator to the first inserted character or `pos` if no characters were inserted.
   /// \throw std::length_error If the size of the string would exceed max_size().
   template <std::input_iterator InputIt>
-  auto insert(const_iterator pos, InputIt first, InputIt last) -> iterator
     requires std::convertible_to<std::iter_value_t<InputIt>, value_type>
+             auto insert(const_iterator pos, InputIt first, InputIt last) -> iterator
+               requires std::convertible_to<std::iter_value_t<InputIt>, value_type>
   {
     const auto index = std::ranges::distance(cbegin(), pos);
     const auto count = std::ranges::distance(first, last);
@@ -553,7 +549,7 @@ class basic_inplace_string {
   /// \return True if the strings are equal, false otherwise.
   [[nodiscard]] friend constexpr auto operator==(const basic_inplace_string& lhs,
                                                  const basic_inplace_string& rhs) noexcept -> bool {
-    return std::ranges::equal(lhs.begin(), lhs.end(), rhs.begin());
+    return std::ranges::equal(lhs.view(), rhs.view());
   }
 
   /// \brief Compare the string to a string view.
@@ -562,16 +558,7 @@ class basic_inplace_string {
   /// \return True if the strings are equal, false otherwise.
   [[nodiscard]] friend constexpr auto operator==(const basic_inplace_string& lhs,
                                                  std::basic_string_view<value_type, traits_type> rhs) noexcept -> bool {
-    return std::ranges::equal(lhs.begin(), lhs.end(), rhs.begin());
-  }
-
-  /// \brief Compare the string to a string view.
-  /// \param lhs The first string to compare.
-  /// \param rhs The second string to compare.
-  /// \return True if the strings are equal, false otherwise.
-  [[nodiscard]] friend constexpr auto operator==(std::basic_string_view<value_type, traits_type> lhs,
-                                                 const basic_inplace_string& rhs) noexcept -> bool {
-    return rhs == lhs;
+    return std::ranges::equal(lhs.view(), rhs);
   }
 
   /// \brief Compares the string to a character string.
@@ -581,60 +568,6 @@ class basic_inplace_string {
   [[nodiscard]] friend constexpr auto operator==(const basic_inplace_string& lhs,
                                                  const value_type* rhs) noexcept -> bool {
     return traits_type::compare(lhs.data(), rhs, traits_type::length(rhs)) == 0;
-  }
-
-  /// \brief Compares the string to a character string.
-  /// \param lhs The first string to compare.
-  /// \param rhs The second string to compare.
-  /// \return True if the strings are equal, false otherwise.
-  [[nodiscard]] friend constexpr auto operator==(const value_type* lhs,
-                                                 const basic_inplace_string& rhs) noexcept -> bool {
-    return rhs == lhs;
-  }
-
-  /// \brief Compare the string to another string.
-  /// \param lhs The first string to compare.
-  /// \param rhs The second string to compare.
-  /// \return True if the strings are not equal, false otherwise.
-  [[nodiscard]] friend constexpr auto operator!=(const basic_inplace_string& lhs,
-                                                 const basic_inplace_string& rhs) noexcept -> bool {
-    return !(lhs == rhs);
-  }
-
-  /// \brief Compare the string to a string view.
-  /// \param lhs The first string to compare.
-  /// \param rhs The second string to compare.
-  /// \return True if the strings are not equal, false otherwise.
-  [[nodiscard]] friend constexpr auto operator!=(const basic_inplace_string& lhs,
-                                                 std::basic_string_view<value_type, traits_type> rhs) noexcept -> bool {
-    return !(lhs == rhs);
-  }
-
-  /// \brief Compare the string to a string view.
-  /// \param lhs The first string to compare.
-  /// \param rhs The second string to compare.
-  /// \return True if the strings are not equal, false otherwise.
-  [[nodiscard]] friend constexpr auto operator!=(std::basic_string_view<value_type, traits_type> lhs,
-                                                 const basic_inplace_string& rhs) noexcept -> bool {
-    return !(lhs == rhs);
-  }
-
-  /// \brief Compares the string to a character string.
-  /// \param lhs The first string to compare.
-  /// \param rhs The second string to compare.
-  /// \return True if the strings are not equal, false otherwise.
-  [[nodiscard]] friend constexpr auto operator!=(const basic_inplace_string& lhs,
-                                                 const value_type* rhs) noexcept -> bool {
-    return !(lhs == rhs);
-  }
-
-  /// \brief Compares the string to a character string.
-  /// \param lhs The first string to compare.
-  /// \param rhs The second string to compare.
-  /// \return True if the strings are not equal, false otherwise.
-  [[nodiscard]] friend constexpr auto operator!=(const value_type* lhs,
-                                                 const basic_inplace_string& rhs) noexcept -> bool {
-    return !(lhs == rhs);
   }
 
   /// \brief Write the string to an output stream.
