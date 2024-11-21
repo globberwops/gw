@@ -31,6 +31,10 @@ concept string_view_like = std::convertible_to<T, std::basic_string_view<CharT, 
 /// \tparam Traits The character traits type.
 template <std::size_t N, class CharT, class Traits = std::char_traits<CharT>>
 class basic_inplace_string {
+  static_assert(!std::is_array_v<CharT>);
+  static_assert(std::is_trivial_v<CharT> && std::is_standard_layout_v<CharT>);
+  static_assert(std::is_same_v<CharT, typename Traits::char_type>);
+
  public:
   using traits_type = Traits;                                            ///< The character traits type.
   using value_type = CharT;                                              ///< The character type.
@@ -61,7 +65,7 @@ class basic_inplace_string {
   consteval explicit(false) basic_inplace_string(const value_type (&str)[N2]) noexcept
     requires(N2 <= N + 1)
       : m_data{} {
-    traits_type::copy(data(), str, N2 - 1);
+    traits_type::copy(begin(), str, N2 - 1);
   }
 
   /// \brief Construct the string with `count` copies of character `ch`.
@@ -111,6 +115,7 @@ class basic_inplace_string {
   /// \param last The end of the range.
   /// \throw std::length_error If the size of the range would exceed max_size().
   template <std::input_iterator InputIt>
+    requires std::convertible_to<std::iter_value_t<InputIt>, value_type>
   constexpr explicit basic_inplace_string(InputIt first, InputIt last) : m_data{} {
     const auto str_size = std::ranges::distance(first, last);
 
@@ -168,7 +173,7 @@ class basic_inplace_string {
   /// \param pos The position of the character to get.
   /// \return A const reference to the character at the specified position.
   /// \throw std::out_of_range If `pos` is out of range.
-  constexpr auto at(size_type pos) const -> const_reference {
+  [[nodiscard]] constexpr auto at(size_type pos) const -> const_reference {
     return pos < size()
                ? m_data[pos]
                : throw std::out_of_range{std::format(
@@ -183,7 +188,7 @@ class basic_inplace_string {
   /// \brief Get a const reference to the character at the specified position.
   /// \param pos The position of the character to get.
   /// \return A const reference to the character at the specified position.
-  constexpr auto operator[](size_type pos) const noexcept -> const_reference { return m_data[pos]; }
+  [[nodiscard]] constexpr auto operator[](size_type pos) const noexcept -> const_reference { return m_data[pos]; }
 
   /// \brief Get a reference to the first character in the string.
   /// \return A reference to the first character in the string.
@@ -191,7 +196,7 @@ class basic_inplace_string {
 
   /// \brief Get a const reference to the first character in the string.
   /// \return A const reference to the first character in the string.
-  constexpr auto front() const noexcept -> const_reference { return m_data[0]; }
+  [[nodiscard]] constexpr auto front() const noexcept -> const_reference { return m_data[0]; }
 
   /// \brief Get a reference to the last character in the string.
   /// \return A reference to the last character in the string.
@@ -199,7 +204,7 @@ class basic_inplace_string {
 
   /// \brief Get a const reference to the last character in the string.
   /// \return A const reference to the last character in the string.
-  constexpr auto back() const noexcept -> const_reference { return m_data[size() - 1]; }
+  [[nodiscard]] constexpr auto back() const noexcept -> const_reference { return m_data[size() - 1]; }
 
   /// \brief Get a pointer to the underlying character array.
   /// \return A pointer to the underlying character array.
@@ -207,20 +212,24 @@ class basic_inplace_string {
 
   /// \brief Get a const pointer to the underlying character array.
   /// \return A const pointer to the underlying character array.
-  constexpr auto data() const noexcept -> const_pointer { return m_data.data(); }
+  [[nodiscard]] constexpr auto data() const noexcept -> const_pointer { return m_data.data(); }
 
   /// \brief Get a const pointer to the underlying character array.
   /// \return A const pointer to the underlying character array.
-  constexpr auto c_str() const noexcept -> const_pointer { return m_data.data(); }
+  [[nodiscard]] constexpr auto c_str() const noexcept -> const_pointer { return m_data.data(); }
 
   /// \brief Get a string view of the string.
   /// \return A string view of the string.
   // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions)
-  constexpr operator std::basic_string_view<value_type, traits_type>() const noexcept { return {data(), size()}; }
+  [[nodiscard]] constexpr operator std::basic_string_view<value_type, traits_type>() const noexcept {
+    return {data(), size()};
+  }
 
   /// \brief Get a string view of the string.
   /// \return A string view of the string.
-  constexpr auto view() const noexcept -> std::basic_string_view<value_type, traits_type> { return {data(), size()}; }
+  [[nodiscard]] constexpr auto view() const noexcept -> std::basic_string_view<value_type, traits_type> {
+    return {data(), size()};
+  }
 
   /// \brief Get an iterator to the beginning of the string.
   /// \return An iterator to the beginning of the string.
@@ -228,11 +237,11 @@ class basic_inplace_string {
 
   /// \brief Get a const iterator to the beginning of the string.
   /// \return A const iterator to the beginning of the string.
-  constexpr auto begin() const noexcept -> const_iterator { return data(); }
+  [[nodiscard]] constexpr auto begin() const noexcept -> const_iterator { return data(); }
 
   /// \brief Get a const iterator to the beginning of the string.
   /// \return A const iterator to the beginning of the string.
-  constexpr auto cbegin() const noexcept -> const_iterator { return data(); }
+  [[nodiscard]] constexpr auto cbegin() const noexcept -> const_iterator { return data(); }
 
   /// \brief Get an iterator to the end of the string.
   /// \return An iterator to the end of the string.
@@ -240,11 +249,11 @@ class basic_inplace_string {
 
   /// \brief Get a const iterator to the end of the string.
   /// \return A const iterator to the end of the string.
-  constexpr auto end() const noexcept -> const_iterator { return std::ranges::next(data(), size()); }
+  [[nodiscard]] constexpr auto end() const noexcept -> const_iterator { return std::ranges::next(data(), size()); }
 
   /// \brief Get a const iterator to the end of the string.
   /// \return A const iterator to the end of the string.
-  constexpr auto cend() const noexcept -> const_iterator { return std::ranges::next(data(), size()); }
+  [[nodiscard]] constexpr auto cend() const noexcept -> const_iterator { return std::ranges::next(data(), size()); }
 
   /// \brief Get a reverse iterator to the end of the string.
   /// \return A reverse iterator to the end of the string.
@@ -252,11 +261,15 @@ class basic_inplace_string {
 
   /// \brief Get a const reverse iterator to the end of the string.
   /// \return A const reverse iterator to the end of the string.
-  constexpr auto rbegin() const noexcept -> const_reverse_iterator { return const_reverse_iterator{end()}; }
+  [[nodiscard]] constexpr auto rbegin() const noexcept -> const_reverse_iterator {
+    return const_reverse_iterator{end()};
+  }
 
   /// \brief Get a const reverse iterator to the end of the string.
   /// \return A const reverse iterator to the end of the string.
-  constexpr auto crbegin() const noexcept -> const_reverse_iterator { return const_reverse_iterator{cend()}; }
+  [[nodiscard]] constexpr auto crbegin() const noexcept -> const_reverse_iterator {
+    return const_reverse_iterator{cend()};
+  }
 
   /// \brief Get a reverse iterator to the beginning of the string.
   /// \return A reverse iterator to the beginning of the string.
@@ -264,11 +277,15 @@ class basic_inplace_string {
 
   /// \brief Get a const reverse iterator to the beginning of the string.
   /// \return A const reverse iterator to the beginning of the string.
-  constexpr auto rend() const noexcept -> const_reverse_iterator { return const_reverse_iterator{begin()}; }
+  [[nodiscard]] constexpr auto rend() const noexcept -> const_reverse_iterator {
+    return const_reverse_iterator{begin()};
+  }
 
   /// \brief Get a const reverse iterator to the beginning of the string.
   /// \return A const reverse iterator to the beginning of the string.
-  constexpr auto crend() const noexcept -> const_reverse_iterator { return const_reverse_iterator{cbegin()}; }
+  [[nodiscard]] constexpr auto crend() const noexcept -> const_reverse_iterator {
+    return const_reverse_iterator{cbegin()};
+  }
 
   /// \brief Check if the string is empty.
   /// \return True if the string is empty, false otherwise.
@@ -518,8 +535,8 @@ class basic_inplace_string {
   /// \param pos The position to start searching from.
   /// \return The position of the first occurrence of the string, or #npos if the string is not found.
   template <std::size_t N2>
-  constexpr auto find(const basic_inplace_string<N2, value_type, traits_type>& str,
-                      size_type pos = 0) const noexcept -> size_type {
+  [[nodiscard]] constexpr auto find(const basic_inplace_string<N2, value_type, traits_type>& str,
+                                    size_type pos = 0) const noexcept -> size_type {
     return find(str.view(), pos);
   }
 
@@ -528,7 +545,7 @@ class basic_inplace_string {
   /// \param pos The position to start searching from.
   /// \param count The number of characters to search for.
   /// \return The position of the first occurrence of the string, or #npos if the string is not found.
-  constexpr auto find(const value_type* str, size_type pos, size_type count) const noexcept -> size_type {
+  [[nodiscard]] constexpr auto find(const value_type* str, size_type pos, size_type count) const noexcept -> size_type {
     return view().find(str, pos, count);
   }
 
@@ -536,7 +553,7 @@ class basic_inplace_string {
   /// \param str The string to find.
   /// \param pos The position to start searching from.
   /// \return The position of the first occurrence of the string, or #npos if the string is not found.
-  constexpr auto find(const value_type* str, size_type pos = 0) const noexcept -> size_type {
+  [[nodiscard]] constexpr auto find(const value_type* str, size_type pos = 0) const noexcept -> size_type {
     return view().find(str, pos);
   }
 
@@ -544,14 +561,16 @@ class basic_inplace_string {
   /// \param ch The character to find.
   /// \param pos The position to start searching from.
   /// \return The position of the first occurrence of the character, or #npos if the character is not found.
-  constexpr auto find(value_type ch, size_type pos = 0) const noexcept -> size_type { return view().find(ch, pos); }
+  [[nodiscard]] constexpr auto find(value_type ch, size_type pos = 0) const noexcept -> size_type {
+    return view().find(ch, pos);
+  }
 
   /// \brief Find the first substring equal to `str`.
   /// \param str The string view to find.
   /// \param pos The position to start searching from.
   /// \return The position of the first occurrence of the string, or #npos if the string is not found.
-  constexpr auto find(string_view_like<value_type, traits_type> auto str,
-                      size_type pos = 0) const noexcept -> size_type {
+  [[nodiscard]] constexpr auto find(string_view_like<value_type, traits_type> auto str,
+                                    size_type pos = 0) const noexcept -> size_type {
     return view().find(std::basic_string_view<value_type, traits_type>{str}, pos);
   }
 
@@ -561,8 +580,8 @@ class basic_inplace_string {
   /// \param pos The position to start searching from.
   /// \return The position of the last occurrence of the string, or #npos if the string is not found.
   template <std::size_t N2>
-  constexpr auto rfind(const basic_inplace_string<N2, value_type, traits_type>& str,
-                       size_type pos = npos) const noexcept -> size_type {
+  [[nodiscard]] constexpr auto rfind(const basic_inplace_string<N2, value_type, traits_type>& str,
+                                     size_type pos = npos) const noexcept -> size_type {
     return rfind(str.view(), pos);
   }
 
@@ -570,8 +589,8 @@ class basic_inplace_string {
   /// \param str The string to find.
   /// \param pos The position to start searching from.
   /// \return The position of the last occurrence of the string, or #npos if the string is not found.
-  constexpr auto rfind(std::basic_string_view<value_type, traits_type> str,
-                       size_type pos = npos) const noexcept -> size_type {
+  [[nodiscard]] constexpr auto rfind(std::basic_string_view<value_type, traits_type> str,
+                                     size_type pos = npos) const noexcept -> size_type {
     return view().rfind(str, pos);
   }
 
@@ -580,7 +599,8 @@ class basic_inplace_string {
   /// \param pos The position to start searching from.
   /// \param count The number of characters to search for.
   /// \return The position of the last occurrence of the string, or #npos if the string is not found.
-  constexpr auto rfind(const value_type* str, size_type pos, size_type count) const noexcept -> size_type {
+  [[nodiscard]] constexpr auto rfind(const value_type* str, size_type pos,
+                                     size_type count) const noexcept -> size_type {
     return view().rfind(str, pos, count);
   }
 
@@ -588,7 +608,7 @@ class basic_inplace_string {
   /// \param str The string to find.
   /// \param pos The position to start searching from.
   /// \return The position of the last occurrence of the string, or #npos if the string is not found.
-  constexpr auto rfind(const value_type* str, size_type pos = npos) const noexcept -> size_type {
+  [[nodiscard]] constexpr auto rfind(const value_type* str, size_type pos = npos) const noexcept -> size_type {
     return view().rfind(str, pos);
   }
 
@@ -596,7 +616,7 @@ class basic_inplace_string {
   /// \param ch The character to find.
   /// \param pos The position to start searching from.
   /// \return The position of the last occurrence of the character, or #npos if the character is not found.
-  constexpr auto rfind(value_type ch, size_type pos = npos) const noexcept -> size_type {
+  [[nodiscard]] constexpr auto rfind(value_type ch, size_type pos = npos) const noexcept -> size_type {
     return view().rfind(ch, pos);
   }
 
@@ -606,8 +626,8 @@ class basic_inplace_string {
   /// \param pos The position to start searching from.
   /// \return The position of the first occurrence of any character in the string, or #npos if no character is found.
   template <std::size_t N2>
-  constexpr auto find_first_of(const basic_inplace_string<N2, value_type, traits_type>& str,
-                               size_type pos = 0) const noexcept -> size_type {
+  [[nodiscard]] constexpr auto find_first_of(const basic_inplace_string<N2, value_type, traits_type>& str,
+                                             size_type pos = 0) const noexcept -> size_type {
     return find_first_of(str.view(), pos);
   }
 
@@ -615,8 +635,8 @@ class basic_inplace_string {
   /// \param str The string view to search for.
   /// \param pos The position to start searching from.
   /// \return The position of the first occurrence of any character in the string, or #npos if no character is found.
-  constexpr auto find_first_of(std::basic_string_view<value_type, traits_type> str,
-                               size_type pos = 0) const noexcept -> size_type {
+  [[nodiscard]] constexpr auto find_first_of(std::basic_string_view<value_type, traits_type> str,
+                                             size_type pos = 0) const noexcept -> size_type {
     return view().find_first_of(str, pos);
   }
 
@@ -624,7 +644,7 @@ class basic_inplace_string {
   /// \param str The character string to search for.
   /// \param pos The position to start searching from.
   /// \return The position of the first occurrence of any character in the string, or #npos if no character is found.
-  constexpr auto find_first_of(const value_type* str, size_type pos = 0) const noexcept -> size_type {
+  [[nodiscard]] constexpr auto find_first_of(const value_type* str, size_type pos = 0) const noexcept -> size_type {
     return view().find_first_of(str, pos);
   }
 
@@ -649,7 +669,8 @@ class basic_inplace_string {
   /// \param lhs The first string to compare.
   /// \param rhs The second string to compare.
   /// \return True if the strings are equal, false otherwise.
-  friend constexpr auto operator==(const basic_inplace_string& lhs, const basic_inplace_string& rhs) noexcept -> bool {
+  [[nodiscard]] friend constexpr auto operator==(const basic_inplace_string& lhs,
+                                                 const basic_inplace_string& rhs) noexcept -> bool {
     return std::ranges::equal(lhs.begin(), lhs.end(), rhs.begin());
   }
 
@@ -657,8 +678,8 @@ class basic_inplace_string {
   /// \param lhs The first string to compare.
   /// \param rhs The second string to compare.
   /// \return True if the strings are equal, false otherwise.
-  friend constexpr auto operator==(const basic_inplace_string& lhs,
-                                   std::basic_string_view<value_type, traits_type> rhs) noexcept -> bool {
+  [[nodiscard]] friend constexpr auto operator==(const basic_inplace_string& lhs,
+                                                 std::basic_string_view<value_type, traits_type> rhs) noexcept -> bool {
     return std::ranges::equal(lhs.begin(), lhs.end(), rhs.begin());
   }
 
@@ -666,8 +687,8 @@ class basic_inplace_string {
   /// \param lhs The first string to compare.
   /// \param rhs The second string to compare.
   /// \return True if the strings are equal, false otherwise.
-  friend constexpr auto operator==(std::basic_string_view<value_type, traits_type> lhs,
-                                   const basic_inplace_string& rhs) noexcept -> bool {
+  [[nodiscard]] friend constexpr auto operator==(std::basic_string_view<value_type, traits_type> lhs,
+                                                 const basic_inplace_string& rhs) noexcept -> bool {
     return rhs == lhs;
   }
 
@@ -675,7 +696,8 @@ class basic_inplace_string {
   /// \param lhs The first string to compare.
   /// \param rhs The second string to compare.
   /// \return True if the strings are equal, false otherwise.
-  friend constexpr auto operator==(const basic_inplace_string& lhs, const value_type* rhs) noexcept -> bool {
+  [[nodiscard]] friend constexpr auto operator==(const basic_inplace_string& lhs,
+                                                 const value_type* rhs) noexcept -> bool {
     return traits_type::compare(lhs.data(), rhs, traits_type::length(rhs)) == 0;
   }
 
@@ -683,7 +705,8 @@ class basic_inplace_string {
   /// \param lhs The first string to compare.
   /// \param rhs The second string to compare.
   /// \return True if the strings are equal, false otherwise.
-  friend constexpr auto operator==(const value_type* lhs, const basic_inplace_string& rhs) noexcept -> bool {
+  [[nodiscard]] friend constexpr auto operator==(const value_type* lhs,
+                                                 const basic_inplace_string& rhs) noexcept -> bool {
     return rhs == lhs;
   }
 
@@ -691,7 +714,8 @@ class basic_inplace_string {
   /// \param lhs The first string to compare.
   /// \param rhs The second string to compare.
   /// \return True if the strings are not equal, false otherwise.
-  friend constexpr auto operator!=(const basic_inplace_string& lhs, const basic_inplace_string& rhs) noexcept -> bool {
+  [[nodiscard]] friend constexpr auto operator!=(const basic_inplace_string& lhs,
+                                                 const basic_inplace_string& rhs) noexcept -> bool {
     return !(lhs == rhs);
   }
 
@@ -699,8 +723,8 @@ class basic_inplace_string {
   /// \param lhs The first string to compare.
   /// \param rhs The second string to compare.
   /// \return True if the strings are not equal, false otherwise.
-  friend constexpr auto operator!=(const basic_inplace_string& lhs,
-                                   std::basic_string_view<value_type, traits_type> rhs) noexcept -> bool {
+  [[nodiscard]] friend constexpr auto operator!=(const basic_inplace_string& lhs,
+                                                 std::basic_string_view<value_type, traits_type> rhs) noexcept -> bool {
     return !(lhs == rhs);
   }
 
@@ -708,8 +732,8 @@ class basic_inplace_string {
   /// \param lhs The first string to compare.
   /// \param rhs The second string to compare.
   /// \return True if the strings are not equal, false otherwise.
-  friend constexpr auto operator!=(std::basic_string_view<value_type, traits_type> lhs,
-                                   const basic_inplace_string& rhs) noexcept -> bool {
+  [[nodiscard]] friend constexpr auto operator!=(std::basic_string_view<value_type, traits_type> lhs,
+                                                 const basic_inplace_string& rhs) noexcept -> bool {
     return !(lhs == rhs);
   }
 
@@ -717,7 +741,8 @@ class basic_inplace_string {
   /// \param lhs The first string to compare.
   /// \param rhs The second string to compare.
   /// \return True if the strings are not equal, false otherwise.
-  friend constexpr auto operator!=(const basic_inplace_string& lhs, const value_type* rhs) noexcept -> bool {
+  [[nodiscard]] friend constexpr auto operator!=(const basic_inplace_string& lhs,
+                                                 const value_type* rhs) noexcept -> bool {
     return !(lhs == rhs);
   }
 
@@ -725,7 +750,8 @@ class basic_inplace_string {
   /// \param lhs The first string to compare.
   /// \param rhs The second string to compare.
   /// \return True if the strings are not equal, false otherwise.
-  friend constexpr auto operator!=(const value_type* lhs, const basic_inplace_string& rhs) noexcept -> bool {
+  [[nodiscard]] friend constexpr auto operator!=(const value_type* lhs,
+                                                 const basic_inplace_string& rhs) noexcept -> bool {
     return !(lhs == rhs);
   }
 
