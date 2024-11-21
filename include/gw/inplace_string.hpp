@@ -106,6 +106,7 @@ class basic_inplace_string {
           std::format("basic_inplace_string::basic_inplace_string: count (which is {}) > max_size (which is {})", count,
                       max_size())};
     }
+
     traits_type::copy(begin(), str, count);
   }
 
@@ -527,125 +528,6 @@ class basic_inplace_string {
   constexpr void swap(basic_inplace_string& other) noexcept {
     using std::swap;
     swap(m_data, other.m_data);
-  }
-
-  /// \brief Find the first substring equal to `str`.
-  /// \tparam N2 The size of the string.
-  /// \param str The string to find.
-  /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of the string, or #npos if the string is not found.
-  template <std::size_t N2>
-  [[nodiscard]] constexpr auto find(const basic_inplace_string<N2, value_type, traits_type>& str,
-                                    size_type pos = 0) const noexcept -> size_type {
-    return find(str.view(), pos);
-  }
-
-  /// \brief Find the first substring equal to the range [`str`, `str + count`).
-  /// \param str The string to find.
-  /// \param pos The position to start searching from.
-  /// \param count The number of characters to search for.
-  /// \return The position of the first occurrence of the string, or #npos if the string is not found.
-  [[nodiscard]] constexpr auto find(const value_type* str, size_type pos, size_type count) const noexcept -> size_type {
-    return view().find(str, pos, count);
-  }
-
-  /// \brief Find the first substring equal to the character string pointed to by `str`.
-  /// \param str The string to find.
-  /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of the string, or #npos if the string is not found.
-  [[nodiscard]] constexpr auto find(const value_type* str, size_type pos = 0) const noexcept -> size_type {
-    return view().find(str, pos);
-  }
-
-  /// \brief Find the first character `ch`.
-  /// \param ch The character to find.
-  /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of the character, or #npos if the character is not found.
-  [[nodiscard]] constexpr auto find(value_type ch, size_type pos = 0) const noexcept -> size_type {
-    return view().find(ch, pos);
-  }
-
-  /// \brief Find the first substring equal to `str`.
-  /// \param str The string view to find.
-  /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of the string, or #npos if the string is not found.
-  [[nodiscard]] constexpr auto find(string_view_like<value_type, traits_type> auto str,
-                                    size_type pos = 0) const noexcept -> size_type {
-    return view().find(std::basic_string_view<value_type, traits_type>{str}, pos);
-  }
-
-  /// \brief Find the last substring equal to `str`.
-  /// \tparam N2 The size of the string.
-  /// \param str The string to find.
-  /// \param pos The position to start searching from.
-  /// \return The position of the last occurrence of the string, or #npos if the string is not found.
-  template <std::size_t N2>
-  [[nodiscard]] constexpr auto rfind(const basic_inplace_string<N2, value_type, traits_type>& str,
-                                     size_type pos = npos) const noexcept -> size_type {
-    return rfind(str.view(), pos);
-  }
-
-  /// \brief Find the last substring equal to `str`.
-  /// \param str The string to find.
-  /// \param pos The position to start searching from.
-  /// \return The position of the last occurrence of the string, or #npos if the string is not found.
-  [[nodiscard]] constexpr auto rfind(std::basic_string_view<value_type, traits_type> str,
-                                     size_type pos = npos) const noexcept -> size_type {
-    return view().rfind(str, pos);
-  }
-
-  /// \brief Find the last substring equal to the range [`str`, `str + count`).
-  /// \param str The string to find.
-  /// \param pos The position to start searching from.
-  /// \param count The number of characters to search for.
-  /// \return The position of the last occurrence of the string, or #npos if the string is not found.
-  [[nodiscard]] constexpr auto rfind(const value_type* str, size_type pos,
-                                     size_type count) const noexcept -> size_type {
-    return view().rfind(str, pos, count);
-  }
-
-  /// \brief Find the last substring equal to the character string pointed to by `str`.
-  /// \param str The string to find.
-  /// \param pos The position to start searching from.
-  /// \return The position of the last occurrence of the string, or #npos if the string is not found.
-  [[nodiscard]] constexpr auto rfind(const value_type* str, size_type pos = npos) const noexcept -> size_type {
-    return view().rfind(str, pos);
-  }
-
-  /// \brief Find the last character `ch`.
-  /// \param ch The character to find.
-  /// \param pos The position to start searching from.
-  /// \return The position of the last occurrence of the character, or #npos if the character is not found.
-  [[nodiscard]] constexpr auto rfind(value_type ch, size_type pos = npos) const noexcept -> size_type {
-    return view().rfind(ch, pos);
-  }
-
-  /// \brief Find the first character equal to one of the characters in `str`.
-  /// \tparam N2 The size of the string.
-  /// \param str The string to search for.
-  /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of any character in the string, or #npos if no character is found.
-  template <std::size_t N2>
-  [[nodiscard]] constexpr auto find_first_of(const basic_inplace_string<N2, value_type, traits_type>& str,
-                                             size_type pos = 0) const noexcept -> size_type {
-    return find_first_of(str.view(), pos);
-  }
-
-  /// \brief Find the first character equal to one of the characters in `str`.
-  /// \param str The string view to search for.
-  /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of any character in the string, or #npos if no character is found.
-  [[nodiscard]] constexpr auto find_first_of(std::basic_string_view<value_type, traits_type> str,
-                                             size_type pos = 0) const noexcept -> size_type {
-    return view().find_first_of(str, pos);
-  }
-
-  /// \brief Find the first character equal to one of the characters in `str`.
-  /// \param str The character string to search for.
-  /// \param pos The position to start searching from.
-  /// \return The position of the first occurrence of any character in the string, or #npos if no character is found.
-  [[nodiscard]] constexpr auto find_first_of(const value_type* str, size_type pos = 0) const noexcept -> size_type {
-    return view().find_first_of(str, pos);
   }
 
   /// \brief Concatenate two strings.
